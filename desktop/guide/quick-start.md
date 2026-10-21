@@ -2,7 +2,7 @@
 
 本章面向开发者和自行构建的使用者。已有安装包时先看[安装客户端](./installation.md)，日常配置见[模型供应商](../configuration/models.md)。
 
-以下应用命令在 `claude-rust-desktop` 目录运行；文档站命令在 `claude-rust-desktop-docs` 目录运行。
+以下应用命令在源码仓库 `deepseek-code` 目录运行；文档站命令在 `deepseek-code-docs` 目录运行。
 
 ## 准备开发环境
 
@@ -26,10 +26,30 @@ git --version
 
 本文 Windows 命令使用 `npm.cmd`，避免 PowerShell 的脚本执行策略拦截 `npm.ps1`，无需修改系统执行策略。
 
+## Linux 构建
+
+Linux（以 Debian 12 为例）需要 Node.js 22+、Rust 稳定版，以及 Tauri 2 的系统开发库：
+
+```bash
+sudo apt install pkg-config libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
+  libjavascriptcoregtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev \
+  libasound2-dev libxdo-dev
+```
+
+构建并得到桌面可执行文件 `dcd`：
+
+```bash
+npm ci
+npm run build                                  # 前端产物 dist/
+cargo build --locked -p deepseek-code-desktop  # target/debug/dcd
+```
+
+没有 root 权限时，可以用 `apt-get download` 下载上述 `-dev` 包及其依赖的 `-dev` 包，解压到用户目录并设置 `PKG_CONFIG_PATH`、`PKG_CONFIG_SYSROOT_DIR` 和 `RUSTFLAGS="-L ..."`，方法与 [CLI 的无 root 构建](../../cli/install.md#没有-root-权限时的-linux-构建)相同；`libsoup-3.0` 还需要 `libsysprof-4-dev` 提供的 `sysprof-capture-4`。前提是对应的运行库已经安装。
+
 ## 启动完整桌面开发环境
 
 ```powershell
-cd D:\code\project\project-harven\claude-rust-desktop
+cd D:\code\deepseek-code
 npm.cmd ci
 npm.cmd run tauri dev
 ```
@@ -57,7 +77,7 @@ npm.cmd run dev
 仅当要使用对应网关功能时，在另一终端运行：
 
 ```powershell
-cd D:\code\project\project-harven\claude-rust-desktop\api-proxy
+cd D:\code\deepseek-code\api-proxy
 npm.cmd install
 npm.cmd run dev
 ```
@@ -69,7 +89,7 @@ npm.cmd run dev
 ## 启动文档站
 
 ```powershell
-cd D:\code\project\project-harven\claude-rust-desktop-docs
+cd D:\code\deepseek-code-docs
 npm.cmd ci
 npm.cmd run dev
 ```
