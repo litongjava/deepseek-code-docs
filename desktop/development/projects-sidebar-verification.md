@@ -41,23 +41,23 @@
 
 截图中的 Sidebar QA 项目与英文会话均为本次临时验证数据。
 
-![最终分组与 Recents 对齐](../assets/projects-sidebar/01-grouping.png)
+![最终分组与 Recents 对齐](../../assets/projects-sidebar/01-grouping.png)
 
-![项目操作菜单](../assets/projects-sidebar/03-project-menu.png)
+![项目操作菜单](../../assets/projects-sidebar/03-project-menu.png)
 
-![项目编辑弹窗](../assets/projects-sidebar/04-edit-project.png)
+![项目编辑弹窗](../../assets/projects-sidebar/04-edit-project.png)
 
-![会话移动菜单](../assets/projects-sidebar/05-move-chat.png)
+![会话移动菜单](../../assets/projects-sidebar/05-move-chat.png)
 
-![复制菜单](../assets/projects-sidebar/02-copy-menu.png)
+![复制菜单](../../assets/projects-sidebar/02-copy-menu.png)
 
-![项目详情](../assets/projects-sidebar/06-project-details.png)
+![项目详情](../../assets/projects-sidebar/06-project-details.png)
 
-![Pinned 分区](../assets/projects-sidebar/07-pinned.png)
+![Pinned 分区](../../assets/projects-sidebar/07-pinned.png)
 
 清理测试记录后的原生 Tauri 侧栏局部截图：
 
-![原生 Tauri 最终侧栏](../assets/projects-sidebar/08-tauri-final.png)
+![原生 Tauri 最终侧栏](../../assets/projects-sidebar/08-tauri-final.png)
 
 ## Recents 与跨模式项目会话回归修复
 

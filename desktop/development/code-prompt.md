@@ -1,6 +1,6 @@
 # Code 模式提示词：样本讲解、隐私清理与项目接入
 
-本文解释 `code_prompt_1.json` 的结构、可复用的设计，以及它在 Claude Rust Desktop 中的实际接入方式。接入日期：2026-10-14。
+本文解释 `code_prompt_1.json` 的结构、可复用的设计，以及它在 DeepSeek Code Desktop 中的实际接入方式。接入日期：2026-10-14。
 
 ## 1. 先认清样本是什么
 

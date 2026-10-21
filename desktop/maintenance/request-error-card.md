@@ -25,6 +25,6 @@ HTTP 请求入口保留状态码及响应正文；流式错误保留结构化错
 
 此次为模拟响应和真实组件验证，未向外部模型发起请求，也未验证打包后的原生窗口。截图为视口证据，不代表完整应用页面。
 
-![浅色主题](../assets/request-error-light.png)
+![浅色主题](../../assets/request-error-light.png)
 
-![深色主题](../assets/request-error-dark.png)
+![深色主题](../../assets/request-error-dark.png)

@@ -33,15 +33,15 @@ git diff --check
 
 页面状态记录：
 
-- [项目布局和配置数量](../assets/project-layout-models-check.json)
-- [菜单内全部模型核对](../assets/project-model-menu-check.json)
-- [New Chat 默认项目](../assets/code-new-chat-project-check.json)
-- [刷新后默认项目](../assets/code-new-chat-project-reload-check.json)
+- [项目布局和配置数量](../../assets/project-layout-models-check.json)
+- [菜单内全部模型核对](../../assets/project-model-menu-check.json)
+- [New Chat 默认项目](../../assets/code-new-chat-project-check.json)
+- [刷新后默认项目](../../assets/code-new-chat-project-reload-check.json)
 
 以下图片是浏览器中的项目内容区域截图。
 
-![项目标题下的 Local 行与单个项目标签](../assets/project-layout-fixed.png)
+![项目标题下的 Local 行与单个项目标签](../../assets/project-layout-fixed.png)
 
-![使用实际供应商目录的模型菜单](../assets/project-models-fixed.png)
+![使用实际供应商目录的模型菜单](../../assets/project-models-fixed.png)
 
 新聊天页的项目栏截图超时，一次强制探测也未成功，因此该项只有本轮页面状态记录，没有图片证据。创建会话时模型参数的验证使用模拟接口单元测试，未执行真实模型推理。

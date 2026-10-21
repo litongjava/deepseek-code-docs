@@ -22,19 +22,19 @@ Bridge 在 `src-tauri/src/bridge/routes/system.rs` 注册的是 `/health`，认�
 
 ## 验证证据
 
-- [修改前浏览器控制台](../assets/sidebar-health-before-console.json)
-- [修改后浏览器健康响应](../assets/sidebar-health-after-response.json)
-- [修改后浏览器控制台](../assets/sidebar-health-after-console.json)
-- [原生窗口重新加载的健康请求](../assets/sidebar-health-native-reload.json)
-- [原生环境确认与剩余错误](../assets/sidebar-health-native-final.json)
+- [修改前浏览器控制台](../../assets/sidebar-health-before-console.json)
+- [修改后浏览器健康响应](../../assets/sidebar-health-after-response.json)
+- [修改后浏览器控制台](../../assets/sidebar-health-after-console.json)
+- [原生窗口重新加载的健康请求](../../assets/sidebar-health-native-reload.json)
+- [原生环境确认与剩余错误](../../assets/sidebar-health-native-final.json)
 
 下图是浏览器页面视口，不是原生窗口截图。
 
-![修改后的浏览器页面](../assets/sidebar-health-fixed-browser.png)
+![修改后的浏览器页面](../../assets/sidebar-health-fixed-browser.png)
 
 下图是连接原生 WebView 的 DevTools 视口，可见的剩余 401 属于文件树接口。
 
-![原生 WebView 控制台](../assets/sidebar-health-native-console.png)
+![原生 WebView 控制台](../../assets/sidebar-health-native-console.png)
 
 ## 仍存在的独立问题
 

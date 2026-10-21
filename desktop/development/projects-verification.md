@@ -49,15 +49,15 @@ HTTP 验证仅创建临时目录、测试项目及空会话，不调用模型；
 
 以下五张图片均为 Chrome 页面视口截图，不是原生 Tauri 窗口截图。前三张拍摄于恢复顶部入口之前，后两张包含恢复后的入口布局；三个模式共用菜单的最新截图见下一节。
 
-![创建多目录项目](../assets/projects-20261013/01-create-project.png)
+![创建多目录项目](../../assets/projects-20261013/01-create-project.png)
 
-![首次信任确认](../assets/projects-20261013/02-trust-folders.png)
+![首次信任确认](../../assets/projects-20261013/02-trust-folders.png)
 
-![聊天框选择项目](../assets/projects-20261013/03-selected-project.png)
+![聊天框选择项目](../../assets/projects-20261013/03-selected-project.png)
 
-![新增目录单独确认信任](../assets/projects-20261013/04-new-folder-trust.png)
+![新增目录单独确认信任](../../assets/projects-20261013/04-new-folder-trust.png)
 
-![保留顶部入口及最后一个目录保护](../assets/projects-20261013/05-last-folder-and-tabs.png)
+![保留顶部入口及最后一个目录保护](../../assets/projects-20261013/05-last-folder-and-tabs.png)
 
 ## 三个模式共用菜单复测（2026-10-13）
 
@@ -65,9 +65,9 @@ HTTP 验证仅创建临时目录、测试项目及空会话，不调用模型；
 
 以下为浏览器侧栏元素截图，已检查菜单顺序和面板位置：
 
-![Cowork 共用菜单与 Recents 下方的协作面板](../assets/projects-20261013/06-shared-menus-cowork.png)
+![Cowork 共用菜单与 Recents 下方的协作面板](../../assets/projects-20261013/06-shared-menus-cowork.png)
 
-![Code 共用菜单与文件浏览器](../assets/projects-20261013/06-shared-menus-code.png)
+![Code 共用菜单与文件浏览器](../../assets/projects-20261013/06-shared-menus-code.png)
 
 ## Recents 按模式隔离复测（2026-10-13）
 
@@ -81,17 +81,17 @@ HTTP 验证仅创建临时目录、测试项目及空会话，不调用模型；
 
 以下为最终侧栏元素截图，已检查分类及面板位置：
 
-![Chat 独立历史](../assets/projects-20261013/07-recents-chat.png)
+![Chat 独立历史](../../assets/projects-20261013/07-recents-chat.png)
 
-![Cowork 独立历史](../assets/projects-20261013/07-recents-cowork.png)
+![Cowork 独立历史](../../assets/projects-20261013/07-recents-cowork.png)
 
-![Code 独立历史](../assets/projects-20261013/07-recents-code.png)
+![Code 独立历史](../../assets/projects-20261013/07-recents-code.png)
 
 ## Projects 菜单简化
 
 已通过浏览器确认展开区不再显示 Create project 文本入口，右侧加号仍可打开创建窗口；All projects 的实际字号为 14px。
 
-![简化后的 Projects 菜单](../assets/projects-20261013/08-project-menu.png)
+![简化后的 Projects 菜单](../../assets/projects-20261013/08-project-menu.png)
 
 ## 尚未验证的部分
 

@@ -26,15 +26,15 @@
 
 Projects 标题右侧的 **All projects** 打开项目总览，加号用于创建项目。项目行与分区标题左对齐，没有额外缩进；展开项目后，所属会话缩进 24px。Projects 展示该项目所有模式的未归档会话，因此在 Chat 中也可以展开 Code 或 Cowork 创建的项目会话。空项目展开后显示 **No chats in this project**。每组默认显示五条会话，更多内容通过 **Show more** 展开。
 
-![项目列表、右侧 All projects 和左对齐的 Recents](../assets/projects-sidebar/01-grouping.png)
+![项目列表、右侧 All projects 和左对齐的 Recents](../../assets/projects-sidebar/01-grouping.png)
 
 悬停项目显示名称、未归档任务数量、源目录路径和 **Edit project** 入口。项目右侧的更多菜单提供固定、编辑、在资源管理器中打开、归档项目会话和移除项目；新建会话按钮直接在该项目中创建会话。
 
-![项目详情浮层](../assets/projects-sidebar/06-project-details.png)
+![项目详情浮层](../../assets/projects-sidebar/06-project-details.png)
 
 **Edit project** 可以修改名称及源目录。新增目录仍需在使用前确认信任；项目至少保留一个目录。取消不会提交编辑内容。
 
-![编辑项目与源目录](../assets/projects-sidebar/04-edit-project.png)
+![编辑项目与源目录](../../assets/projects-sidebar/04-edit-project.png)
 
 固定的会话在当前模式的 **Pinned** 中提供快捷入口，所属项目中仍保留该会话。**Recents** 显示当前模式中未归档、未固定的近期会话，包括已关联项目的会话；行首没有额外缩进或文件夹图标。Chat、Cowork、Code 都始终保留 Recents 标题，列表为空时显示 **No recent chats**，不会隐藏整个分区。项目固定、分区折叠和手动未读标记保存在当前客户端；会话固定与归档保存在数据库。
 
@@ -44,9 +44,9 @@ Projects 标题右侧的 **All projects** 打开项目总览，加号用于创�
 - **Copy**：复制会话路由链接、完整 Markdown 消息或工作目录。链接指向当前应用地址中的对应会话；仅持有链接不会分享本地会话数据。
 - **Open in → File Explorer**：在桌面客户端中打开工作目录。未关联目录时入口禁用。
 
-![移动会话的二级菜单](../assets/projects-sidebar/05-move-chat.png)
+![移动会话的二级菜单](../../assets/projects-sidebar/05-move-chat.png)
 
-![复制会话的二级菜单](../assets/projects-sidebar/02-copy-menu.png)
+![复制会话的二级菜单](../../assets/projects-sidebar/02-copy-menu.png)
 
 快捷键：重命名 `Ctrl+Alt+R`，固定 `Ctrl+Alt+P`，标记未读 `Ctrl+Shift+U`，复制会话链接 `Ctrl+Alt+L`，复制工作目录 `Ctrl+Shift+C`，归档 `Ctrl+Shift+A`。快捷键作用于当前会话或已打开菜单的会话；输入框和编辑弹窗中不会触发这些操作。
 

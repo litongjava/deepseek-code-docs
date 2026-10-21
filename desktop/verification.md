@@ -1,8 +1,8 @@
 # 应用界面
 
-Claude Rust Desktop 的主界面包含功能侧栏、会话输入区和模型选择入口。
+DeepSeek Code Desktop 的主界面包含功能侧栏、会话输入区和模型选择入口。
 
-![Claude Rust Desktop 主界面](./assets/claude-desktop-browser.png)
+![DeepSeek Code Desktop 主界面](../assets/claude-desktop-browser.png)
 
 - **功能侧栏**：进入聊天、项目、自定义和知识库等页面。技能、MCP、连接器和插件集中在“扩展 → 自定义”，设置中也有自定义入口。
 - **会话输入区**：输入问题，选择模型与推理模式后发送。

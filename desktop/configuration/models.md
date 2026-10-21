@@ -11,7 +11,7 @@
 
 自定义地址使用服务根地址或 `/v1` 基础地址，例如 `http://127.0.0.1:8317/v1`。先保存供应商，再点击“获取模型列表”；也可以直接手动添加模型。获取列表后点击“保存”应用变更。
 
-![第三方供应商目录](../assets/providers-builtins.png)
+![第三方供应商目录](../../assets/providers-builtins.png)
 
 ## 单独配置模型
 
@@ -25,9 +25,9 @@ Token 数量接受正整数与 K / M 写法，例如 `256K`、`1M`、`1.5M`，�
 
 获取列表会更新旧的 text 默认值和已识别限制，保留模型显示名称和启用状态；接口明确返回 text-only 时不会因名称推断开启 Image。接口未提供参数且模型未知时，保留已有手动参数。保存后才写入本地配置。
 
-![获取模型后自动识别的视觉输入与上下文](../assets/models-auto-fetch.png)
+![获取模型后自动识别的视觉输入与上下文](../../assets/models-auto-fetch.png)
 
-![自定义供应商与模型参数](../assets/providers-custom.png)
+![自定义供应商与模型参数](../../assets/providers-custom.png)
 
 ## 新建会话与 Effort
 
@@ -39,7 +39,7 @@ Token 数量接受正整数与 K / M 写法，例如 `256K`、`1M`、`1.5M`，�
 
 桌面端保存到 `general-settings.json`，浏览器开发环境保存到 `general_settings` localStorage；两种环境的偏好独立。
 
-![三个模式独立默认供应商与模型](../assets/models-mode-defaults.png)
+![三个模式独立默认供应商与模型](../../assets/models-mode-defaults.png)
 
 ### 模型菜单
 
@@ -47,7 +47,7 @@ Token 数量接受正整数与 K / M 写法，例如 `256K`、`1M`、`1.5M`，�
 
 每个供应商组内的模型按显示名称升序排列，忽略大小写并按数字自然顺序比较，例如 `gpt-2` 在 `gpt-10` 前；搜索后保持同样顺序。
 
-![模型菜单升序排列](../assets/models-ascending-menu.png)
+![模型菜单升序排列](../../assets/models-ascending-menu.png)
 
 **Effort** 子菜单提供 Off、Low、High、Max；当前选择会保存在本机浏览器或 WebView 偏好中，发送消息时交给后端。
 
@@ -55,9 +55,9 @@ Token 数量接受正整数与 K / M 写法，例如 `256K`、`1M`、`1.5M`，�
 - 自定义 OpenAI 兼容接口发送 `reasoning_effort`；Off 为 `none`。DeepSeek 官方地址同时设置 `thinking` 开关。自定义服务必须支持对应参数及等级。
 - 自定义 Anthropic 新版 Claude 使用 adaptive thinking 和 effort；Sonnet 的 Max 映射到其最高支持等级 High。旧版模型使用受输出上限约束的 thinking budget。
 
-![按供应商选择模型](../assets/providers-model-selector.png)
+![按供应商选择模型](../../assets/providers-model-selector.png)
 
-![Effort 选择](../assets/providers-effort.png)
+![Effort 选择](../../assets/providers-effort.png)
 
 ## 本地保存与运行要求
 

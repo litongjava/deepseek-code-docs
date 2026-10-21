@@ -33,9 +33,9 @@
 
 模型请求返回 HTTP 400 时，回复区域显示“无效请求”卡片，并保留此前的回复与工具记录。点击“查看详情”可以展开原始错误内容和 `Status: 400`，右侧复制按钮复制错误内容及状态码。卡片跟随当前浅色或深色主题。
 
-![HTTP 400 错误卡片（浅色）](../assets/request-error-light.png)
+![HTTP 400 错误卡片（浅色）](../../assets/request-error-light.png)
 
-![HTTP 400 错误卡片（深色）](../assets/request-error-dark.png)
+![HTTP 400 错误卡片（深色）](../../assets/request-error-dark.png)
 
 图片来自真实组件的浏览器模拟验证页面，详见[验证记录](../maintenance/request-error-card.md)。
 

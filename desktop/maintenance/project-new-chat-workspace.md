@@ -22,8 +22,8 @@
 
 修复前：
 
-![重复工作区栏](../assets/project-new-chat/before.png)
+![重复工作区栏](../../assets/project-new-chat/before.png)
 
 修复后：
 
-![工作区栏只显示一次](../assets/project-new-chat/after.png)
+![工作区栏只显示一次](../../assets/project-new-chat/after.png)

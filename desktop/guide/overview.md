@@ -1,6 +1,6 @@
 # 项目介绍
 
-Claude Rust Desktop 使用 React 19、TypeScript、Tauri 2 和 Rust 构建桌面 AI 工作台。前端呈现聊天与辅助面板，Rust 负责本地数据、模型请求、工具执行和桌面能力。
+DeepSeek Code Desktop 使用 React 19、TypeScript、Tauri 2 和 Rust 构建桌面 AI 工作台。前端呈现聊天与辅助面板，Rust 负责本地数据、模型请求、工具执行和桌面能力。
 
 ## 适合谁
 
