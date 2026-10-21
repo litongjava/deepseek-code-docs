@@ -45,7 +45,7 @@ http://127.0.0.1:30085/api/system-status
 
 ### 3. 开发浏览器的本地代理
 
-`npm.cmd run tauri dev` 启动后，访问 `http://127.0.0.1:5200`。开发模式的供应商与聊天请求使用同源 `/api`，Vite 将请求转发到 `127.0.0.1:30085`，在服务器侧读取 `%APPDATA%\com.claude.desktop\dev-bridge-key` 并添加 Bridge 鉴权。
+`npm.cmd run tauri dev` 启动后，访问 `http://127.0.0.1:5200`。开发模式的供应商与聊天请求使用同源 `/api`，Vite 将请求转发到 `127.0.0.1:30085`，在服务器侧读取数据目录（默认 `~/.deepseek-code`，规则同[数据位置](../maintenance/data.md#数据位置)）下的 `dev-bridge-key` 并添加 Bridge 鉴权。
 
 该文件仅由 Rust 调试构建生成，位于仓库外。代理限制本机 Host 和来源；浏览器不需要手动复制 Key。Rust 重新启动后，代理会读取新 Key。后端编译或未启动期间出现 500/连接失败时，等待启动完成再刷新。
 

@@ -8,6 +8,16 @@
 
 **处理**：当前版本最多等待 3 秒首个字节，详见[非交互模式](./non-interactive.md#标准输入)。没有输入时用 `< /dev/null` 运行。
 
+## `-p` 报错 Tool permission interrupted the turn
+
+**现象**：旧版本在 `-p` 模式下，模型一旦调用需要审批的工具，整轮就失败，退出码 1：
+
+```
+Error: Engine execution failed: Tool permission interrupted the turn: Tool approval required but no approval host ...
+```
+
+**处理**：当前版本改为拒绝这次调用，模型会继续回答，见[非交互模式 · 权限](./non-interactive.md#权限)。
+
 ## tool_use ids were found without tool_result
 
 **现象**：使用 DeepSeek Anthropic 兼容接口时，模型一次调用两个以上工具后请求失败：

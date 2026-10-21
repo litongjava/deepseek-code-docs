@@ -61,11 +61,13 @@ Token 数量接受正整数与 K / M 写法，例如 `256K`、`1M`、`1.5M`，�
 
 ## 本地保存与运行要求
 
-桌面端和开发浏览器都通过 Rust 接口保存至：
+桌面端和开发浏览器都通过 Rust 接口保存至数据目录下的 `config.json`，默认：
 
 ```text
-%APPDATA%\com.claude.desktop\config.json
+~/.deepseek-code/config.json
 ```
+
+数据目录的解析规则见[数据备份、升级与迁移](../maintenance/data.md#数据位置)。
 
 配置包含供应商 API Key。旧浏览器 `app_providers` 数据会在首次成功连接后迁移，已有同 ID 文件配置优先；原缓存保留为迁移备份。保存失败会返回错误并回滚内存配置，不会显示成功。引擎发送时同步最新供应商配置，使用配置的输出上限与输入类型检查，并按上下文窗口进行后续压缩。
 
