@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-14",
+  "browser": "Chrome (visible)",
+  "tool": "deepseek-browser-use dsb",
+  "scope": "Navigation, plugin category filtering, Settings embedding. Native MCP lifecycle excluded.",
+  "runs": [
+    {
+      "jobId": "job-1791953963723-2",
+      "status": "done",
+      "steps": 22,
+      "durationMs": "11468",
+      "startedAt": "1791953963723",
+      "finishedAt": "1791953975191",
+      "count": 22,
+      "failed": 0,
+      "succeeded": 22,
+      "expectFailed": 0,
+      "assertions": [
+        {
+          "index": 3,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": 0,
+            "expected": 0,
+            "js": "Array.from(document.querySelectorAll('nav[aria-label] button')).filter(b => ['目录','MCP'].includes(b.textContent.trim())).length",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 5,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": "#/customize",
+            "expected": "#/customize",
+            "js": "location.hash",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 8,
+          "command": "execute_js",
+          "assertion": {
+            "actual": "技能,MCP,连接器,插件",
+            "expected": "技能,MCP,连接器,插件",
+            "js": "Array.from(document.querySelectorAll('nav[aria-label=\"自定义\"] button')).map(b => b.textContent.trim()).join(',')",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 9,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": 6,
+            "expected": 6,
+            "js": "document.querySelectorAll(\"article\").length",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 11,
+          "command": "input_text_by_selector",
+          "assertion": {
+            "actual": 1,
+            "expected": 1,
+            "js": "document.querySelectorAll(\"article\").length",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 13,
+          "command": "input_text_by_selector",
+          "assertion": {
+            "actual": "没有匹配的插件分类",
+            "expected": "没有匹配的插件分类",
+            "js": "document.querySelector(\"[role=status]\")?.textContent",
+            "passed": true,
+            "matcher": "equals"
+          }
+        }
+      ]
+    },
+    {
+      "jobId": "job-1791954065040-4",
+      "status": "done",
+      "steps": 21,
+      "durationMs": "12991",
+      "startedAt": "1791954065040",
+      "finishedAt": "1791954078031",
+      "count": 21,
+      "failed": 0,
+      "succeeded": 21,
+      "expectFailed": 0,
+      "assertions": [
+        {
+          "index": 2,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": "#/settings",
+            "expected": "#/settings",
+            "js": "location.hash",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 4,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": 6,
+            "expected": 6,
+            "js": "document.querySelectorAll(\"article\").length",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 8,
+          "command": "execute_js",
+          "assertion": {
+            "actual": true,
+            "expected": true,
+            "js": "document.documentElement.scrollWidth <= innerWidth",
+            "passed": true,
+            "matcher": "equals"
+          }
+        }
+      ]
+    },
+    {
+      "jobId": "job-1791954255282-5",
+      "status": "done",
+      "steps": 11,
+      "durationMs": "10990",
+      "startedAt": "1791954255282",
+      "finishedAt": "1791954266272",
+      "count": 11,
+      "failed": 0,
+      "succeeded": 11,
+      "expectFailed": 0,
+      "assertions": [
+        {
+          "index": 4,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": "#/",
+            "expected": "#/",
+            "js": "location.hash",
+            "passed": true,
+            "matcher": "equals"
+          }
+        },
+        {
+          "index": 9,
+          "command": "click_element_by_selector",
+          "assertion": {
+            "actual": "#/settings",
+            "expected": "#/settings",
+            "js": "location.hash",
+            "passed": true,
+            "matcher": "equals"
+          }
+        }
+      ]
+    }
+  ]
+}

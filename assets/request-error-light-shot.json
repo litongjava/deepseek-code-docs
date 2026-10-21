@@ -1,0 +1,31 @@
+{
+  "data": {
+    "path": "data\\2026101440\\shot-1.png",
+    "note": "默认不返回 base64；需要内联图片时传 inline=true。",
+    "size": 23780,
+    "inline": false,
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29884",
+      "attempts": 1,
+      "elapsedMs": "116"
+    },
+    "capture": {
+      "retries": 0,
+      "pageClosed": false,
+      "stage": "complete",
+      "timeoutMs": 8000,
+      "browserConnected": true,
+      "actualMode": "viewport",
+      "requestedMode": "viewport",
+      "attempts": 1,
+      "elapsedMs": "114"
+    },
+    "capture_degraded": false,
+    "url": "/data/2026101440/shot-1.png",
+    "base64Omitted": true
+  },
+  "ok": true,
+  "code": 1
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "execute_js": {
+      "body": "async () => {\nconst {useWorkspaceModeStore: store} = await import('/src/stores/useWorkspaceModeStore.ts');\nsessionStorage.setItem('recents-test-original-mode', JSON.stringify({mode:store.getState().mode, recentsCollapsed:store.getState().recentsCollapsed}));\nstore.setState({recentsCollapsed:{chat:false,cowork:false,code:false}});\nsessionStorage.setItem('recents-test-created-ids', '[]');\nreturn true;\n}"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(1)"
+    }
+  },
+  {
+    "execute_js": {
+      "body": "async () => { const api = await import('/src/api.ts'); const c = await api.createConversation('Recents verification chat'); const ids = JSON.parse(sessionStorage.getItem('recents-test-created-ids')); ids.push(c.id); sessionStorage.setItem('recents-test-created-ids',JSON.stringify(ids)); const saved = (await api.getConversations()).find(x=>x.id===c.id); if(saved?.workspace_mode !== 'chat') throw new Error('Wrong saved mode'); return {id:c.id,mode:saved.workspace_mode}; }"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(2)"
+    }
+  },
+  {
+    "execute_js": {
+      "body": "async () => { const api = await import('/src/api.ts'); const c = await api.createConversation('Recents verification cowork'); const ids = JSON.parse(sessionStorage.getItem('recents-test-created-ids')); ids.push(c.id); sessionStorage.setItem('recents-test-created-ids',JSON.stringify(ids)); const saved = (await api.getConversations()).find(x=>x.id===c.id); if(saved?.workspace_mode !== 'cowork') throw new Error('Wrong saved mode'); return {id:c.id,mode:saved.workspace_mode}; }"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(3)"
+    }
+  },
+  {
+    "execute_js": {
+      "body": "async () => { const api = await import('/src/api.ts'); const c = await api.createConversation('Recents verification code'); const ids = JSON.parse(sessionStorage.getItem('recents-test-created-ids')); ids.push(c.id); sessionStorage.setItem('recents-test-created-ids',JSON.stringify(ids)); const saved = (await api.getConversations()).find(x=>x.id===c.id); if(saved?.workspace_mode !== 'code') throw new Error('Wrong saved mode'); return {id:c.id,mode:saved.workspace_mode}; }"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(1)"
+    }
+  },
+  {
+    "wait_for_function": {
+      "expression": "() => { const el = document.querySelector('[data-recents-mode=\"chat\"]'); return !!el && el.innerText.includes('Recents verification chat') && !el.innerText.includes('Recents verification cowork') && !el.innerText.includes('Recents verification code'); }",
+      "timeoutSeconds": 5
+    },
+    "expect": {
+      "js": "(() => { const el = document.querySelector('[data-recents-mode=\"chat\"]'); return !!el && el.innerText.includes('Recents verification chat') && !el.innerText.includes('Recents verification cowork') && !el.innerText.includes('Recents verification code'); })()",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\07-recents-chat.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(2)"
+    }
+  },
+  {
+    "wait_for_function": {
+      "expression": "() => { const el = document.querySelector('[data-recents-mode=\"cowork\"]'); return !!el && el.innerText.includes('Recents verification cowork') && !el.innerText.includes('Recents verification chat') && !el.innerText.includes('Recents verification code'); }",
+      "timeoutSeconds": 5
+    },
+    "expect": {
+      "js": "(() => { const el = document.querySelector('[data-recents-mode=\"cowork\"]'); return !!el && el.innerText.includes('Recents verification cowork') && !el.innerText.includes('Recents verification chat') && !el.innerText.includes('Recents verification code'); })()",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\07-recents-cowork.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(3)"
+    }
+  },
+  {
+    "wait_for_function": {
+      "expression": "() => { const el = document.querySelector('[data-recents-mode=\"code\"]'); return !!el && el.innerText.includes('Recents verification code') && !el.innerText.includes('Recents verification chat') && !el.innerText.includes('Recents verification cowork'); }",
+      "timeoutSeconds": 5
+    },
+    "expect": {
+      "js": "(() => { const el = document.querySelector('[data-recents-mode=\"code\"]'); return !!el && el.innerText.includes('Recents verification code') && !el.innerText.includes('Recents verification chat') && !el.innerText.includes('Recents verification cowork'); })()",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\07-recents-code.png"
+    }
+  }
+]

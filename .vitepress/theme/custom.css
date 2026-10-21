@@ -1,0 +1,16 @@
+:root {
+  --vp-c-brand-1: #b65032;
+  --vp-c-brand-2: #ca684a;
+  --vp-c-brand-3: #b65032;
+  --vp-c-brand-soft: rgba(182, 80, 50, .12);
+  --vp-home-hero-name-color: #b65032;
+  --vp-home-hero-image-background-image: linear-gradient(135deg, #f1cbb8, #faeddf);
+  --vp-home-hero-image-filter: blur(65px);
+  --vp-font-family-base: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+.dark { --vp-c-brand-1: #f0aa8b; --vp-c-brand-2: #e89674; --vp-c-brand-3: #b65032; --vp-home-hero-name-color: #f0aa8b; }
+.VPHome .VPHero { padding-top: 80px; padding-bottom: 54px; }
+.VPHome .VPFeature { border-radius: 16px; }
+.vp-doc img { border-radius: 12px; border: 1px solid var(--vp-c-divider); margin: 24px 0; }
+.vp-doc a { text-underline-offset: 4px; }
+.vp-doc h2 { margin-top: 42px; }

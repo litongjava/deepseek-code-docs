@@ -1,0 +1,50 @@
+[
+  {
+    "click_element_by_index": {
+      "index": 8
+    }
+  },
+  {
+    "wait_for_count": {
+      "selector": "[role=\"dialog\"]",
+      "max": 0,
+      "timeoutSeconds": 5
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "button[aria-label^=\"Remove folder \"][aria-label$=\"source-c\"]"
+    }
+  },
+  {
+    "wait_for_count": {
+      "selector": "button[aria-label^=\"Remove folder \"]",
+      "max": 2,
+      "timeoutSeconds": 5
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "button[aria-label^=\"Remove folder \"][aria-label$=\"source-b\"]"
+    }
+  },
+  {
+    "wait_for_count": {
+      "selector": "button[aria-label^=\"Remove folder \"]",
+      "max": 1,
+      "timeoutSeconds": 5
+    }
+  },
+  {
+    "execute_js": {
+      "body": "() => [...document.querySelectorAll('button[aria-label^=\"Remove folder \"]')].map(b => ({label:b.ariaLabel,disabled:b.disabled,title:b.title}))"
+    },
+    "expect": {
+      "js": "document.querySelectorAll('button[aria-label^=\"Remove folder \"]').length === 1 && document.querySelector('button[aria-label^=\"Remove folder \"]').disabled",
+      "equals": true
+    }
+  },
+  {
+    "get_browser_state": {}
+  }
+]

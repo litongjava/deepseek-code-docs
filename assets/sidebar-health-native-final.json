@@ -1,0 +1,34 @@
+{
+  "data": {
+    "result": {
+      "tauri": true,
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+          "url": "http://127.0.0.1:30085/api/filesystem/tree"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+          "url": "http://127.0.0.1:30085/api/filesystem/tree"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+          "url": "http://127.0.0.1:30085/api/filesystem/tree"
+        }
+      ]
+    },
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29047",
+      "attempts": 1,
+      "elapsedMs": "953"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 16
+  },
+  "ok": true,
+  "code": 1
+}

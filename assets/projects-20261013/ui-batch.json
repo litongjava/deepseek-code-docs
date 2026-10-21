@@ -1,0 +1,46 @@
+[
+  {
+    "execute_js": {
+      "body": "document.querySelector('button[type=submit]').disabled"
+    },
+    "expect": {
+      "js": "document.querySelector('button[type=submit]').disabled",
+      "equals": true
+    }
+  },
+  {
+    "input_text_by_selector": {
+      "selector": "input[aria-label=\"Project name\"]",
+      "text": "UI Verification 20261013"
+    }
+  },
+  {
+    "input_text_by_selector": {
+      "selector": "input[aria-label=\"Folder path\"]",
+      "text": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\claude-project-ui-2026101311\\source-a"
+    }
+  },
+  {
+    "click_element_by_role": {
+      "role": "button",
+      "name": "Add",
+      "exact": true
+    }
+  },
+  {
+    "input_text_by_selector": {
+      "selector": "input[aria-label=\"Folder path\"]",
+      "text": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\claude-project-ui-2026101311\\source-b"
+    }
+  },
+  {
+    "click_element_by_role": {
+      "role": "button",
+      "name": "Add",
+      "exact": true
+    }
+  },
+  {
+    "get_browser_state": {}
+  }
+]

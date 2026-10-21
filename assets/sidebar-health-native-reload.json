@@ -1,0 +1,24 @@
+{
+  "data": {
+    "result": {
+      "tauriWindowReloaded": true,
+      "health": {
+        "url": "http://127.0.0.1:30085/health",
+        "status": 200
+      }
+    },
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "28813",
+      "attempts": 1,
+      "elapsedMs": "1187"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 15
+  },
+  "ok": true,
+  "code": 1
+}

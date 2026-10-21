@@ -1,0 +1,56 @@
+[
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(2)"
+    }
+  },
+  {
+    "execute_js": {
+      "body": "() => {\n const nav = document.querySelector('nav[aria-label=\"Main navigation\"]');\n const sidebar = nav.parentElement;\n const labels = ['New Chat','Search','Tools','Extensions','Projects'];\n const menus = labels.every(label => [...nav.querySelectorAll('button')].some(b => b.ariaLabel === label && b.getBoundingClientRect().height > 0));\n const recents = [...sidebar.querySelectorAll('span')].find(e => e.textContent === 'Recents');\n const panel = sidebar.querySelector('[data-sidebar-panel]');\n const expectedPanel = 'cowork';\n const panelCorrect = expectedPanel === 'chat' ? !panel : panel?.dataset.sidebarPanel === expectedPanel && !!(recents.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);\n return {mode: 'Cowork', menus, recents: !!recents, panelCorrect, passed: menus && !!recents && panelCorrect};\n}"
+    },
+    "expect": {
+      "js": "(() => {\n const nav = document.querySelector('nav[aria-label=\"Main navigation\"]');\n const sidebar = nav.parentElement;\n const labels = ['New Chat','Search','Tools','Extensions','Projects'];\n const menus = labels.every(label => [...nav.querySelectorAll('button')].some(b => b.ariaLabel === label && b.getBoundingClientRect().height > 0));\n const recents = [...sidebar.querySelectorAll('span')].find(e => e.textContent === 'Recents');\n const panel = sidebar.querySelector('[data-sidebar-panel]');\n const expectedPanel = 'cowork';\n const panelCorrect = expectedPanel === 'chat' ? !panel : panel?.dataset.sidebarPanel === expectedPanel && !!(recents.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);\n return {mode: 'Cowork', menus, recents: !!recents, panelCorrect, passed: menus && !!recents && panelCorrect};\n})().passed",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\06-shared-menus-cowork.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(3)"
+    }
+  },
+  {
+    "execute_js": {
+      "body": "() => {\n const nav = document.querySelector('nav[aria-label=\"Main navigation\"]');\n const sidebar = nav.parentElement;\n const labels = ['New Chat','Search','Tools','Extensions','Projects'];\n const menus = labels.every(label => [...nav.querySelectorAll('button')].some(b => b.ariaLabel === label && b.getBoundingClientRect().height > 0));\n const recents = [...sidebar.querySelectorAll('span')].find(e => e.textContent === 'Recents');\n const panel = sidebar.querySelector('[data-sidebar-panel]');\n const expectedPanel = 'code';\n const panelCorrect = expectedPanel === 'chat' ? !panel : panel?.dataset.sidebarPanel === expectedPanel && !!(recents.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);\n return {mode: 'Code', menus, recents: !!recents, panelCorrect, passed: menus && !!recents && panelCorrect};\n}"
+    },
+    "expect": {
+      "js": "(() => {\n const nav = document.querySelector('nav[aria-label=\"Main navigation\"]');\n const sidebar = nav.parentElement;\n const labels = ['New Chat','Search','Tools','Extensions','Projects'];\n const menus = labels.every(label => [...nav.querySelectorAll('button')].some(b => b.ariaLabel === label && b.getBoundingClientRect().height > 0));\n const recents = [...sidebar.querySelectorAll('span')].find(e => e.textContent === 'Recents');\n const panel = sidebar.querySelector('[data-sidebar-panel]');\n const expectedPanel = 'code';\n const panelCorrect = expectedPanel === 'chat' ? !panel : panel?.dataset.sidebarPanel === expectedPanel && !!(recents.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);\n return {mode: 'Code', menus, recents: !!recents, panelCorrect, passed: menus && !!recents && panelCorrect};\n})().passed",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\06-shared-menus-code.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(1)"
+    }
+  },
+  {
+    "execute_js": {
+      "body": "() => {\n const nav = document.querySelector('nav[aria-label=\"Main navigation\"]');\n const sidebar = nav.parentElement;\n const labels = ['New Chat','Search','Tools','Extensions','Projects'];\n const menus = labels.every(label => [...nav.querySelectorAll('button')].some(b => b.ariaLabel === label && b.getBoundingClientRect().height > 0));\n const recents = [...sidebar.querySelectorAll('span')].find(e => e.textContent === 'Recents');\n const panel = sidebar.querySelector('[data-sidebar-panel]');\n const expectedPanel = 'chat';\n const panelCorrect = expectedPanel === 'chat' ? !panel : panel?.dataset.sidebarPanel === expectedPanel && !!(recents.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);\n return {mode: 'Chat', menus, recents: !!recents, panelCorrect, passed: menus && !!recents && panelCorrect};\n}"
+    },
+    "expect": {
+      "js": "(() => {\n const nav = document.querySelector('nav[aria-label=\"Main navigation\"]');\n const sidebar = nav.parentElement;\n const labels = ['New Chat','Search','Tools','Extensions','Projects'];\n const menus = labels.every(label => [...nav.querySelectorAll('button')].some(b => b.ariaLabel === label && b.getBoundingClientRect().height > 0));\n const recents = [...sidebar.querySelectorAll('span')].find(e => e.textContent === 'Recents');\n const panel = sidebar.querySelector('[data-sidebar-panel]');\n const expectedPanel = 'chat';\n const panelCorrect = expectedPanel === 'chat' ? !panel : panel?.dataset.sidebarPanel === expectedPanel && !!(recents.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);\n return {mode: 'Chat', menus, recents: !!recents, panelCorrect, passed: menus && !!recents && panelCorrect};\n})().passed",
+      "equals": true
+    }
+  }
+]

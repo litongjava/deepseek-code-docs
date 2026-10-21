@@ -1,0 +1,18 @@
+{
+  "data": {
+    "result": {},
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "27994",
+      "attempts": 1,
+      "elapsedMs": "2006"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 17
+  },
+  "ok": true,
+  "code": 1
+}

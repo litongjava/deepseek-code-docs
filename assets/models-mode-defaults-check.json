@@ -1,0 +1,48 @@
+{
+  "data": {
+    "result": {
+      "defaults": {
+        "chat": {
+          "providerId": "model-auto-check-20261014",
+          "modelId": "gateway-vision"
+        },
+        "work": {
+          "providerId": "model-auto-check-20261014",
+          "modelId": "custom-vl-72b-256k"
+        },
+        "study": {
+          "providerId": "model-auto-check-20261014",
+          "modelId": "gpt-4o-mini"
+        }
+      },
+      "values": {
+        "Chat · Provider": "model-auto-check-20261014",
+        "Chat · Model": "gateway-vision",
+        "Work · Provider": "model-auto-check-20261014",
+        "Work · Model": "custom-vl-72b-256k",
+        "Study · Provider": "model-auto-check-20261014",
+        "Study · Model": "gpt-4o-mini"
+      },
+      "assertions": {
+        "chat": true,
+        "work": true,
+        "study": true,
+        "reloadMatches": true
+      },
+      "passed": true
+    },
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29997",
+      "attempts": 1,
+      "elapsedMs": "3"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 45
+  },
+  "ok": true,
+  "code": 1
+}

@@ -1,0 +1,25 @@
+{
+  "data": {
+    "result": {
+      "url": "http://127.0.0.1:5200/#/",
+      "mode": "code",
+      "lastCodeProjectId": "245a6d64-2bf5-4fcc-9906-b825457ce470",
+      "pendingProjectId": "245a6d64-2bf5-4fcc-9906-b825457ce470",
+      "projectLabel": "paper-question-cv",
+      "remembered": true
+    },
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29996",
+      "attempts": 1,
+      "elapsedMs": "4"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 10
+  },
+  "ok": true,
+  "code": 1
+}

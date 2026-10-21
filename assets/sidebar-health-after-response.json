@@ -1,0 +1,38 @@
+{
+  "data": {
+    "request": {
+      "correlationMissed": false,
+      "method": "GET",
+      "requestedAt": "1791889015789",
+      "requestId": "699664499377782791",
+      "correlatedBy": "identity",
+      "respondedAt": "1791889015789",
+      "url": "http://127.0.0.1:30085/health",
+      "status": 200,
+      "resourceType": "fetch"
+    },
+    "correlationMissed": false,
+    "ageMs": 0,
+    "fromLookBack": false,
+    "correlatedBy": "identity",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29987",
+      "attempts": 1,
+      "elapsedMs": "13"
+    },
+    "bodyAvailable": true,
+    "truncated": false,
+    "respondedAt": "1791889015789",
+    "body": "{\"active_sse_connections\":0,\"database\":true,\"status\":\"healthy\"}",
+    "bodyLength": 63,
+    "url": "http://127.0.0.1:30085/health",
+    "requestId": "699664499377782791",
+    "bodyCapturedAt": "1791889015791",
+    "status": 200,
+    "bodyFromCache": true
+  },
+  "ok": true,
+  "code": 1
+}

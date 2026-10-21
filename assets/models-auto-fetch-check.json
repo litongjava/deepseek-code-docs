@@ -1,0 +1,72 @@
+{
+  "data": {
+    "result": {
+      "status": 200,
+      "assertions": {
+        "catalogFallback": true,
+        "preservedDisabled": true,
+        "fetchedMetadata": true,
+        "explicitTextOnly": true,
+        "nameFallback": true
+      },
+      "passed": true,
+      "models": [
+        {
+          "contextWindow": 128000,
+          "enabled": false,
+          "id": "gpt-4o",
+          "inputTypes": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 16384,
+          "name": "GPT-4o"
+        },
+        {
+          "contextWindow": 256000,
+          "enabled": true,
+          "id": "gateway-vision",
+          "inputTypes": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 32000,
+          "name": "Gateway Vision"
+        },
+        {
+          "contextWindow": 64000,
+          "enabled": true,
+          "id": "gpt-4o-mini",
+          "inputTypes": [
+            "text"
+          ],
+          "maxTokens": 16384,
+          "name": "gpt-4o-mini"
+        },
+        {
+          "contextWindow": 256000,
+          "enabled": true,
+          "id": "custom-vl-72b-256k",
+          "inputTypes": [
+            "text",
+            "image"
+          ],
+          "name": "Custom VL 72B"
+        }
+      ]
+    },
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29990",
+      "attempts": 1,
+      "elapsedMs": "10"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 17
+  },
+  "ok": true,
+  "code": 1
+}

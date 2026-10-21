@@ -1,0 +1,65 @@
+[
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(1)"
+    }
+  },
+  {
+    "wait_for_function": {
+      "expression": "() => { const e=document.querySelector('[data-recents-mode=\"chat\"]'); return !!e && e.innerText.includes('Recents verification chat') && !e.innerText.includes('Recents verification cowork') && !e.innerText.includes('Recents verification code'); }",
+      "timeoutSeconds": 5
+    },
+    "expect": {
+      "js": "(() => { const e=document.querySelector('[data-recents-mode=\"chat\"]'); return !!e && e.innerText.includes('Recents verification chat') && !e.innerText.includes('Recents verification cowork') && !e.innerText.includes('Recents verification code'); })()",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\07-recents-chat.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(2)"
+    }
+  },
+  {
+    "wait_for_function": {
+      "expression": "() => { const e=document.querySelector('[data-recents-mode=\"cowork\"]'); return !!e && e.innerText.includes('Recents verification cowork') && !e.innerText.includes('Recents verification chat') && !e.innerText.includes('Recents verification code'); }",
+      "timeoutSeconds": 5
+    },
+    "expect": {
+      "js": "(() => { const e=document.querySelector('[data-recents-mode=\"cowork\"]'); return !!e && e.innerText.includes('Recents verification cowork') && !e.innerText.includes('Recents verification chat') && !e.innerText.includes('Recents verification code'); })()",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\07-recents-cowork.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Workspace mode\"] button:nth-child(3)"
+    }
+  },
+  {
+    "wait_for_function": {
+      "expression": "() => { const e=document.querySelector('[data-recents-mode=\"code\"]'); return !!e && e.innerText.includes('Recents verification code') && !e.innerText.includes('Recents verification chat') && !e.innerText.includes('Recents verification cowork'); }",
+      "timeoutSeconds": 5
+    },
+    "expect": {
+      "js": "(() => { const e=document.querySelector('[data-recents-mode=\"code\"]'); return !!e && e.innerText.includes('Recents verification code') && !e.innerText.includes('Recents verification chat') && !e.innerText.includes('Recents verification cowork'); })()",
+      "equals": true
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\07-recents-code.png"
+    }
+  }
+]

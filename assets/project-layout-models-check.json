@@ -1,0 +1,87 @@
+{
+  "data": {
+    "result": {
+      "url": "http://127.0.0.1:5200/#/projects?project=245a6d64-2bf5-4fcc-9906-b825457ce470",
+      "providers": [
+        {
+          "name": "Local Claude 8317",
+          "total": 47,
+          "enabled": true,
+          "enabledModels": 47
+        }
+      ],
+      "selectorCount": 47,
+      "modelKeys": [
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-5.6-sol",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gemini-3-flash",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-imagine-image",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-imagine-video-1.5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::claude-opus-5-5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::claude-sonnet-5-5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-6-luna",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-image-2",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gemini-3.8-flash-high",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gemini-3.1-flash-lite",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-imagine-image-quality",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-5.5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-6-sol",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-6.1-sol",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-image-1.5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-image-2.5-sunburst",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-oss-120b-medium",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-imagine-image-2.0",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-voice-tts-1.0",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-image-2.5-flare",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-build-0.1",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-composer-2.5-fast",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::claude-haiku-5-5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-5.6-luna",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-image-2.5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.7",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.6",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.20-0309-reasoning",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.20-multi-agent-0309",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-tts",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gemini-3.5-flash-lite",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::claude-haiku-4-5-20251001",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::codex-auto-review",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::claude-opus-4-6-thinking",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-3-mini-fast",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-imagine-video",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-imagine-video-1.5-preview",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gemini-3.1-flash-image",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.3",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-3-mini",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-6-astra",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::gpt-5.6-terra",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::claude-sonnet-4-6",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.7-build-fast",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.5",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::grok-4.20-0309-non-reasoning",
+        "d3cd780b-783e-48aa-b1dd-0d60fbb12bef::deepseek-v4.1-flash"
+      ],
+      "layout": {
+        "titleBottom": 132,
+        "barTop": 156,
+        "barBottom": 182,
+        "inputTop": 199,
+        "barText": " Localpaper-question-cv",
+        "projectLabelCount": 1,
+        "allProjectsInContent": false
+      }
+    },
+    "awaited": true,
+    "evalTimeoutMs": "60000",
+    "retryBudget": {
+      "retries": 0,
+      "commandAttempts": 1,
+      "remainingMs": "29988",
+      "attempts": 1,
+      "elapsedMs": "12"
+    },
+    "screenshot_skipped": "not-requested",
+    "seq": 5
+  },
+  "ok": true,
+  "code": 1
+}

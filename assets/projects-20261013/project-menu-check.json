@@ -1,0 +1,29 @@
+[
+  {
+    "execute_js": {
+      "body": "() => { const nav=document.querySelector('nav[aria-label=\"Main navigation\"]'); const buttons=[...nav.querySelectorAll('button')]; const all=buttons.find(b=>b.textContent.trim()==='All projects'); return {textCreateRemoved:!buttons.some(b=>b.textContent.trim()==='Create project'),plusPresent:!!nav.querySelector('[aria-label=\"Create project\"]'),fontSize:getComputedStyle(all).fontSize}; }"
+    }
+  },
+  {
+    "screenshot": {
+      "selector": "div.h-screen.bg-claude-sidebar",
+      "path": "D:\\code\\project\\project-harven\\claude-rust-desktop-docs\\assets\\projects-20261013\\08-project-menu.png"
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "nav [aria-label=\"Create project\"]"
+    }
+  },
+  {
+    "wait_for_element": {
+      "selector": "input[aria-label=\"Project name\"]",
+      "timeoutSeconds": 5
+    }
+  },
+  {
+    "click_element_by_selector": {
+      "selector": "[aria-label=\"Close create project\"]"
+    }
+  }
+]

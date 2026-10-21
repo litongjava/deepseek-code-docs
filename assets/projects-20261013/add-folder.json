@@ -1,0 +1,25 @@
+[
+  {
+    "input_text_by_selector": {
+      "selector": "input[aria-label=\"Folder path\"]",
+      "text": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\claude-project-ui-2026101311\\source-c"
+    }
+  },
+  {
+    "click_element_by_role": {
+      "role": "button",
+      "name": "Add",
+      "exact": true
+    }
+  },
+  {
+    "click_element_by_role": {
+      "role": "button",
+      "name": "Save folders",
+      "exact": true
+    }
+  },
+  {
+    "get_browser_state": {}
+  }
+]
