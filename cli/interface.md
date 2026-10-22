@@ -8,10 +8,12 @@
 ──────────────────────────────────────────────
 > 修复登录页的样式问题
 ──────────────────────────────────────────────
-ask mode (Shift+Tab to cycle) - Enter send - Alt+Enter newline
+? for shortcuts
 ```
 
-- 输入框上下各有一条分隔线，下面一行显示当前的[权限模式](./permissions.md)和常用按键。
+- 输入框上下各有一条分隔线。
+- 下面一行和 Claude Code 一样：默认的 ask 模式显示 `? for shortcuts`，其他[权限模式](./permissions.md)显示带颜色的标签，例如 `⏵⏵ accept edits on (shift+tab to cycle)`、`⏸ plan mode on (shift+tab to cycle)`、`⏵⏵ bypass permissions on (shift+tab to cycle)`。
+- 在空输入框里按 `?`，会列出全部快捷键。
 - 提交后，提示词连同上下两条分隔线一起保留在对话记录里，方便回看自己问过什么。
 - 输入 `/` 会弹出斜杠命令列表，`↑` `↓` 选择，`Tab` 补全。
 - 一轮结束后，输入框里可能出现灰色的[建议补全](./suggestions.md)，按 `Tab` 接受。
@@ -26,7 +28,7 @@ ask mode (Shift+Tab to cycle) - Enter send - Alt+Enter newline
 ──────────────────────────────────────────────
 ›
 ──────────────────────────────────────────────
-ask mode (Shift+Tab to cycle) · Enter queues · /btw question /background detach · Esc interrupts
+esc to interrupt
 ```
 
 **状态行**：
@@ -34,6 +36,8 @@ ask mode (Shift+Tab to cycle) · Enter queues · /btw question /background detac
 - 括号里依次是：已用时间、本轮输出的 token 数（`↓`），以及模型是否正在思考。
 
 **提示行**：轮换显示的小技巧，见[运行提示](./tips.md)。
+
+**底部**：运行中在模式标签后面追加 `· esc to interrupt`；ask 模式只显示 `esc to interrupt`。
 
 **运行中仍然可以输入**：
 - 直接输入并回车：这条提示词会排队，等这一轮结束后自动执行。

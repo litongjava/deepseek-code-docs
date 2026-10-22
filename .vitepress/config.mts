@@ -84,8 +84,9 @@ export default defineConfig({
           { text: '状态查看', link: '/cli/status' },
           { text: '输出上限与自动续写', link: '/cli/output-limit' }
         ] },
-        { text: '代码智能', items: [
-          { text: '语言服务器（LSP）', link: '/cli/lsp' }
+        { text: '代码智能与外部代理', items: [
+          { text: '语言服务器（LSP）', link: '/cli/lsp' },
+          { text: '调用 Claude Code 与 Codex', link: '/cli/external-agents' }
         ] },
         { text: '自动化', items: [
           { text: '非交互模式', link: '/cli/non-interactive' },

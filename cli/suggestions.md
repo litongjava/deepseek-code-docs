@@ -5,11 +5,12 @@
 ```text
 ● Changed 1 file (+1) · Ctrl+O shows the diffs
     hello.py  +1
-Worked for 4s · done · 6:15 PM
+
+✻ Brewed for 4s · done 6:15 PM
 ──────────────────────────────────────────────
 > now run it
 ──────────────────────────────────────────────
-ask mode (Shift+Tab to cycle) - Tab accepts the suggestion - Enter send
+? for shortcuts · tab to accept suggestion
 ```
 
 ## 操作

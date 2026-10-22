@@ -44,7 +44,8 @@
 ● Changed 2 files (+3 −1) · Ctrl+O shows the diffs
     NOTES.md     +2
     src/main.rs  +1 −1
-Worked for 6s · done · 6:17 PM
+
+✻ Churned for 6s · done 6:17 PM
 ```
 
 数据来自 `Write` 和 `Edit` 成功执行后校验过的文件变更记录。查看具体 diff 按 `Ctrl+O`；查看整个工作区相对 Git 的差异用 `/diff`。

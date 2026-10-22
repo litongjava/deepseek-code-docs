@@ -33,6 +33,7 @@ dcl -m deepseek-flash --api-format anthropic -p "总结 README" < /dev/null   # 
 | 当前会话、模型、服务的状态 | [状态查看](./status.md) |
 | 回复被截断时怎么办 | [输出上限与自动续写](./output-limit.md) |
 | 跳转定义、查引用、诊断 | [语言服务器（LSP）](./lsp.md) |
+| 把子任务交给本机的 Claude Code 或 Codex | [调用 Claude Code 与 Codex](./external-agents.md) |
 | 在脚本和 CI 中使用 | [非交互模式](./non-interactive.md) |
 | 让结果是合法 JSON | [结构化输出](./structured-output.md) |
 | 团队共享记忆 | [团队同步](./team-sync.md) |
