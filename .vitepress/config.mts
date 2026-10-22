@@ -68,6 +68,7 @@ export default defineConfig({
           { text: '安装与构建', link: '/cli/install' }
         ] },
         { text: '配置', items: [
+          { text: '首次启动与内置提供商', link: '/cli/first-run' },
           { text: '接入 DeepSeek', link: '/cli/deepseek' },
           { text: '模型与提供商', link: '/cli/providers' },
           { text: '数据目录', link: '/cli/data-directory' },
@@ -76,17 +77,25 @@ export default defineConfig({
         { text: '交互模式', items: [
           { text: '交互界面与快捷键', link: '/cli/interface' },
           { text: '工具调用与改动详情', link: '/cli/tool-calls' },
+          { text: '! 命令模式', link: '/cli/shell-mode' },
+          { text: '@ 引用文件', link: '/cli/file-mentions' },
+          { text: '图片', link: '/cli/images' },
+          { text: '# 写入项目说明', link: '/cli/memory-notes' },
+          { text: 'vim 模式', link: '/cli/vim-mode' },
+          { text: '回退', link: '/cli/rewind' },
           { text: '权限模式与工具审批', link: '/cli/permissions' },
           { text: '计划模式', link: '/cli/plan-mode' },
           { text: '自动权限模式', link: '/cli/auto-mode' },
           { text: '建议补全', link: '/cli/suggestions' },
           { text: '运行提示', link: '/cli/tips' },
           { text: '状态查看', link: '/cli/status' },
-          { text: '输出上限与自动续写', link: '/cli/output-limit' }
+          { text: '输出上限与自动续写', link: '/cli/output-limit' },
+          { text: '上下文用量与费用', link: '/cli/context-and-cost' }
         ] },
         { text: '代码智能与外部代理', items: [
           { text: '语言服务器（LSP）', link: '/cli/lsp' },
-          { text: '调用 Claude Code 与 Codex', link: '/cli/external-agents' }
+          { text: '调用 Claude Code 与 Codex', link: '/cli/external-agents' },
+          { text: '代码审查与安全审查', link: '/cli/code-review' }
         ] },
         { text: '自动化', items: [
           { text: '非交互模式', link: '/cli/non-interactive' },

@@ -17,6 +17,7 @@
 |---|---|---|
 | `spinnerTipsEnabled` | `true` | 运行中是否在状态行下显示提示，见[运行提示](./tips.md) |
 | `promptSuggestionEnabled` | `true` | 一轮结束后是否生成下一句建议，见[建议补全](./suggestions.md) |
+| `editorMode` | `normal` | 设为 `vim` 时使用 vim 风格编辑，见[vim 模式](./vim-mode.md) |
 | `hooks` | 无 | 工具调用前后执行的 hooks |
 
 这两个开关和 Claude Code 的同名设置含义一致。
@@ -27,7 +28,7 @@
 |---|---|---|
 | `DEEPSEEK_API_KEY` | DeepSeek API Key | [接入 DeepSeek](./deepseek.md) |
 | `DEEPSEEK_BASE_URL` | 覆盖 DeepSeek 接口地址 | [接入 DeepSeek](./deepseek.md) |
-| `DEEPSEEK_CODE_DATA_DIR` | 数据目录（旧名 `CLAUDE_RUST_DATA_DIR`） | [数据目录](./data-directory.md) |
+| `DEEPSEEK_CODE_DATA_DIR` | 数据目录 | [数据目录](./data-directory.md) |
 | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | 启用代理团队工具 | [代理团队](./agent-teams.md) |
 | `CLAUDE_BRIDGE_OAUTH_TOKEN` | 远程控制服务的 token | [远程控制](./remote-control.md) |
 | `TEAM_SYNC_TOKEN` | 团队同步客户端 token | [团队同步](./team-sync.md) |

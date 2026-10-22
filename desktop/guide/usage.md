@@ -30,7 +30,7 @@ Skills 提供可复用的任务说明或工具工作流。添加后应通过小�
 
 ## 本地数据与日志
 
-`src-tauri/src/main.rs` 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）保存 `claude_desktop.db`，知识库放在该目录下的 `knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
+`src-tauri/src/main.rs` 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）保存 `deepseek_code.db`，知识库放在该目录下的 `knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
 
 日志初始化逻辑将滚动日志写入进程工作目录下的 `logs`。不同启动方式可能改变工作目录。
 

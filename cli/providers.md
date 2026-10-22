@@ -5,6 +5,7 @@
 | 方式 | 特点 |
 |---|---|
 | **临时提供商** | 用命令行参数或环境变量启动，例如 `-m deepseek-flash` 配合 `DEEPSEEK_API_KEY`。不写入配置，`/model` 列不出模型 |
+| **内置提供商** | 第一次启动时从列表中选择，粘贴 API Key 即可，见[首次启动与内置提供商](./first-run.md) |
 | **保存的提供商** | 用 `/provider add` 保存到数据目录，之后可以用 `/provider`、`/model` 随时切换，Desktop 也能看到 |
 
 ## 保存一个提供商：`/provider add`

@@ -62,6 +62,20 @@ esc to interrupt
 | `Ctrl+U` / `Ctrl+K` | 删除光标前 / 后的内容 |
 | `Ctrl+L` | 清理底部界面 |
 | `Ctrl+D` | 输入框为空时退出 |
+| `Esc` `Esc` | 输入框为空时连按两次：[回退](./rewind.md) |
+| `?` | 输入框为空时：显示快捷键列表 |
+| `@` | 补全项目文件，见[`@` 引用文件](./file-mentions.md) |
+| `Ctrl+V` | 粘贴剪贴板中的图片，见[图片](./images.md) |
+
+输入框的特殊前缀：
+
+| 前缀 | 作用 |
+|---|---|
+| `!` | 直接运行 Shell 命令，见[`!` 命令模式](./shell-mode.md) |
+| `# ` | 写入项目说明，见[`#` 写入项目说明](./memory-notes.md) |
+| `/` | 斜杠命令 |
+
+`/vim` 可以切换到 vim 风格的编辑，见[vim 模式](./vim-mode.md)。
 
 快捷键可以在数据目录的 `keybindings.json` 中自定义。
 
@@ -74,6 +88,10 @@ esc to interrupt
 | `/provider`、`/model`、`/test` | 提供商和模型，见[模型与提供商](./providers.md) |
 | `/plan 任务` | 进入[计划模式](./plan-mode.md) |
 | `/lsp` | [语言服务器](./lsp.md) |
-| `/compact` | 压缩上下文，完整记录仍保留在存档里 |
+| `/compact` | 压缩上下文，完整记录仍保留在存档里，见[上下文用量与费用](./context-and-cost.md) |
+| `/usage`、`/cost` | 本次会话的 token 用量和费用 |
+| `/rewind` | [回退](./rewind.md)代码或对话 |
+| `/code-review`、`/security-review` | [代码审查与安全审查](./code-review.md) |
+| `/vim` | 切换 [vim 模式](./vim-mode.md) |
 | `/rename 名称` | 给会话命名 |
 | `/exit` | 退出 |

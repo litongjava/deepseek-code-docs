@@ -4,18 +4,9 @@
 
 ## 数据位置
 
-Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录下的 `~/.deepseek-code`（Windows 为 `%USERPROFILE%\.deepseek-code`）。其中保存供应商配置 `config.json`、用户设置 `settings.json`、会话数据库 `claude_desktop.db`、MCP 配置 `mcp-servers.json`、技能 `skills/` 和知识库 `knowledge/` 等。Rust 启动日志会打印实际使用的目录。
+Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录下的 `~/.deepseek-code`（Windows 为 `%USERPROFILE%\.deepseek-code`）。其中保存供应商配置 `config.json`、用户设置 `settings.json`、会话数据库 `deepseek_code.db`、MCP 配置 `mcp-servers.json`、技能 `skills/` 和知识库 `knowledge/` 等。Rust 启动日志会打印实际使用的目录。
 
-目录按以下顺序确定：
-
-1. 环境变量 `DEEPSEEK_CODE_DATA_DIR`；旧变量 `CLAUDE_RUST_DATA_DIR` 仍然有效。CLI 还可以用 `--data-dir`。
-2. `~/.deepseek-code`。
-3. **兼容旧版本**：如果 `~/.deepseek-code` 中还没有 `claude_desktop.db`，而旧数据目录中有，就继续使用旧目录，CLI 会在 stderr 提示。旧目录位置：
-   - Windows：`%APPDATA%\com.claude.desktop`
-   - macOS：`~/Library/Application Support/com.claude.desktop`
-   - Linux：`~/.local/share/com.claude.desktop`
-
-从旧目录迁移：先退出 Desktop 和所有 dcl 进程，再把整个旧目录移动（或复制）为 `~/.deepseek-code`，例如 Linux 上执行 `mv ~/.local/share/com.claude.desktop ~/.deepseek-code`。之后两端都自动使用新目录。
+设置环境变量 `DEEPSEEK_CODE_DATA_DIR` 可以改用其他目录，CLI 还可以用 `--data-dir`。
 
 `~/.deepseek-code` 中的 `settings.json` 可以配置 hooks，因此模型编辑该目录下的文件需要审批；`workspaces/` 子目录是普通会话工作区，不受此限制。
 
