@@ -30,6 +30,40 @@ Model API error 400: messages.2:`tool_use` ids were found without `tool_result` 
 
 **处理**：升级到包含该修复的版本。当前版本把同一轮的工具结果放进一条 user 消息，并在每次请求前合并相邻同角色消息。
 
+## `--json-schema` 报 Structured output is not valid JSON
+
+**现象**：使用 DeepSeek 时，旧版本的 `--json-schema` 总是失败。Anthropic 协议返回普通文本，报 `Structured output is not valid JSON`；OpenAI 协议直接报 `Model API error 400 ... This response_format type is unavailable now`。
+
+**处理**：升级到当前版本。对 DeepSeek 改为通过提示词约束输出，并在本地校验，见 [DeepSeek 配置 · 结构化输出](./deepseek.md#结构化输出-json-schema)。如果当前版本仍报 `does not match JSON schema`，说明模型输出确实不符合 schema，可以在提示词里写清各字段的含义后重试。
+
+## auto 模式报 Auto permission denial limit reached
+
+**现象**：`--permission-mode auto` 配合 DeepSeek 时，所有工具调用都被拒绝，随后整轮中止：
+
+```
+Error: Engine execution failed: Auto permission denial limit reached; stopping the headless turn
+```
+
+**原因**：旧版本的分类器要求回复只有一个内容块，而 DeepSeek 会先返回思考块，因此每次判断都被当作无效回复，按拒绝处理。OpenAI 协议下则因为不支持 `json_schema` 而直接失败。
+
+**处理**：升级到当前版本。如果仍然报错，先用 `/permissions auto-config show` 确认已经配置了分类器。
+
+## database is locked
+
+**现象**：旧版本在计划模式中选择"清空上下文"、Desktop 与 dcl 同时写同一个会话，或多个 dcl 并发运行时，偶发 `database is locked`。
+
+**原因**：先读后写的事务在 SQLite WAL 模式下升级写锁失败时会立即报错，不会等待 `busy_timeout`。
+
+**处理**：升级到当前版本。所有写事务都改为一开始就获取写锁，遇到并发时会等待，最长 5 秒。
+
+## Another skills import is running
+
+**现象**：没有并发导入时，导入技能偶发报 `Another skills import is running`。编辑 MCP 配置时报 `MCP configuration is being edited; retry`，原因相同。
+
+**原因**：同一进程里其他线程正在启动子进程（例如 Bash 工具或 MCP 服务），子进程短暂继承了锁文件的描述符，锁没有及时释放。
+
+**处理**：当前版本会重试最多 500 毫秒。如果仍然报错，说明确实有另一个进程正在操作，等它结束后重试。
+
 ## 构建报错 `alsa-sys` 或 `unable to find library -lxdo`
 
 缺少 `libasound2-dev` 或 `libxdo-dev`。安装对应包；没有 root 权限时见[安装与构建](./install.md#没有-root-权限时的-linux-构建)。
