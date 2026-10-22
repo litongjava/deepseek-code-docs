@@ -69,6 +69,7 @@ export default defineConfig({
           { text: '接入 DeepSeek 模型', link: '/cli/deepseek' }
         ] },
         { text: '使用', items: [
+          { text: '交互模式', link: '/cli/interactive' },
           { text: '非交互模式与自动化', link: '/cli/non-interactive' },
           { text: '协作：团队同步、远程控制与多会话', link: '/cli/collaboration' },
           { text: '实战：用 dcl 修复开源项目 Issue', link: '/cli/case-qwerty-learner' }

@@ -84,6 +84,28 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 **处理**：升级到当前版本，会像其他工具一样请求确认；也可以用 `--allowed-tools SendMessage` 预先授权。
 
+## Output token limit reached
+
+**含义**：模型这次回复达到了输出 token 上限（`max_tokens`），被截断了。DeepSeek 的思考内容也计入输出，旧版本默认上限只有 8192，用 Write 写较大的文件时很容易被截断。
+
+**处理**：当前版本 DeepSeek 默认上限为 32000，被截断时会自动续写，最多 3 次，被截断的工具调用不会执行，见[交互模式 · 输出上限](./interactive.md#输出上限)。仍然提示时，发送一条后续消息让模型继续，或用 `--max-tokens` 调高上限。
+
+## `/provider add` 报 Invalid environment variable name
+
+**原因**：API Key 一栏要求填写环境变量的**名字**（如 `DEEPSEEK_API_KEY`），旧版本在填入 Key 本身时只报这一句就退出了。
+
+**处理**：当前版本会说明原因并重新询问。先在终端设置环境变量，再填写变量名，见[交互模式 · 配置模型](./interactive.md#配置模型-provider-add)。
+
+## 运行时界面闪烁、滚轮只能滚动一小块区域
+
+**原因**：旧版本每输出一行就擦除并重画底部界面，并在出现工具详情后接管鼠标，滚轮只能滚动详情面板。
+
+**处理**：升级到当前版本。现在界面改为一次性整体刷新，并且不再接管鼠标。
+
+## 计划模式下 Bash 被禁用
+
+**处理**：当前版本在计划模式下直接执行只读命令，其他命令会先询问，见[交互模式 · 计划模式](./interactive.md#计划模式)。
+
 ## 构建报错 `alsa-sys` 或 `unable to find library -lxdo`
 
 缺少 `libasound2-dev` 或 `libxdo-dev`。安装对应包；没有 root 权限时见[安装与构建](./install.md#没有-root-权限时的-linux-构建)。
