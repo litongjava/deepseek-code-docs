@@ -63,18 +63,42 @@ export default defineConfig({
       ] }
       ],
       '/cli/': [
-        { text: 'CLI 入门', items: [
+        { text: '入门', items: [
           { text: 'dcl 概览', link: '/cli/' },
-          { text: '安装与构建', link: '/cli/install' },
-          { text: '接入 DeepSeek 模型', link: '/cli/deepseek' }
+          { text: '安装与构建', link: '/cli/install' }
         ] },
-        { text: '使用', items: [
-          { text: '交互模式', link: '/cli/interactive' },
-          { text: '非交互模式与自动化', link: '/cli/non-interactive' },
-          { text: '协作：团队同步、远程控制与多会话', link: '/cli/collaboration' },
-          { text: '实战：用 dcl 修复开源项目 Issue', link: '/cli/case-qwerty-learner' }
+        { text: '配置', items: [
+          { text: '接入 DeepSeek', link: '/cli/deepseek' },
+          { text: '模型与提供商', link: '/cli/providers' },
+          { text: '数据目录', link: '/cli/data-directory' },
+          { text: '设置项参考', link: '/cli/settings' }
         ] },
-        { text: '维护与参考', items: [
+        { text: '交互模式', items: [
+          { text: '交互界面与快捷键', link: '/cli/interface' },
+          { text: '工具调用与改动详情', link: '/cli/tool-calls' },
+          { text: '权限模式与工具审批', link: '/cli/permissions' },
+          { text: '计划模式', link: '/cli/plan-mode' },
+          { text: '自动权限模式', link: '/cli/auto-mode' },
+          { text: '建议补全', link: '/cli/suggestions' },
+          { text: '运行提示', link: '/cli/tips' },
+          { text: '状态查看', link: '/cli/status' },
+          { text: '输出上限与自动续写', link: '/cli/output-limit' }
+        ] },
+        { text: '代码智能', items: [
+          { text: '语言服务器（LSP）', link: '/cli/lsp' }
+        ] },
+        { text: '自动化', items: [
+          { text: '非交互模式', link: '/cli/non-interactive' },
+          { text: '结构化输出', link: '/cli/structured-output' }
+        ] },
+        { text: '协作', items: [
+          { text: '团队同步', link: '/cli/team-sync' },
+          { text: '远程控制', link: '/cli/remote-control' },
+          { text: '会话消息', link: '/cli/session-messages' },
+          { text: '代理团队', link: '/cli/agent-teams' }
+        ] },
+        { text: '实战与参考', items: [
+          { text: '用 dcl 修复开源项目 Issue', link: '/cli/case-qwerty-learner' },
           { text: '故障排查', link: '/cli/troubleshooting' }
         ] }
       ]

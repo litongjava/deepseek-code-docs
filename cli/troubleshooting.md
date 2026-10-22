@@ -34,7 +34,7 @@ Model API error 400: messages.2:`tool_use` ids were found without `tool_result` 
 
 **现象**：使用 DeepSeek 时，旧版本的 `--json-schema` 总是失败。Anthropic 协议返回普通文本，报 `Structured output is not valid JSON`；OpenAI 协议直接报 `Model API error 400 ... This response_format type is unavailable now`。
 
-**处理**：升级到当前版本。对 DeepSeek 改为通过提示词约束输出，并在本地校验，见 [DeepSeek 配置 · 结构化输出](./deepseek.md#结构化输出-json-schema)。如果当前版本仍报 `does not match JSON schema`，说明模型输出确实不符合 schema，可以在提示词里写清各字段的含义后重试。
+**处理**：升级到当前版本。对 DeepSeek 改为通过提示词约束输出，并在本地校验，见 [DeepSeek 配置 · 结构化输出](./structured-output.md)。如果当前版本仍报 `does not match JSON schema`，说明模型输出确实不符合 schema，可以在提示词里写清各字段的含义后重试。
 
 ## auto 模式报 Auto permission denial limit reached
 
@@ -88,13 +88,13 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 **含义**：模型这次回复达到了输出 token 上限（`max_tokens`），被截断了。DeepSeek 的思考内容也计入输出，旧版本默认上限只有 8192，用 Write 写较大的文件时很容易被截断。
 
-**处理**：当前版本 DeepSeek 默认上限为 32000，被截断时会自动续写，最多 3 次，被截断的工具调用不会执行，见[交互模式 · 输出上限](./interactive.md#输出上限)。仍然提示时，发送一条后续消息让模型继续，或用 `--max-tokens` 调高上限。
+**处理**：当前版本 DeepSeek 默认上限为 32000，被截断时会自动续写，最多 3 次，被截断的工具调用不会执行，见[交互模式 · 输出上限](./output-limit.md)。仍然提示时，发送一条后续消息让模型继续，或用 `--max-tokens` 调高上限。
 
 ## `/provider add` 报 Invalid environment variable name
 
 **原因**：API Key 一栏要求填写环境变量的**名字**（如 `DEEPSEEK_API_KEY`），旧版本在填入 Key 本身时只报这一句就退出了。
 
-**处理**：当前版本会说明原因并重新询问。先在终端设置环境变量，再填写变量名，见[交互模式 · 配置模型](./interactive.md#配置模型-provider-add)。
+**处理**：当前版本会说明原因并重新询问。先在终端设置环境变量，再填写变量名，见[交互模式 · 配置模型](./providers.md)。
 
 ## 运行时界面闪烁、滚轮只能滚动一小块区域
 
@@ -104,7 +104,13 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 ## 计划模式下 Bash 被禁用
 
-**处理**：当前版本在计划模式下直接执行只读命令，其他命令会先询问，见[交互模式 · 计划模式](./interactive.md#计划模式)。
+**处理**：当前版本在计划模式下直接执行只读命令，其他命令会先询问，见[交互模式 · 计划模式](./plan-mode.md)。
+
+## LSP 报 Cannot start language server 或 not installed
+
+**原因**：对应语言的服务端没有安装，或者不在 `PATH` 上。
+
+**处理**：运行 `/lsp` 查看各语言的状态，按提示执行 `/lsp install <语言>`，或用系统包管理器安装，见[语言服务器](./lsp.md)。安装 Java 时如果提示下载的不是压缩包，通常是下载站点临时不可用，稍后重试即可。
 
 ## 构建报错 `alsa-sys` 或 `unable to find library -lxdo`
 
