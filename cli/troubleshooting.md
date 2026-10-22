@@ -64,6 +64,26 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 **处理**：当前版本会重试最多 500 毫秒。如果仍然报错，说明确实有另一个进程正在操作，等它结束后重试。
 
+## TeamSpawn 报 team_name is required
+
+**现象**：模型明明传了参数，`TeamSpawn` 仍然每次都返回 `team_name is required`。日志中该工具的 `input` 为 `{}`。
+
+**原因**：旧版本拼接流式工具参数时，会把"与已拼接内容开头相同"的片段当成重复片段丢弃。参数里包含对象数组时（例如 `TeamSpawn` 的 `members`、`TodoWrite` 的 `todos`），以 `{"` 开头的增量片段会被误丢，拼出的 JSON 不完整，最终参数变成空对象。
+
+**处理**：升级到当前版本。
+
+## Remote Control 客户端一直显示"运行中"
+
+**原因**：旧版本只在断开连接时才发送 `result` 事件，远程客户端无法知道某一轮已经结束。
+
+**处理**：升级到当前版本，现在每轮结束都会发送 `result`。
+
+## SendMessage 报 Team message access requires granted project tool permission
+
+**原因**：旧版本在 ask 模式下没有弹出确认就直接拒绝。
+
+**处理**：升级到当前版本，会像其他工具一样请求确认；也可以用 `--allowed-tools SendMessage` 预先授权。
+
 ## 构建报错 `alsa-sys` 或 `unable to find library -lxdo`
 
 缺少 `libasound2-dev` 或 `libxdo-dev`。安装对应包；没有 root 权限时见[安装与构建](./install.md#没有-root-权限时的-linux-构建)。
