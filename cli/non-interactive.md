@@ -64,4 +64,6 @@ dcl -m deepseek-flash --api-format anthropic \
 | `error` | 请求或引擎错误 |
 | `result` | 最终结果，含 `is_error`、`result`、`session_id` 和用量 |
 
+`stream-json` 同时输出参考协议的 `system`、`assistant`、`user`、`result` 消息，SDK 和多轮会话的用法见 [SDK 与 stream-json 协议](./sdk.md)。
+
 `run.err` 包含引擎日志（`INFO`/`ERROR`），排查接口错误时先看这里。

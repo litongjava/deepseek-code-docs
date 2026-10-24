@@ -99,7 +99,8 @@ export default defineConfig({
         ] },
         { text: '自动化', items: [
           { text: '非交互模式', link: '/cli/non-interactive' },
-          { text: '结构化输出', link: '/cli/structured-output' }
+          { text: '结构化输出', link: '/cli/structured-output' },
+          { text: 'SDK 与 stream-json 协议', link: '/cli/sdk' }
         ] },
         { text: '协作', items: [
           { text: '团队同步', link: '/cli/team-sync' },
