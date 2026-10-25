@@ -44,7 +44,7 @@ esc to interrupt
 - `/btw 问题`：问一个旁支问题，不打断主任务。
 - `/background`：把当前任务转到后台，释放终端。
 
-**需要你回答时**：例如工具审批、计划审批，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
+**需要你回答时**：工具审批在输入框的位置显示选项菜单，用 `↑`/`↓` 和 `Enter` 或数字键选择，见[审批提示](./permissions.md#审批提示)。计划审批等需要输入文字的问题，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
 
 ## 快捷键
 
