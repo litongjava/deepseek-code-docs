@@ -6,12 +6,14 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 | 模式 | 行为 |
 |---|---|
-| `ask`（默认） | 读文件、搜索等只读操作直接执行；改文件、运行命令前询问 |
-| `accept-edits` | 文件编辑自动放行，运行命令仍然询问 |
+| `ask`（默认） | 读文件、搜索等只读操作直接执行，只读的 shell 命令也直接执行；改文件、运行其他命令前询问 |
+| `accept-edits` | 文件编辑自动放行，只读的 shell 命令直接执行，其他命令仍然询问 |
 | `plan` | 只调查不修改，见[计划模式](./plan-mode.md) |
 | `auto` | 由一个分类模型判断是否放行，见[自动权限模式](./auto-mode.md) |
 | `dont-ask` | 不询问：需要审批的调用一律拒绝，已放行的规则照常生效 |
 | `bypass` | 不检查，全部放行。只在隔离环境中使用 |
+
+只读的 shell 命令指 `ls`、`cat`、`grep`、`find`（不含 `-exec`、`-delete`）、`git status`/`log`/`diff` 等只查看内容的命令，用管道或 `&&` 连接时每一段都必须只读，判断规则与[计划模式](./plan-mode.md)相同。在 ask 和 accept-edits 模式下，这类命令的路径参数还必须都在工作目录内：`cat /etc/hosts`、`ls ..`、以 `~` 开头或含 `$` 变量的参数仍然会询问。显式的 ask 或 deny 规则（例如 `/permissions ask Bash(ls *)`）优先。
 
 - 启动时指定：`dcl --permission-mode accept-edits`。
 - 运行中切换：`Shift+Tab` 在 ask → accept-edits → plan 之间循环；也可以用 `/permissions <模式>`。
