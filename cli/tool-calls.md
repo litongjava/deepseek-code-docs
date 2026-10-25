@@ -25,6 +25,26 @@
 - 修改文件的工具（`Write`、`Edit`）会直接显示带颜色的 diff 预览。
 - 多个工具并行运行时，各自在结束时打印，标题里带着参数，不会混淆。
 
+## 连续的只读调用合并为一行
+
+和 Claude Code 一样，连续的搜索、读文件、列目录和只读 shell 命令（例如 `ls`、`cat`、`grep`）不逐个打印，而是合并成一行。运行期间显示正在做什么和最近一次调用：
+
+```text
+  Searching for 2 patterns, reading 1 file…
+  ⎿  Read(src/calc.py)
+```
+
+模型开始回答或调用其他工具后，这一行定格为灰色的汇总；之前有思考过程时，前面加上思考时长：
+
+```text
+  Thought for 1s, searched for 3 patterns, read 3 files
+● 项目里有 3 个 Python 文件……
+```
+
+- `Grep`、`Glob` 计为 pattern，`Read` 和 `cat`/`head`/`tail` 计为 file，`ListDir` 和 `ls`/`tree` 计为 directory，其他只读命令计为 shell command。
+- 失败的调用不合并，照常单独打印错误原因。
+- 每个调用的参数和完整输出仍可以用 `Ctrl+O` 查看。
+
 ## 展开全部详情：Ctrl+O
 
 一轮结束后，在输入框按 `Ctrl+O`，会把上一轮的完整内容打印到对话记录中：
