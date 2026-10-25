@@ -8,7 +8,7 @@
 
 ✻ Brewed for 4s · done 6:15 PM
 ──────────────────────────────────────────────
-> now run it
+❯ now run it
 ──────────────────────────────────────────────
 ? for shortcuts · tab to accept suggestion
 ```

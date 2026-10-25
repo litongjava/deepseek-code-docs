@@ -9,7 +9,7 @@
 3. **粘贴剪贴板图片**：截图后在输入框按 `Ctrl+V`，dcl 会把图片保存到[数据目录](./data-directory.md)的 `pasted-images/` 下，并插入 `@路径`。
 
 ```text
-> 这个页面哪里对不齐？ @/home/you/.deepseek-code/pasted-images/3f2c….png
+❯ 这个页面哪里对不齐？ @/home/you/.deepseek-code/pasted-images/3f2c….png
 ```
 
 ## 规则

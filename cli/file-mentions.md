@@ -7,8 +7,8 @@
 输入 `@` 后接文件名的一部分，会弹出项目文件列表：
 
 ```text
-> 解释一下 @ma
-› @src/main.rs
+❯ 解释一下 @ma
+❯ @src/main.rs
   @README.md
 ↑↓ select · Tab/Enter complete · Esc close   1–2 / 2
 ```

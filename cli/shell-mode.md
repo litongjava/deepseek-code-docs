@@ -3,11 +3,11 @@
 在输入框里以 `!` 开头，后面的内容会直接在你的 Shell 里运行，不经过模型。命令和输出会加入对话，模型下一轮可以用到。
 
 ```text
-> !git status --short
+❯ !git status --short
 ! git status --short
   ⎿  M src/main.rs
      ?? notes.md
-> 把刚才 git status 里改动的文件总结一下
+❯ 把刚才 git status 里改动的文件总结一下
 ```
 
 ## 行为

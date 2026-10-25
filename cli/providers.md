@@ -13,7 +13,7 @@
 在交互模式里运行 `/provider add`，按提示逐项填写：
 
 ```text
-> /provider add
+❯ /provider add
 Provider setup; /cancel cancels. Enter environment variable NAMES, never API keys.
 Provider ID: deepseek
 Protocol (openai / anthropic / gemini): anthropic

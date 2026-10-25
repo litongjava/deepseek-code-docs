@@ -3,7 +3,7 @@
 在输入框里以 `# `（井号加空格）开头，这一行会作为一条规则写进项目的说明文件，不发送给模型。之后的每次对话，模型都会读到它。
 
 ```text
-> # 提交前先运行 cargo test
+❯ # 提交前先运行 cargo test
 Saved to /home/you/project/AGENTS.md: - 提交前先运行 cargo test
 ```
 

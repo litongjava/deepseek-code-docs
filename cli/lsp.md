@@ -7,7 +7,7 @@ dcl 内置一个 LSP 客户端，模型可以用 `LSP` 工具做跳转定义、�
 ## 查看状态：`/lsp`
 
 ```text
-> /lsp
+❯ /lsp
 Language servers (used by the LSP tool for definitions, references and diagnostics)
   ✓ Rust                   rust-analyzer                /usr/local/cargo/bin/rust-analyzer
   ✓ Python                 pylsp                        ~/.deepseek-code/lsp/python/bin/pylsp
@@ -44,7 +44,7 @@ Vue 使用 2.x 版本的语言服务器：3.x 只能通过 TypeScript 服务器�
 ## 一键安装：`/lsp install <语言>`
 
 ```text
-> /lsp install java
+❯ /lsp install java
 Install jdtls for Java? This downloads Red Hat's Java language support from open-vsx.org
 (about 140 MB: jdtls plus its own Java runtime), under ~/.deepseek-code/lsp. [y/N] y
 Installing jdtls for Java…
