@@ -35,10 +35,11 @@ src/calc.py
  ❯ 1. Yes
    2. Yes, allow all edits during this session (shift+tab)
    3. No
- ↑↓ select · enter confirm · tab to amend · esc to interrupt
+ ↑↓ select · enter confirm · tab to amend · esc to cancel
 ```
 
-- `↑`/`↓` 选择、`Enter` 确认，也可以直接按数字键。`Esc` 中断这一轮。
+- `↑`/`↓` 选择、`Enter` 确认，也可以直接按数字键。
+- `Esc` 等同于选"No"：这次调用不执行，这一轮停止，模型知道是你拒绝的。
 - 回答后审批框随即清除，和 Claude Code 一样，对话记录里只留下这次调用的结果（例如修改的 diff 或命令输出）。内容超过一屏时，审批框只显示开头部分，末尾标明还有多少行。
 - 第 2 项只批准一次之外，还会放宽本会话：修改文件时切换到 `accept-edits` 模式；Bash 命令添加会话规则（见下文）；其他工具添加以工具名为规则的放行。规则保存在本会话中，可以用 `/permissions list` 查看、`/permissions remove` 删除。
 - 选"No"时，这一轮停止，和 Claude Code 一样显示 `⎿ Interrupted · What should DeepSeek Code do instead?`，等你输入下一步要做什么。模型收到的结果是"用户拒绝了这次调用，停下来等待用户的指示"。
