@@ -61,6 +61,14 @@ esc to interrupt
 
 **`/mcp` 和 `/hooks`**：`/mcp` 列出 MCP 服务及其状态（已连接及工具数、失败原因、已停用），选中一个可以查看工具、重新连接、停用或启用。`/hooks` 是只读菜单：先显示一共配置了多少个 hook，然后列出全部事件及说明，选中事件查看它的 matcher、执行内容和超时。和 Claude Code 一样，`/mcp` 不列出 dcl 自带、未启用也未修改过的预设服务（会注明隐藏了几个）；没有其他服务时显示 `No MCP servers configured`。带参数的 `/mcp list`、`/hooks list` 仍然输出 JSON。
 
+**后台子代理**：和 Claude Code 一样，模型可以让子代理在后台运行（Agent 工具的 `run_in_background`），调用立即返回，记录里显示 `Backgrounded agent (↓ to manage · ctrl+o to expand)`。子代理在独立的会话里运行，沿用当前的提供商、模型和权限模式。运行期间：
+
+- 一轮结束的那一行显示 `Waiting for 1 background agent to finish`；
+- 输入框下方列出 `● main` 和每个运行中的子代理（类型、说明、已用时间、输出 token 数），提示 `↓ to manage`；
+- 页脚显示 `← for agents`：在空输入框按 `←`，提示 `Press ← again to open agents`，再按一次打开任务视图，可以查看或停止（`x`）子代理。
+
+子代理结束时显示 `● Agent "说明" completed`，它的报告写入会话记录，输入框空闲时自动开始新的一轮，让模型查看结果。
+
 **`/memory` 和 `/agents`**：`/memory` 列出用户、项目、本地三份说明文件（位置和大小），选中后打开编辑，也可以查看当前加载的项目说明。`/agents` 列出可以委派的子代理及说明；需要时直接让模型"用 explore 代理查找……"即可。
 
 **需要你回答时**：工具审批在输入框的位置显示选项菜单，用 `↑`/`↓` 和 `Enter` 或数字键选择，见[审批提示](./permissions.md#审批提示)。计划审批等需要输入文字的问题，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
