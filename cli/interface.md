@@ -4,6 +4,10 @@
 
 启动时先显示三行标题：版本、当前模型、工作目录（家目录缩写为 `~`）。会话 ID 用 `/status` 查看。
 
+## 启动时的确认
+
+和 Claude Code 一样，第一次在某个目录交互启动时，dcl 先问你是否信任这个目录（`Is this a project you created or one you trust?`），选 `Yes, I trust this folder` 才会加载项目设置和 hooks 并开始会话，选 `No, exit` 直接退出。信任一个目录也包括它的子目录。第一次以 `bypass` 权限模式启动时，还会要求确认 Bypass Permissions 的警告。两个回答都保存在[数据目录](./data-directory.md)的 `startup-prompts.json` 中；`-p`、管道输入和 SDK 不会询问。
+
 ## 输入框
 
 ```text
@@ -55,7 +59,9 @@ esc to interrupt
 
 **后台命令结束时**：和 Claude Code 一样显示一行 `● Background command "npm test" completed (exit code 0)`（停止的显示 `was stopped`），并通知模型。模型正在工作时，它在下一个工具结果之后读到；空闲时会自动开始新的一轮，让模型查看结果、继续下一步。正在输入时会等你发送或清空输入后再开始。这类通知不会出现在 `↑` 的历史提示词里。
 
-**`/mcp` 和 `/hooks`**：`/mcp` 列出 MCP 服务及其状态（已连接及工具数、失败原因、已停用），选中一个可以查看工具、重新连接、停用或启用。`/hooks` 是只读菜单：先显示一共配置了多少个 hook，然后列出全部事件及说明，选中事件查看它的 matcher、执行内容和超时。带参数的 `/mcp list`、`/hooks list` 仍然输出 JSON。
+**`/mcp` 和 `/hooks`**：`/mcp` 列出 MCP 服务及其状态（已连接及工具数、失败原因、已停用），选中一个可以查看工具、重新连接、停用或启用。`/hooks` 是只读菜单：先显示一共配置了多少个 hook，然后列出全部事件及说明，选中事件查看它的 matcher、执行内容和超时。和 Claude Code 一样，`/mcp` 不列出 dcl 自带、未启用也未修改过的预设服务（会注明隐藏了几个）；没有其他服务时显示 `No MCP servers configured`。带参数的 `/mcp list`、`/hooks list` 仍然输出 JSON。
+
+**`/memory` 和 `/agents`**：`/memory` 列出用户、项目、本地三份说明文件（位置和大小），选中后打开编辑，也可以查看当前加载的项目说明。`/agents` 列出可以委派的子代理及说明；需要时直接让模型"用 explore 代理查找……"即可。
 
 **需要你回答时**：工具审批在输入框的位置显示选项菜单，用 `↑`/`↓` 和 `Enter` 或数字键选择，见[审批提示](./permissions.md#审批提示)。计划审批等需要输入文字的问题，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
 
@@ -64,18 +70,24 @@ esc to interrupt
 | 按键 | 作用 |
 |---|---|
 | `Enter` | 发送；运行中交给这一轮在下一个工具结果之后读取 |
-| `Alt+Enter` | 换行（运行中也可用 `Shift+Enter`） |
+| `Alt+Enter` | 换行（运行中也可用 `Shift+Enter`）；也可以在行尾输入 `\` 再按 `Enter` |
 | `Esc` / `Ctrl+C` | 中断当前这一轮，已有的对话保留 |
 | `Shift+Tab` | 切换权限模式：ask → accept-edits → plan |
-| `Ctrl+O` | 一轮结束后：展开上一轮全部工具调用；运行中：打开详情面板 |
-| `PgUp` / `PgDn` | 详情面板翻页 |
+| `Ctrl+O` | 打开整个会话的详细记录，见[工具调用](./tool-calls.md) |
+| `Ctrl+T` | 显示或隐藏待办列表（☒ 已完成，☐ 未完成，进行中的加粗），运行中也可用 |
+| `Alt+P` | 打开模型选择（同 `/model`），`←`/`→` 调整 effort |
 | `↑` / `↓` | 历史提示词 |
 | `Ctrl+R` | 搜索历史提示词 |
 | `Tab` / `→` | 接受建议补全（输入框为空时） |
-| `Ctrl+U` / `Ctrl+K` | 删除光标前 / 后的内容 |
+| `Ctrl+U` / `Ctrl+K` | 删除光标前 / 后的内容；之后下方提示 `Ctrl+Y to paste deleted text` |
+| `Ctrl+Y` | 粘贴最近一次删除的内容 |
+| `Ctrl+_` | 撤销输入框里的上一次修改 |
+| `Ctrl+G` | 用 `$VISUAL`、`$EDITOR` 或 `vi` 编辑当前输入；多行输入时下方会提示 |
+| `Ctrl+S` | 暂存当前输入（提示 `› stashed`），发送下一条提示词后自动恢复（提示 `Draft restored`）；输入框为空时再按一次直接取回 |
+| `Ctrl+Z` | 挂起到 shell，`fg` 回来（Windows 不支持） |
 | `Ctrl+L` | 清理底部界面 |
 | `Ctrl+D` | 输入框为空时退出 |
-| `Esc` `Esc` | 输入框为空时连按两次：[回退](./rewind.md) |
+| `Esc` `Esc` | 输入框有内容时：清空（第一次按下提示 `Esc again to clear`）；为空时：[回退](./rewind.md) |
 | `?` | 输入框为空时：显示或关闭快捷键面板 |
 | `@` | 补全项目文件，见[`@` 引用文件](./file-mentions.md) |
 | `Ctrl+V` | 粘贴剪贴板中的图片，见[图片](./images.md) |

@@ -17,6 +17,7 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 - 启动时指定：`dcl --permission-mode accept-edits`。
 - 运行中切换：`Shift+Tab` 在 ask → accept-edits → plan 之间循环；也可以用 `/permissions <模式>`。
+- 不带参数的 `/permissions` 和 Claude Code 一样打开分页管理：Recently denied（本会话被拒绝的调用）、Allow、Ask、Deny（`Add a new rule…` 添加规则，选中规则可以删除；命令行和设置文件里的规则只读）、Auto mode（自动模式配置）、Workspace（工作目录和 `Add directory…`），`←`/`→` 切换。
 - `bypass` 必须显式启用，`Shift+Tab` 只能从它切回 ask。
 
 ## 审批提示
