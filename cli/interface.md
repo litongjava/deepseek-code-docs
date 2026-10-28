@@ -15,7 +15,7 @@
 
 - 输入框上下各有一条分隔线。
 - 下面一行和 Claude Code 一样：默认的 ask 模式显示 `? for shortcuts`，其他[权限模式](./permissions.md)显示带颜色的标签，例如 `⏵⏵ accept edits on (shift+tab to cycle)`、`⏸ plan mode on (shift+tab to cycle)`、`⏵⏵ bypass permissions on (shift+tab to cycle)`。
-- 在空输入框里按 `?`，会列出全部快捷键。
+- 在空输入框里按 `?`，和 Claude Code 一样在输入框下方分三列显示快捷键，代替提示行；再按 `?` 或按其他键关闭。
 - 提交后，提示词连同上下两条分隔线一起保留在对话记录里，方便回看自己问过什么。
 - 输入 `/` 会在输入框上方弹出斜杠命令列表，下方仍显示模式提示行：按名称字母顺序，一次显示 5 条，每条一行（过长的说明以 `…` 截断）；继续输入时和 Claude Code 一样排序：名称以输入开头的在前（名称短的优先，例如 `/co` 依次是 `/copy`、`/color`、`/config`），然后是名称中某个单词以输入开头的（`/mo` 匹配 `/auto-mode-setup`）、名称包含输入的、按顺序包含这些字母的，最后是说明包含输入的；都不匹配时显示 `No commands match "/xx"`。`↑` `↓` 选择，`Tab` 补全。
 - 长输入在单词之间换行，续行缩进两格。
@@ -68,7 +68,7 @@ esc to interrupt
 | `Ctrl+L` | 清理底部界面 |
 | `Ctrl+D` | 输入框为空时退出 |
 | `Esc` `Esc` | 输入框为空时连按两次：[回退](./rewind.md) |
-| `?` | 输入框为空时：显示快捷键列表 |
+| `?` | 输入框为空时：显示或关闭快捷键面板 |
 | `@` | 补全项目文件，见[`@` 引用文件](./file-mentions.md) |
 | `Ctrl+V` | 粘贴剪贴板中的图片，见[图片](./images.md) |
 

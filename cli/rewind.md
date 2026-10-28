@@ -9,15 +9,33 @@ dcl 在每一轮开始前，都会为 Git 仓库里会被修改的文件记录�
 | 输入框为空时，1 秒内连按两次 `Esc` | 和 Claude Code 一样；第一次按下时，下方提示 `esc again to rewind` |
 | `/rewind` | 直接输入命令 |
 
-两种方式都会列出本会话的检查点：
+两种方式都和 Claude Code 一样打开选择列表，每个检查点以那一轮的提示词表示，下面注明改了几个文件，最后一项是 `(current)`：
 
 ```text
-c3f2…  2026-10-22T09:12:03Z  2 file changes
-  message: 7a1e…
-/rewind preview ID previews conflicts. Choose /rewind code ID, conversation ID, or both ID. ...
+ Rewind
+ Restore the code and/or conversation to the point before…
+ ❯ Fix the divide function
+   2 files changed
+   (current)
+ Enter to continue · Esc to cancel
 ```
 
+选中一项后再选恢复什么：
+
+```text
+ Rewind to before: Fix the divide function
+ 2 files changed
+ ❯ Restore code and conversation
+   Restore conversation
+   Restore code
+   Never mind
+```
+
+那一轮没有改代码时，只有"Restore conversation"和"Never mind"。没有交互终端时（例如输入来自管道），`/rewind` 改为打印检查点 ID，用下面的命令恢复。
+
 ## 恢复
+
+也可以直接用命令：
 
 | 命令 | 作用 |
 |---|---|
