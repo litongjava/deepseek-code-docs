@@ -35,13 +35,41 @@ src/calc.py
  ❯ 1. Yes
    2. Yes, allow all edits during this session (shift+tab)
    3. No
- ↑↓ select · enter confirm · esc to interrupt
+ ↑↓ select · enter confirm · tab to amend · esc to interrupt
 ```
 
 - `↑`/`↓` 选择、`Enter` 确认，也可以直接按数字键。`Esc` 中断这一轮。
 - 回答后审批框随即清除，和 Claude Code 一样，对话记录里只留下这次调用的结果（例如修改的 diff 或命令输出）。内容超过一屏时，审批框只显示开头部分，末尾标明还有多少行。
 - 第 2 项只批准一次之外，还会放宽本会话：修改文件时切换到 `accept-edits` 模式；Bash 命令添加会话规则（见下文）；其他工具添加以工具名为规则的放行。规则保存在本会话中，可以用 `/permissions list` 查看、`/permissions remove` 删除。
-- 选"No"时，模型会收到拒绝结果，然后换一种方式继续。
+- 选"No"时，这一轮停止，和 Claude Code 一样显示 `⎿ Interrupted · What should DeepSeek Code do instead?`，等你输入下一步要做什么。模型收到的结果是"用户拒绝了这次调用，停下来等待用户的指示"。
+
+### 用 Tab 补充说明
+
+选中"Yes"或"No"时按 `Tab`，这一项变成输入框，可以补一句话给模型：
+
+```text
+ Do you want to proceed?
+ ❯ 1. Yes, use -5 instead
+   2. Yes, and don’t ask again for: git *
+   3. No
+ enter confirm · esc to cancel amend
+```
+
+- **Yes + 说明**：这次调用照常执行，执行结果之后，模型会收到你写的这句话，例如"用 -5 代替"，它会据此继续。
+- **No + 说明**：这次调用不执行，模型收到拒绝结果和你的说明（例如"保留 README，回复 ok 就行"），然后按说明继续，这一轮不会停止。
+- 说明保存在会话记录中，属于你自己的话；之后的对话、恢复和复制会话时都会带上，不会混进工具输出。
+- 再按 `Tab` 或 `Esc` 退出输入，回到普通选项；输入框为空时按 `Enter` 等同于直接选这一项。
+- 对话记录里，被拒绝的调用显示为 `Rejected` 或 `Rejected: 你的说明`。
+
+### 切换到自动模式
+
+已经配置了[自动权限模式](./auto-mode.md)时，菜单多一项：
+
+```text
+   3. Yes, and switch to auto mode · auto mode handles these prompts for you
+```
+
+选它会批准这次调用，并把本会话切换到 `auto` 模式，之后的调用由分类模型判断。没有配置自动模式时不显示这一项，审批菜单不会替你开启它。
 
 Bash 命令的审批和 Claude Code 一样，第 2 项记住的是命令前缀：
 
@@ -60,10 +88,11 @@ This command requires approval
 ```
 
 - **记住前缀**：命令以程序名加子命令开头时（例如 `npm run`、`git status`、`cargo test`），添加规则 `Bash(npm run *)`，之后本会话中以 `npm run` 开头的命令都直接执行。
-- **记住整条命令**：程序后面直接跟参数时（例如 `rm notes.txt`、`ls -la`），只记住这条命令本身，不会放行这个程序的所有用法。
+- **记住程序**：程序后面先跟选项时（例如 `git -C src log`、`ls -la`），和 Claude Code 一样添加 `Bash(git *)`，放行这个程序的所有用法。
+- **记住整条命令**：程序后面直接跟参数时（例如 `touch notes.txt`），以及会删除、覆盖文件、执行代码或访问网络的程序（`rm`、`mv`、`cp`、`chmod`、`curl`、`ssh`、`bash`、`python`、`node`、`find`、`xargs` 等），只记住这条命令本身。
 - **只有"是/否"**：多行命令，以及含有 `&&`、`|`、`;`、`$`、重定向、括号或 `*` 的命令。放行规则永远不会匹配这类命令，记住也没有用。
 - Bash 先显示说明，再在虚线之间显示完整命令；其他工具显示工具名和格式化后的输入（最多 12 行）。
-- 没有实时界面时（例如输入来自管道），同样的内容以文本显示，输入 `1`/`y` 放行、`2` 放行并记住（有该项时）、其他输入拒绝。
+- 没有实时界面时（例如输入来自管道），同样的内容以文本显示，输入 `1`/`y` 放行、`2` 放行并记住（有该项时）、切换到自动模式那一项的编号（有该项时），其他输入拒绝。
 - 连接了[远程控制](./remote-control.md)时，远程客户端同样会收到这个请求，哪一方先回答就以哪一方为准。
 
 ## 规则
