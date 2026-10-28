@@ -123,6 +123,8 @@ esc to interrupt
 | `/lsp` | [语言服务器](./lsp.md) |
 | `/compact` | 压缩上下文，完整记录仍保留在存档里，见[上下文用量与费用](./context-and-cost.md) |
 | `/usage`、`/cost` | 本次会话的 token 用量和费用 |
+| `/copy` | 复制模型最近一条回答，`/copy 2` 复制倒数第 2 条。和 Claude Code 一样，同时写入系统临时目录下的 `deepseek-code/response.md`；没有系统剪贴板工具时通过终端（OSC 52）复制 |
+| `/export` | 导出整个对话：选择复制到剪贴板或保存为文件；`/export 文件名` 直接保存 |
 | `/rewind` | [回退](./rewind.md)代码或对话 |
 | `/code-review`、`/security-review` | [代码审查与安全审查](./code-review.md) |
 | `/vim` | 切换 [vim 模式](./vim-mode.md) |

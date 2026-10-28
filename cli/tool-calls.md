@@ -41,6 +41,21 @@
 ● 项目里有 3 个 Python 文件……
 ```
 
+模型思考时，工作区和 Claude Code 一样显示思考时长和最新的思考内容（合并成一段，只保留最后几行）：
+
+```text
+● Thinking for 4s…
+  ⎿  We need to find the integer solutions. x^2 ≡ 2 mod 7, so x ≡ 3 or 4 mod 7…
+```
+
+思考之后直接回答、没有合并的只读调用时，回答前单独一行灰色的思考时长：
+
+```text
+  Thought for 2s
+
+● 391
+```
+
 - `Grep`、`Glob` 计为 pattern，`Read` 和 `cat`/`head`/`tail` 计为 file，`ListDir` 和 `ls`/`tree` 计为 directory，其他只读命令计为 shell command。
 - 失败的调用不合并，照常单独打印错误原因。
 - 每个调用的参数和完整输出仍可以用 `Ctrl+O` 查看。

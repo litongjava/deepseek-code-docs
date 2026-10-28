@@ -20,7 +20,7 @@
 | 命令 | 作用 |
 |---|---|
 | `/context` | 和 Claude Code 一样画出上下文窗口：10×10 的方格按系统提示、工具定义、消息着色，旁边列出各部分的估算、剩余空间和自动压缩预留；数据来自最近一次请求；第一次请求之前，系统提示和工具定义取自其他会话最近一次请求的测量，消息取自本会话，作为估算 |
-| `/compact` | 把之前的对话压缩成摘要，完整记录仍保留在存档中 |
+| `/compact` | 把之前的对话压缩成摘要，完整记录仍保留在存档中。和 Claude Code 一样显示 `⎿  Compacted (ctrl+o to see full summary)`；按 `Ctrl+O` 打开的详细记录里，`✻ Conversation compacted` 下面就是摘要全文 |
 | `/autocompact 80%` | 历史达到窗口的 80% 时自动压缩；`/autocompact off` 关闭 |
 | `/usage` 或 `/cost` | 打开设置对话框的 Usage 页：总费用、API 耗时、实际耗时、代码改动行数和 token 数；`/usage local` 输出 JSON |
 
