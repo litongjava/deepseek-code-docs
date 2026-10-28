@@ -65,7 +65,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 
 交互模式里输入 `/` 会列出全部斜杠命令，`/help` 查看说明。
 
-交互模式里输入 `/resume`（不带 ID），和 Claude Code 一样打开本项目其他会话的选择列表：按最近使用排序，每项显示会话名称（没有命名时显示第一条提示词）、多久之前和消息数。直接输入文字筛选，`Enter` 切换到选中的会话，`Esc` 取消。
+交互模式里输入 `/resume`（不带 ID），和 Claude Code 一样打开本项目其他会话的选择列表：按最近使用排序，每项显示会话名称（没有命名时显示第一条提示词）、多久之前和消息数。直接输入文字筛选，`Enter` 切换到选中的会话，`Esc` 取消。`空格` 预览选中会话的完整记录，`Ctrl+R` 重命名，`Ctrl+A` 在本项目和全部项目之间切换（全部项目时显示每个会话的目录）。
 
 ```text
  Resume session
@@ -73,5 +73,5 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
  ⌕ Search…
  ❯ Read README.md then answer ok.
    8 minutes ago · 4 messages
- Type to search · Enter to resume · Esc to cancel
+ Ctrl+A to show all projects · Space to preview · Ctrl+R to rename · Type to search · Esc to cancel
 ```

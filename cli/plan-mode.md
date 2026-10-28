@@ -10,17 +10,30 @@
 | `Shift+Tab` | 切换到 plan 模式，再输入任务 |
 | `--permission-mode plan` | 启动时就进入 |
 
-模型写完计划后会请求审批，你可以选择：
+模型写完计划后会请求审批。和 Claude Code 一样，输入框的位置显示计划和三个选项：
 
 ```text
-Choose 1–4, or feedback: <changes>.
-1. Yes, clear context and auto-accept edits
-2. Yes, auto-accept edits (keep context)
-3. Yes, manually approve edits (keep context)
-4. No, keep planning (or enter feedback)
+Ready to code?
+Here is DeepSeek Code's plan:
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+# Plan: make divide reject a zero divisor
+...
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ DeepSeek Code has written up a plan and is ready to execute. Would you like to proceed?
+ ❯ 1. Yes, auto-accept edits
+   2. Yes, manually approve edits
+   3. Tell DeepSeek Code what to change
+      shift+tab to approve with this feedback
+ ctrl+g to edit in vi · ~/.../plans/....md
 ```
 
-在 `Answer ›` 输入框里输入编号，或者直接写修改意见让模型继续完善计划。选择"清空上下文"时，计划会作为新上下文的起点，之前的消息存档保留。
+- **1. Yes, auto-accept edits**：批准计划，之后的文件修改直接放行（`accept-edits` 模式）。已经配置[自动权限模式](./auto-mode.md)时，这一项是"Yes, and use auto mode"，批准后切换到 `auto` 模式。
+- **2. Yes, manually approve edits**：批准计划，每次修改文件仍然询问。
+- **3. Tell DeepSeek Code what to change**：选中后直接输入修改意见，按 `Enter` 发给模型，它会修改计划后再次请求审批；按 `Shift+Tab` 则在批准计划的同时把这段话交给模型（按第 2 项的方式批准）。
+- **`Ctrl+G`**：用 `$VISUAL`、`$EDITOR` 或 `vi` 打开计划文件修改，保存后模型会重新读取并再次请求审批。
+- **`Esc`**：拒绝计划，对话记录里显示 `⎿ User rejected DeepSeek Code's plan:` 和框起来的计划，这一轮停止，仍然停留在计划模式。
+
+计划较长时只显示开头部分，末尾标明还有多少行；完整内容在计划文件里。没有交互终端时（例如输入来自管道），审批以文字提问，输入 `1`–`4` 或 `feedback: 修改意见`，其中 `1` 会清空上下文后实施（之前的消息存档保留）。
 
 ## 计划期间能做什么
 
