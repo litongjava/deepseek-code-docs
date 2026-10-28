@@ -24,7 +24,7 @@
 | `/autocompact 80%` | 历史达到窗口的 80% 时自动压缩；`/autocompact off` 关闭 |
 | `/usage` 或 `/cost` | 打开设置对话框的 Usage 页：总费用、API 耗时、实际耗时、代码改动行数和 token 数；`/usage local` 输出 JSON |
 
-`/cost` 是 Claude Code 中对应命令的名字，显示的内容与 `/usage` 相同。`/status`、`/config`、`/cost` 不带参数时打开同一个设置对话框（Status、Config、Usage、Stats 四页，`←`/`→` 切换）。Stats 页和 Claude Code 一样显示一年内每天的使用热力图，以及全部时间、最近 7 天或 30 天（按 `r` 切换）的常用模型、总 token、会话数、最长会话、活跃天数、连续使用天数、最活跃的一天、各类 token 合计和各模型的用量：Config 页列出模型、权限模式、effort、自动压缩、主题等设置的当前值，输入文字筛选，`Enter` 选择新值。输入框上方右侧的 `● medium · /effort` 显示当前使用的 effort。
+`/cost` 是 Claude Code 中对应命令的名字，显示的内容与 `/usage` 相同。`/status`、`/config`、`/cost` 不带参数时打开同一个设置对话框（Status、Config、Usage、Stats 四页，`←`/`→` 切换）。Stats 页和 Claude Code 一样显示一年内每天的使用热力图，以及全部时间、最近 7 天或 30 天（按 `r` 切换）的常用模型、总 token、会话数、最长会话、活跃天数、连续使用天数、最活跃的一天、各类 token 合计和各模型的用量：Config 页列出模型、权限模式、effort、自动压缩、主题、编辑模式（Editor mode）等设置的当前值，输入文字筛选；和 Claude Code 一样，按 `Enter` 或空格把选中的设置原地切换到下一个值，模型、提供商和状态行打开各自的选择界面。输入框上方右侧的 `● medium · /effort` 显示当前使用的 effort。
 
 ## 费用估算
 

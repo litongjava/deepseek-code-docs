@@ -1,12 +1,12 @@
 # vim 模式
 
-`/vim` 打开或关闭 vim 风格的输入框编辑。设置保存在[数据目录](./data-directory.md)的 `settings.json` 中（`"editorMode": "vim"`），下次启动依然生效。
+`/vim` 打开或关闭 vim 风格的输入框编辑；也可以和 Claude Code 一样，在 `/config` 的 Config 页把 Editor mode 改为 `vim`（`Enter` 或空格切换）。设置保存在[数据目录](./data-directory.md)的 `settings.json` 中（`"editorMode": "vim"`），下次启动依然生效。
 
 ## 模式
 
 - **插入模式**：每次出现输入框时都处于插入模式，和平时一样输入。
 - **普通模式**：输入框有内容时按 `Esc` 进入，用按键移动光标和编辑。
-- 输入框下方显示 `-- INSERT --` 或 `-- NORMAL --`。
+- 和 Claude Code 一样，插入模式时输入框下方一行以 `-- INSERT --` 开头；普通模式不显示标记。
 - 输入框为空时，`Esc` 仍然用于[连按两次回退](./rewind.md)。
 
 ## 普通模式的按键

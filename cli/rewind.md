@@ -30,16 +30,24 @@ dcl 在每一轮开始前，都会为 Git 仓库里会被修改的文件记录�
 
  This message and everything after it will be removed.
  The code will be restored +1 -16 in 2 files.
- ❯ Restore code and conversation
-   Restore conversation
-   Restore code
-   Never mind
+ ❯ 1. Restore code and conversation
+   2. Restore conversation
+   3. Restore code
+   4. Summarize from here
+   5. Summarize up to here
+   6. Never mind
  ⚠ Restored files go back whole, losing later changes by anyone. Bash changes to other files are not undone.
 ```
 
-- 那一轮没有改代码时，只有"Restore conversation"和"Never mind"，也不显示代码那一行。
+- 和 Claude Code 一样，选项带编号，按数字键直接选择。
+- 那一轮没有改代码时，没有恢复代码的两项，也不显示代码那一行；它是会话的第一条消息时，没有"Summarize up to here"。
 - 恢复代码时，文件整个回到那一轮之前的内容，之后别人对同一文件的修改也会丢失；Bash 命令改动的其他文件不会撤销。
-- Claude Code 确认页里的"Summarize from here"和"Summarize up to here"，dcl 没有提供。没有交互终端时（例如输入来自管道），`/rewind` 改为打印检查点 ID，用下面的命令恢复。
+- 恢复对话后，和 Claude Code 一样，屏幕重新显示回退后的对话，那条消息放回输入框，可以修改后重新发送。原来的完整对话仍保留，可以用 `/resume` 找到。
+- **Summarize from here**：保留这条消息之前的对话，把这条消息和之后的内容压缩成一段摘要。
+- **Summarize up to here**：把这条消息之前的对话压缩成摘要，保留这条消息和之后的内容。
+- 两种摘要都写进对话的一个新分支，原对话不变；完成后显示 `⎿  Summarized N messages …`，摘要全文可以在 `Ctrl+O` 里查看。代码不会改动。
+
+没有交互终端时（例如输入来自管道），`/rewind` 改为打印检查点 ID，用下面的命令恢复。
 
 ## 恢复
 

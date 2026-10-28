@@ -44,6 +44,8 @@ esc to interrupt
 
 **提示行**：轮换显示的小技巧，见[运行提示](./tips.md)。
 
+**窗口标题**：和 Claude Code 一样，启动后终端窗口标题为 `✳ DeepSeek Code`；发送第一条提示词后，dcl 在后台让模型用几个词概括话题，下一次出现输入框时标题改为 `✳ 话题`；退出时清空。这会多发一次很短的模型请求。
+
 **底部**：运行中在模式标签后面追加 `· esc to interrupt`；ask 模式只显示 `esc to interrupt`。
 
 **运行中仍然可以输入**：
@@ -126,6 +128,8 @@ esc to interrupt
 | `/copy` | 复制模型最近一条回答，`/copy 2` 复制倒数第 2 条。和 Claude Code 一样，同时写入系统临时目录下的 `deepseek-code/response.md`；没有系统剪贴板工具时通过终端（OSC 52）复制 |
 | `/export` | 导出整个对话：选择复制到剪贴板或保存为文件；`/export 文件名` 直接保存 |
 | `/rewind` | [回退](./rewind.md)代码或对话 |
+| `/ide` | 选择要连接的编辑器（列出打开了当前项目的编辑器，最后一项 None 断开）；没有可连接的编辑器时只提示一行。`/ide status` 显示详细状态 |
+| `/terminal-setup` | 说明如何在提示词里换行：任何终端都可以用 `\` + `Enter` 或 `Alt+Enter`；终端能区分时 `Shift+Enter` 也可以 |
 | `/code-review`、`/security-review` | [代码审查与安全审查](./code-review.md) |
 | `/vim` | 切换 [vim 模式](./vim-mode.md) |
 | `/rename 名称` | 给会话命名 |
