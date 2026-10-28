@@ -65,13 +65,14 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 
 交互模式里输入 `/` 会列出全部斜杠命令，`/help` 查看说明。
 
-交互模式里输入 `/resume`（不带 ID），和 Claude Code 一样打开本项目其他会话的选择列表：按最近使用排序，每项显示会话名称（没有命名时显示第一条提示词）、多久之前和消息数。直接输入文字筛选，`Enter` 切换到选中的会话，`Esc` 取消。`空格` 预览选中会话的完整记录，`Ctrl+R` 重命名，`Ctrl+A` 在本项目和全部项目之间切换（全部项目时显示每个会话的目录）。
+交互模式里输入 `/resume`（不带 ID），和 Claude Code 一样打开本项目其他会话的选择列表：按最近使用排序，每项显示会话名称（没有命名时显示第一条提示词），下面是多久之前、会话最后工作时所在的 Git 分支和会话记录的大小，例如 `8 seconds ago · feature · 424B`。直接输入文字筛选，`Enter` 切换到选中的会话，`Esc` 取消。`空格` 预览选中会话的完整记录，`Ctrl+R` 重命名，`Ctrl+A` 在本项目和全部项目之间切换（全部项目时显示每个会话的目录），`Ctrl+B` 只显示当前分支上的会话。分支在每一轮开始时记录，不在 Git 仓库里的会话不显示分支。
 
 ```text
  Resume session
  my-project
  ⌕ Search…
  ❯ Read README.md then answer ok.
-   8 minutes ago · 4 messages
- Ctrl+A to show all projects · Space to preview · Ctrl+R to rename · Type to search · Esc to cancel
+   8 minutes ago · main · 2.4KB
+ Ctrl+A to show all projects · Ctrl+B to only show current branch · Space to preview · Ctrl+R to rename
+ Type to search · Esc to cancel
 ```
