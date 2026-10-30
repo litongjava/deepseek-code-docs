@@ -36,15 +36,58 @@ sudo apt install pkg-config libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
   libasound2-dev libxdo-dev
 ```
 
-构建并得到桌面可执行文件 `dcd`：
+开发调试时用下面的 `npm run tauri -- dev`。要得到可以独立运行的 `dcd`，按[构建 release 版本](#构建-release-版本)构建。
+
+没有 root 权限时，可以用 `apt-get download` 下载上述 `-dev` 包及其依赖的 `-dev` 包，解压到用户目录并设置 `PKG_CONFIG_PATH`、`PKG_CONFIG_SYSROOT_DIR` 和 `RUSTFLAGS="-L ..."`，方法与 [CLI 的无 root 构建](../../cli/install.md#没有-root-权限时的-linux-构建)相同；`libsoup-3.0` 还需要 `libsysprof-4-dev` 提供的 `sysprof-capture-4`。前提是对应的运行库已经安装。
+
+## 构建 release 版本
+
+以下命令在 Windows 和 Linux 上相同（Windows PowerShell 中把 `npm` 写成 `npm.cmd`）。Cargo 输出在仓库根目录的 `target/` 下。
+
+### 方式一：构建脚本（推荐）
 
 ```bash
 npm ci
-npm run build                                  # 前端产物 dist/
-cargo build --locked -p deepseek-code-desktop  # target/debug/dcd
+npm run build:desktop     # 只构建 Desktop：dcd 和安装包
+npm run build:all         # 同时构建 CLI（dcl）和 Desktop
 ```
 
-没有 root 权限时，可以用 `apt-get download` 下载上述 `-dev` 包及其依赖的 `-dev` 包，解压到用户目录并设置 `PKG_CONFIG_PATH`、`PKG_CONFIG_SYSROOT_DIR` 和 `RUSTFLAGS="-L ..."`，方法与 [CLI 的无 root 构建](../../cli/install.md#没有-root-权限时的-linux-构建)相同；`libsoup-3.0` 还需要 `libsysprof-4-dev` 提供的 `sysprof-capture-4`。前提是对应的运行库已经安装。
+产物复制到 `artifacts/<版本>-release-<时间>/`：`desktop/dcd`（Windows 为 `dcd.exe`）、`desktop/bundle/` 下的安装包（Windows 为 `.msi`/`.exe`，Linux 为 `.deb`/`.rpm`/`.AppImage`），以及记录版本和平台的 `build.json`。其他参数：
+
+| 参数 | 作用 |
+|---|---|
+| `--no-bundle` | 只构建可执行文件，不打安装包，例如 `npm run build:desktop -- --no-bundle` |
+| `--debug` | 构建 debug 版本 |
+| `--check` | 只运行 `cargo check`，不构建 |
+
+这个脚本内部调用 `tauri build`，会先执行 `npm run build` 构建前端。
+
+### 方式二：Tauri CLI
+
+```bash
+npm ci
+npm run tauri -- build
+```
+
+可执行文件在 `target/release/dcd`，安装包在 `target/release/bundle/`。`scripts/release.ps1`（Windows 发版：打 tag 并构建）也是用这种方式构建的。
+
+### 方式三：直接用 Cargo
+
+只需要可执行文件、不需要安装包时，可以直接用 Cargo 构建 release 版本：
+
+```bash
+npm ci
+npm run build    # 先构建前端 dist/，它会被打包进 dcd
+cargo build --locked --release -p deepseek-code-desktop --features tauri/custom-protocol
+```
+
+产物为 `target/release/dcd`（Windows 为 `target\release\dcd.exe`）。
+
+::: warning 不要漏掉 `--features tauri/custom-protocol`
+Tauri 只有在启用 `custom-protocol` 特性时才使用打包进程序的前端；`tauri build` 会自动加上它，直接用 Cargo 时要自己加。只运行 `cargo build --locked --release -p deepseek-code-desktop` 也能编译成功，但得到的是开发模式的程序：窗口会去加载 `http://127.0.0.1:5200` 的 Vite 开发服务，没有运行 `npm run dev` 时窗口是空白的。
+:::
+
+不加 `--release` 时得到 debug 版本 `target/debug/dcd`，同样需要 `--features tauri/custom-protocol` 才能脱离开发服务运行。
 
 ## 启动完整桌面开发环境
 
