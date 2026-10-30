@@ -4,7 +4,7 @@
 
 ## 数据位置
 
-Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录下的 `~/.deepseek-code`（Windows 为 `%USERPROFILE%\.deepseek-code`）。其中保存供应商配置 `config.json`、用户设置 `settings.json`、会话数据库 `deepseek_code.db`、MCP 配置 `mcp-servers.json`、技能 `skills/`、知识库 `knowledge/`、本地记忆 `memory.sqlite3`、上传文件 `uploads/` 和 App Studio 项目 `app-studio/` 等。Rust 启动日志会打印实际使用的目录。
+Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录下的 `~/.deepseek-code`（Windows 为 `%USERPROFILE%\.deepseek-code`）。其中保存供应商配置 `config.json`、用户设置 `settings.json`、会话数据库 `deepseek_code.db`、MCP 配置 `mcp-servers.json`、技能 `skills/`、知识库 `knowledge/`、本地记忆 `memory.sqlite3`、上传文件 `uploads/`、App Studio 项目 `app-studio/` 和多代理编排设置 `orchestrator.toml`（没有这个文件时使用默认值）等。Rust 启动日志会打印实际使用的目录。
 
 旧版本把上传文件、App Studio 项目和部分记忆放在系统本地数据目录下的 `claude-desktop/` 中（Linux 为 `~/.local/share/claude-desktop`，Windows 为 `%LOCALAPPDATA%\claude-desktop`）。新版本不再读取那里，也不会自动迁移；需要旧文件时手动复制到数据目录对应的子目录。
 
