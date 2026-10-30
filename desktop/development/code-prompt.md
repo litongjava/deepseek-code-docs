@@ -130,7 +130,7 @@ Get-Content -LiteralPath 'D:\项目\配置.json' -Raw -Encoding UTF8
 ### 用户提问和联网
 
 - `AskUserQuestion` 使用 `questions` 数组，一次 1–4 个问题，每个问题带 `header`、2–4 个 `options`（含 `description`，可选 `preview`），支持 `multiSelect`。
-- `WebFetch` 参数为 `url` 和 `prompt`：抓取页面后按 `prompt` 回答，页面会缓存一段时间；访问新主机前按权限规则询问，可用 `WebFetch(domain:example.com)` 规则放行。
+- `WebFetch` 参数为 `url`、`prompt` 和可选的 `offset`：抓取页面后用会话模型按 `prompt` 回答，同一 URL 缓存 15 分钟，长页面用 `offset` 分段读取；访问新主机前按权限规则询问，可用 `WebFetch(domain:example.com)` 规则放行。
 - `WebSearch` 参数为 `query`，可选 `allowed_domains`、`blocked_domains` 过滤结果；搜索供应商沿用项目配置，没有配置时如实报告。
 
 ## 6. 代码接入链路
