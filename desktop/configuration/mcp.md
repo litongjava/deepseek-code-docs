@@ -8,35 +8,21 @@ MCP 把外部工具服务接入客户端。先启动服务并确认工具可发�
 
 ## 添加与启动
 
-打开“扩展 → 自定义 → MCP”，或“Settings（设置）→ 自定义 → MCP”添加服务，填写：
+打开“扩展 → 自定义 → MCP”，或“Settings（设置）→ 自定义 → MCP”添加服务。先填名称，再选传输类型：
 
-- 名称：用于识别服务。
-- 命令：启动服务的可执行程序。
-- 参数：传给程序的参数。
-- 环境变量：表单按 JSON 对象解析，例如 `{"EXAMPLE_MODE":"read-only"}`；这里只演示格式，不代表特定服务配置。
-- 传输类型：保持默认 `stdio`。远程服务见下一节。
+| 传输类型 | 需要填写 |
+|---|---|
+| `stdio`（默认） | 命令、工作目录（可选）、参数、环境变量 |
+| `HTTP (Streamable HTTP)` | URL，可选请求头 |
+| `SSE`（旧版 HTTP+SSE） | URL，可选请求头 |
+| `WebSocket` | `ws://` 或 `wss://` 地址，可选请求头 |
+
+- 环境变量和请求头都按 JSON 对象填写，例如 `{"EXAMPLE_MODE":"read-only"}`、`{"Authorization":"Bearer xxx"}`；这里只演示格式，不代表特定服务配置。
+- 编辑远程服务时，表单会带出已保存的 URL 和请求头，保存后保持不变。服务列表中远程服务显示传输类型和 URL。
 
 保存后启动，检查运行状态、错误提示、工具数量和资源数量。展开工具列表，确认目标工具存在，再用范围明确的任务测试。
 
-## 远程服务（HTTP、SSE、WebSocket）
-
-共享引擎和 Claude Code 一样支持 Streamable HTTP、旧版 HTTP+SSE 和 WebSocket 服务，但 Desktop 表单目前没有地址和请求头字段，下拉框里的传输类型也不会保存。远程服务请用 CLI 添加，或直接编辑配置文件：
-
-```bash
-dcl mcp add --transport http docs https://mcp.example.com/mcp --header "Authorization: Bearer xxx"
-```
-
-或在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）的 `mcp-servers.json` 中写入：
-
-```json
-{
-  "mcpServers": {
-    "docs": { "type": "http", "url": "https://mcp.example.com/mcp", "headers": { "Authorization": "Bearer xxx" } }
-  }
-}
-```
-
-`type` 可以是 `http`、`sse` 或 `ws`。添加后回到 MCP 页面启动并检查工具列表。**不要在 Desktop 表单里编辑远程服务**：保存时会丢掉地址和请求头，服务变回 stdio。详细说明见 CLI 文档的 [MCP 服务](../../cli/mcp.md)。
+服务保存在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）的 `mcp-servers.json` 中，格式和 Claude Code 的 `mcpServers` 一致；也可以用 CLI 的 `dcl mcp add --transport http|sse|ws 名称 URL --header "K: V"` 添加，见 CLI 文档的 [MCP 服务](../../cli/mcp.md)。
 
 ## 参数中的空格
 

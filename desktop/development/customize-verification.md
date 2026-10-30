@@ -12,7 +12,7 @@
 - TypeScript：`npx tsc --noEmit` 通过。
 - 应用生产构建：`npm run build` 通过。
 - 可见 Chrome：独立自定义页面 22 步、Settings 内嵌页面 21 步全部通过，无失败动作或失败断言。Settings 页面在 1664×937 与 1280×800 视口检查，无页面横向溢出。
-- 技能创建入口追加验证 11 步通过：Settings 内选择“使用 Claude 创建”会进入新的聊天输入界面并预填 skill-creator 提示，未发送消息。
+- 技能创建入口追加验证 11 步通过：Settings 内选择“使用 Claude 创建”会进入新的聊天输入界面并预填 skill-creator 提示，未发送消息。（这个入口现已改名为“使用 DeepSeek Code 创建”。）
 
 逐项断言结果保存在[浏览器验证记录](/customize-browser-verification.json)。
 
