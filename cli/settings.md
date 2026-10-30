@@ -19,6 +19,7 @@
 | `promptSuggestionEnabled` | `true` | 一轮结束后是否生成下一句建议，见[建议补全](./suggestions.md) |
 | `editorMode` | `normal` | 设为 `vim` 时使用 vim 风格编辑，见[vim 模式](./vim-mode.md) |
 | `hooks` | 无 | 工具调用前后执行的 hooks |
+| `remoteControlAtStartup` | `false` | 交互会话启动时自动连接远程控制，见[远程控制](./remote-control.md#启动时自动连接) |
 
 这两个开关和 Claude Code 的同名设置含义一致。
 
@@ -44,6 +45,8 @@
 | `--max-tokens` | 输出上限 | [输出上限与自动续写](./output-limit.md) |
 | `--permission-mode` | 权限模式 | [权限模式与工具审批](./permissions.md) |
 | `--allowed-tools` | 本次免确认的工具 | [权限模式与工具审批](./permissions.md) |
+| `--allow-dangerously-skip-permissions` | 让 bypass 模式进入 `Shift+Tab` 循环 | [权限模式与工具审批](./permissions.md#权限模式) |
+| `--full-access` | 完全访问：bypass 并忽略 deny 规则和沙箱 | [权限模式与工具审批](./permissions.md#完全访问) |
 | `--data-dir` | 数据目录 | [数据目录](./data-directory.md) |
 | `-p, --print` | 非交互执行一次 | [非交互模式](./non-interactive.md) |
 | `--json-schema` | 结构化输出 | [结构化输出](./structured-output.md) |

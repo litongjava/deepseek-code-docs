@@ -16,9 +16,13 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 只读的 shell 命令指 `ls`、`cat`、`grep`、`find`（不含 `-exec`、`-delete`）、`git status`/`log`/`diff` 等只查看内容的命令，用管道或 `&&` 连接时每一段都必须只读，判断规则与[计划模式](./plan-mode.md)相同。在 ask 和 accept-edits 模式下，这类命令的路径参数还必须都在工作目录内：`cat /etc/hosts`、`ls ..`、以 `~` 开头或含 `$` 变量的参数仍然会询问。显式的 ask 或 deny 规则（例如 `/permissions ask Bash(ls *)`）优先。
 
 - 启动时指定：`dcl --permission-mode accept-edits`。
-- 运行中切换：`Shift+Tab` 在 ask → accept-edits → plan 之间循环；也可以用 `/permissions <模式>`。
+- 运行中切换：`Shift+Tab` 和 Claude Code 一样按 ask → accept-edits → plan → bypass → auto → ask 循环；也可以用 `/permissions <模式>`。bypass 只在启动时允许了才出现在循环里（见下文）；auto 没有配置分类模型时跳过，直接回到 ask。
 - 不带参数的 `/permissions` 和 Claude Code 一样打开分页管理：Recently denied（本会话被拒绝的调用）、Allow、Ask、Deny（`Add a new rule…` 添加规则，选中规则可以删除；命令行和设置文件里的规则只读）、Auto mode（自动模式配置）、Workspace（工作目录和 `Add directory…`），`←`/`→` 切换。
-- `bypass` 必须显式启用，`Shift+Tab` 只能从它切回 ask。
+- `bypass` 必须在启动时允许：`--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 以普通模式启动，只是让 bypass 进入 `Shift+Tab` 循环。以 bypass 启动时会先确认一次。
+
+### 完全访问
+
+`dcl --full-access` 是更彻底的 bypass：除了不询问，还**忽略 deny 规则**，并且命令在沙箱之外运行。首次使用时显示一次单独的警告。只在可以随时丢弃的机器上使用。
 
 ## 审批提示
 
@@ -42,7 +46,7 @@ src/calc.py
 - `↑`/`↓` 选择、`Enter` 确认，也可以直接按数字键。
 - `Esc` 等同于选"No"：这次调用不执行，这一轮停止，模型知道是你拒绝的。
 - 回答后审批框随即清除，和 Claude Code 一样，对话记录里只留下这次调用的结果（例如修改的 diff 或命令输出）。内容超过一屏时，审批框只显示开头部分，末尾标明还有多少行。
-- 第 2 项只批准一次之外，还会放宽本会话：修改文件时切换到 `accept-edits` 模式；Bash 命令添加会话规则（见下文）；其他工具添加以工具名为规则的放行。规则保存在本会话中，可以用 `/permissions list` 查看、`/permissions remove` 删除。
+- 第 2 项只批准一次之外，还会放宽之后的审批：修改文件时，本会话切换到 `accept-edits` 模式；Bash 命令添加放行规则（见下文）；其他工具添加以工具名为规则的放行。和 Claude Code 一样，规则立即在本会话生效，同时写入项目的 `.claude/settings.local.json`，之后在这个项目里启动的会话也会沿用。可以用 `/permissions list` 查看、`/permissions remove` 删除；写入文件失败时会提示，规则仍在本会话有效。
 - 选"No"时，这一轮停止，和 Claude Code 一样显示 `⎿ Interrupted · What should DeepSeek Code do instead?`，等你输入下一步要做什么。模型收到的结果是"用户拒绝了这次调用，停下来等待用户的指示"。
 
 ### 用 Tab 补充说明
@@ -89,13 +93,35 @@ This command requires approval
    3. No
 ```
 
-- **记住前缀**：命令以程序名加子命令开头时（例如 `npm run`、`git status`、`cargo test`），添加规则 `Bash(npm run *)`，之后本会话中以 `npm run` 开头的命令都直接执行。
+- **记住前缀**：命令以程序名加子命令开头时（例如 `npm run`、`git status`、`cargo test`），添加规则 `Bash(npm run *)`，之后以 `npm run` 开头的命令都直接执行。
 - **记住程序**：程序后面先跟选项时（例如 `git -C src log`、`ls -la`），和 Claude Code 一样添加 `Bash(git *)`，放行这个程序的所有用法。
 - **记住整条命令**：程序后面直接跟参数时（例如 `touch notes.txt`），以及会删除、覆盖文件、执行代码或访问网络的程序（`rm`、`mv`、`cp`、`chmod`、`curl`、`ssh`、`bash`、`python`、`node`、`find`、`xargs` 等），只记住这条命令本身。
 - **只有"是/否"**：多行命令，以及含有 `&&`、`|`、`;`、`$`、重定向、括号或 `*` 的命令。放行规则永远不会匹配这类命令，记住也没有用。
 - Bash 先显示说明，再在虚线之间显示完整命令；其他工具显示工具名和格式化后的输入（最多 12 行）。
 - 没有实时界面时（例如输入来自管道），同样的内容以文本显示，输入 `1`/`y` 放行、`2` 放行并记住（有该项时）、切换到自动模式那一项的编号（有该项时），其他输入拒绝。
 - 连接了[远程控制](./remote-control.md)时，远程客户端同样会收到这个请求，哪一方先回答就以哪一方为准。
+
+### 访问新网站
+
+`WebFetch` 访问一个新主机前会询问：
+
+```text
+Fetch
+  https://example.com/
+  DeepSeek Code wants to fetch content from example.com
+───────────────────────────────────────────
+ Do you want to allow DeepSeek Code to fetch this content?
+ ❯ 1. Yes
+   2. Yes, and don’t ask again for example.com
+   3. No
+```
+
+- 常见文档站点（`docs.python.org`、`developer.mozilla.org`、`doc.rust-lang.org` 等）和 Claude Code 一样预先放行，不询问。
+- 第 2 项添加规则 `WebFetch(domain:example.com)`。
+- `bypass` 模式直接放行；`dont-ask` 模式和没有 `--allowed-tools` 的 `-p` 模式拒绝。
+- `/deep-research` 启动的研究代理可以访问任何网页（这是你明确发起的联网研究），deny 规则对它们仍然有效。
+
+沙箱中的命令访问允许列表之外的主机时，也会询问。
 
 ## 规则
 
@@ -115,7 +141,20 @@ This command requires approval
 dcl --allowed-tools "Bash(npm test)" --allowed-tools Edit
 ```
 
-显式的 deny 规则优先于任何模式，包括 `bypass`。
+规则也可以写在设置文件的 `permissions.allow`、`permissions.ask`、`permissions.deny` 里，例如项目的 `.claude/settings.local.json`：
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(npm run *)", "WebFetch(domain:docs.rs)"],
+    "deny": ["WebFetch(domain:example.com)", "Read(.env)"]
+  }
+}
+```
+
+`WebFetch` 规则按域名匹配：`domain:example.com` 匹配这个主机，`domain:*.example.com` 匹配它的子域名；解析不了的 URL 不会被放行规则匹配，但会被 deny 和 ask 规则匹配。
+
+显式的 deny 规则优先于任何模式，包括 `bypass`；只有 `--full-access` 会忽略它。
 
 ## 始终需要确认的位置
 
