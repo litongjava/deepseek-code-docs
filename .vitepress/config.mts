@@ -77,6 +77,7 @@ export default defineConfig({
         { text: '交互模式', items: [
           { text: '交互界面与快捷键', link: '/cli/interface' },
           { text: '工具调用与改动详情', link: '/cli/tool-calls' },
+          { text: '内置工具', link: '/cli/tools' },
           { text: '! 命令模式', link: '/cli/shell-mode' },
           { text: '@ 引用文件', link: '/cli/file-mentions' },
           { text: '图片', link: '/cli/images' },
@@ -86,6 +87,7 @@ export default defineConfig({
           { text: '权限模式与工具审批', link: '/cli/permissions' },
           { text: '计划模式', link: '/cli/plan-mode' },
           { text: '自动权限模式', link: '/cli/auto-mode' },
+          { text: '沙箱', link: '/cli/sandbox' },
           { text: '建议补全', link: '/cli/suggestions' },
           { text: '运行提示', link: '/cli/tips' },
           { text: '状态查看', link: '/cli/status' },
@@ -95,12 +97,16 @@ export default defineConfig({
         { text: '代码智能与外部代理', items: [
           { text: '语言服务器（LSP）', link: '/cli/lsp' },
           { text: '调用 Claude Code、Codex 与 dcl', link: '/cli/external-agents' },
-          { text: '代码审查与安全审查', link: '/cli/code-review' }
+          { text: '代码审查与安全审查', link: '/cli/code-review' },
+          { text: 'MCP 服务', link: '/cli/mcp' },
+          { text: '联网搜索与深度研究', link: '/cli/web-search' }
         ] },
         { text: '自动化', items: [
           { text: '非交互模式', link: '/cli/non-interactive' },
           { text: '结构化输出', link: '/cli/structured-output' },
-          { text: 'SDK 与 stream-json 协议', link: '/cli/sdk' }
+          { text: 'SDK 与 stream-json 协议', link: '/cli/sdk' },
+          { text: '工作流', link: '/cli/workflows' },
+          { text: '定时任务与循环', link: '/cli/scheduling' }
         ] },
         { text: '协作', items: [
           { text: '团队同步', link: '/cli/team-sync' },

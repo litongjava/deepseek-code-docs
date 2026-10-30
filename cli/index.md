@@ -25,6 +25,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | 所有可调的设置项 | [设置项参考](./settings.md) |
 | 输入框、快捷键、运行中的操作 | [交互界面与快捷键](./interface.md) |
 | 工具调用的显示、展开详情、改动汇总 | [工具调用与改动详情](./tool-calls.md) |
+| 模型能用哪些工具 | [内置工具](./tools.md) |
 | 直接运行 Shell 命令 | [`!` 命令模式](./shell-mode.md) |
 | 把文件交给模型 | [`@` 引用文件](./file-mentions.md) |
 | 发送截图和图片 | [图片](./images.md) |
@@ -34,6 +35,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | 哪些操作需要确认、怎样放行 | [权限模式与工具审批](./permissions.md) |
 | 先调查、后动手 | [计划模式](./plan-mode.md) |
 | 用模型自动判断是否放行 | [自动权限模式](./auto-mode.md) |
+| 限制命令能写哪些目录、访问哪些网站 | [沙箱](./sandbox.md) |
 | 下一句该说什么 | [建议补全](./suggestions.md) |
 | 运行时的小提示 | [运行提示](./tips.md) |
 | 当前会话、模型、服务的状态 | [状态查看](./status.md) |
@@ -42,8 +44,12 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | 跳转定义、查引用、诊断 | [语言服务器（LSP）](./lsp.md) |
 | 把子任务交给本机的 Claude Code、Codex 或另一个 dcl | [调用 Claude Code、Codex 与 dcl](./external-agents.md) |
 | 审查改动、查找安全漏洞 | [代码审查与安全审查](./code-review.md) |
+| 接入数据库、浏览器等外部工具 | [MCP 服务](./mcp.md) |
+| 联网搜索、多角度深度研究 | [联网搜索与深度研究](./web-search.md) |
 | 在脚本和 CI 中使用 | [非交互模式](./non-interactive.md) |
 | 让结果是合法 JSON | [结构化输出](./structured-output.md) |
+| 用脚本编排多个子代理 | [工作流](./workflows.md) |
+| 定时执行、反复检查 | [定时任务与循环](./scheduling.md) |
 | 团队共享记忆 | [团队同步](./team-sync.md) |
 | 从另一台设备继续会话 | [远程控制](./remote-control.md) |
 | 会话之间互发消息 | [会话消息](./session-messages.md) |

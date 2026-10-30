@@ -64,7 +64,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 **后台命令结束时**：和 Claude Code 一样显示一行 `● Background command "npm test" completed (exit code 0)`（停止的显示 `was stopped`），并通知模型。模型正在工作时，它在下一个工具结果之后读到；空闲时会自动开始新的一轮，让模型查看结果、继续下一步。正在输入时会等你发送或清空输入后再开始。这类通知不会出现在 `↑` 的历史提示词里。
 
-**`/mcp` 和 `/hooks`**：`/mcp` 列出 MCP 服务及其状态（已连接及工具数、失败原因、已停用），选中一个可以查看工具、重新连接、停用或启用。`/hooks` 是只读菜单：先显示一共配置了多少个 hook，然后列出全部事件及说明，选中事件查看它的 matcher、执行内容和超时。和 Claude Code 一样，`/mcp` 不列出 dcl 自带、未启用也未修改过的预设服务（会注明隐藏了几个）；没有其他服务时显示 `No MCP servers configured`。带参数的 `/mcp list`、`/hooks list` 仍然输出 JSON。
+**`/mcp` 和 `/hooks`**：`/mcp` 列出 [MCP 服务](./mcp.md)及其状态（已连接及工具数、失败原因、已停用），选中一个可以查看工具、重新连接、停用或启用。`/hooks` 是只读菜单：先显示一共配置了多少个 hook，然后列出全部事件及说明，选中事件查看它的 matcher、执行内容和超时。和 Claude Code 一样，`/mcp` 不列出 dcl 自带、未启用也未修改过的预设服务（会注明隐藏了几个）；没有其他服务时显示 `No MCP servers configured`。带参数的 `/mcp list`、`/hooks list` 仍然输出 JSON。
 
 **后台子代理**：和 Claude Code 一样，模型可以让子代理在后台运行（Agent 工具的 `run_in_background`），调用立即返回，记录里显示 `Backgrounded agent (↓ to manage · ctrl+o to expand)`。子代理在独立的会话里运行，沿用当前的提供商、模型和权限模式。运行期间：
 
@@ -126,6 +126,9 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/provider`、`/model`、`/test` | 提供商和模型，见[模型与提供商](./providers.md) |
 | `/plan 任务` | 进入[计划模式](./plan-mode.md) |
 | `/lsp` | [语言服务器](./lsp.md) |
+| `/loop` | 定时重复一条提示词，或让模型自定节奏，见[定时任务与循环](./scheduling.md) |
+| `/workflows` | 查看和停止[工作流](./workflows.md) |
+| `/deep-research 问题` | [联网深度研究](./web-search.md#deep-research) |
 | `/compact` | 压缩上下文，完整记录仍保留在存档里，见[上下文用量与费用](./context-and-cost.md) |
 | `/usage`、`/cost` | 本次会话的 token 用量和费用 |
 | `/copy` | 复制模型最近一条回答，`/copy 2` 复制倒数第 2 条。和 Claude Code 一样，同时写入系统临时目录下的 `deepseek-code/response.md`；没有系统剪贴板工具时通过终端（OSC 52）复制 |
