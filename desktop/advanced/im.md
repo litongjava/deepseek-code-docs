@@ -32,4 +32,4 @@ IM 权限控制谁能访问机器人；本机工具权限需要另行配置，�
 
 检查日志、凭据、平台权限、地址和网络。需平台回调本机时，应提供平台可达的部署地址，本地 `127.0.0.1` 不能直接接受外部平台访问。
 
-本章基于源码整理，未做真实平台发送测试。源码参考：`IMIntegrationPanel.tsx`、`src-tauri/src/im_integration`。
+本章基于源码整理，未做真实平台发送测试。源码参考：`IMIntegrationPanel.tsx`、`crates/core/src/im_integration`、`src-tauri/src/bridge/routes/im.rs`。

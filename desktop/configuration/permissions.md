@@ -26,4 +26,4 @@
 
 IM 另有平台访问权限，决定谁能与机器人交互，与本页控制工具行为的权限不同。见[IM 集成](../advanced/im.md)。
 
-源码参考：`PermissionModeSelector.tsx`、`src-tauri/src/permissions`。
+源码参考：`PermissionModeSelector.tsx`、`crates/core/src/permissions`。

@@ -18,7 +18,7 @@
 
 **System Command**：通过系统 shell 执行，并包含危险命令检查。应明确执行位置、参数与内容，执行状态成功不等于产物符合预期。
 
-这些差异依据 `src-tauri/src/scheduler/mod.rs`，不是从界面名称推断的功能承诺。
+这些差异依据 `crates/core/src/scheduler/mod.rs`，不是从界面名称推断的功能承诺。
 
 ## 运行与排错
 
@@ -26,4 +26,4 @@
 
 检查启用状态、下一次时间、输出和错误。无记录先查进程与时区，有记录但结果错误则检查具体执行器。
 
-源码参考：`NewTaskModal.tsx`、`TaskList.tsx`、`src-tauri/src/scheduler/mod.rs`、`src-tauri/src/task/cron.rs`。
+源码参考：`NewTaskModal.tsx`、`TaskList.tsx`、`crates/core/src/scheduler/mod.rs`、`crates/core/src/task/cron.rs`。

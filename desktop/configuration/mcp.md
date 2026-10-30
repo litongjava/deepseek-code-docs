@@ -48,4 +48,4 @@ dcl mcp add --transport http docs https://mcp.example.com/mcp --header "Authoriz
 
 启动失败先核对命令、参数、有效 JSON 和凭据。启动成功但工具列表为空时检查服务日志和协议兼容性。
 
-自定义中的 MCP 页面直接使用 Tauri IPC，普通浏览器不能原样管理服务。源码参考：`CustomizePage.tsx`、`McpSettingsPage.tsx`、`src-tauri/src/mcp`。
+自定义中的 MCP 页面直接使用 Tauri IPC，普通浏览器不能原样管理服务。源码参考：`CustomizePage.tsx`、`McpSettingsPage.tsx`、`crates/core/src/mcp`、`src-tauri/src/bridge/routes/mcp.rs`。

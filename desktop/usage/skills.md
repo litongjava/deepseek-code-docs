@@ -42,4 +42,4 @@ Skill 复用任务说明、方法和上下文。MCP 提供工具服务，Skill �
 
 流程变化后更新正文，用相同示例复测。只在当前会话提出要求，不一定会修改已保存的 Skill。
 
-源码参考：`CustomizePage.tsx`、`PluginsPage.tsx`、`McpSettingsPage.tsx`、`src/features/skills`、`src-tauri/src/skills`。
+源码参考：`CustomizePage.tsx`、`PluginsPage.tsx`、`McpSettingsPage.tsx`、`SkillImportPanel.tsx`、`crates/core/src/skills`、`src-tauri/src/bridge/routes/skills.rs`。

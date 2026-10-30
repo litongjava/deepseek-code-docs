@@ -26,4 +26,4 @@ MemEx 是额外的记忆后端。此前本机日志显示缺少 `src-tauri/memex
 
 删除条目或清空记忆前确认保留需求。知识库、MemEx 和会话 SQLite 可能位于不同位置，备份应覆盖实际数据源。
 
-源码参考：`KnowledgePanel.tsx`、`MemoryPanel.tsx`、`src-tauri/src/knowledge`、`src-tauri/src/memory`。
+源码参考：`KnowledgePanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。

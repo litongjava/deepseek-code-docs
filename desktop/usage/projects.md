@@ -86,6 +86,6 @@ Projects 标题右侧的 **All projects** 打开项目总览，加号用于创�
 
 代码仓库应有自己的版本管理和备份，客户端数据库备份不能代替项目文件备份。
 
-源码参考：`SidebarNavigation.tsx`、`ProjectsPage.tsx`、`features/project/`、`src-tauri/src/bridge/routes/projects.rs` 和 `src-tauri/src/db/project_repo.rs`。
+源码参考：`SidebarNavigation.tsx`、`ProjectsPage.tsx`、`features/project/`、`src-tauri/src/bridge/routes/projects.rs` 和 `crates/core/src/db/project_repo.rs`。
 
 本轮实现的验证范围见[项目工作流验证记录](../development/projects-verification.md)。

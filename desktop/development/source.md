@@ -1,6 +1,6 @@
 # 源码与接口导航
 
-以下路径相对于应用工程 `claude-rust-desktop`。本文档工程不依赖这些文件在部署机器上存在。
+以下路径相对于应用仓库 `deepseek-code`。业务逻辑在 CLI 与 Desktop 共用的引擎 `crates/core` 中，`src-tauri` 只保留 Desktop 的窗口、Tauri 命令和 Bridge 路由。本文档工程不依赖这些文件在部署机器上存在。
 
 ## 前端入口
 
@@ -21,9 +21,12 @@
 - `src-tauri/src/bridge/mod.rs`：Bridge 状态、鉴权、CORS、监听端口。
 - `src-tauri/src/bridge/routes/mod.rs`：HTTP 路由汇总。
 - `src-tauri/src/commands`：Tauri 命令。
-- `src-tauri/src/native_engine`：模型和工具执行核心。
-- `src-tauri/src/db`：SQLite 及迁移相关逻辑。
-- `src-tauri/src/permissions`：工具权限管理。
+- `crates/core/src/native_engine`：模型和工具执行核心（与 CLI 共用）。
+- `crates/core/src/prompt`：系统提示词。
+- `crates/core/src/tools`：内置工具。
+- `crates/core/src/db`：SQLite 及迁移相关逻辑。
+- `crates/core/src/permissions`：工具权限管理。
+- `crates/core/src/mcp`、`crates/core/src/skills`、`crates/core/src/memory`：MCP、技能和记忆。
 
 ## 常用 HTTP 入口
 
