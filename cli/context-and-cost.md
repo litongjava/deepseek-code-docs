@@ -11,7 +11,7 @@
 | 开启了自动压缩 | `12% until auto-compact` |
 | 没有开启自动压缩 | `Context low (5% remaining) · Run /compact to compact & continue` |
 
-- **预算的计算**：开启自动压缩时，预算是自动压缩阈值（窗口的百分比）；没有开启时，预算是整个上下文窗口。
+- **预算的计算**：开启自动压缩时，预算是自动压缩阈值；没有开启时，预算是整个上下文窗口。
 - **用量的估算**：按最近一次压缩之后的消息和工具输出估算。
 - **何时显示**：只有模型配置了上下文窗口时才会出现。DeepSeek（1048576 tokens）和 Claude（200000 tokens）模型默认就有。
 
@@ -21,10 +21,17 @@
 |---|---|
 | `/context` | 和 Claude Code 一样画出上下文窗口：10×10 的方格按系统提示、工具定义、消息着色，旁边列出各部分的估算、剩余空间和自动压缩预留；数据来自最近一次请求；第一次请求之前，系统提示和工具定义取自其他会话最近一次请求的测量，消息取自本会话，作为估算 |
 | `/compact` | 把之前的对话压缩成摘要，完整记录仍保留在存档中。和 Claude Code 一样显示 `⎿  Compacted (ctrl+o to see full summary)`；按 `Ctrl+O` 打开的详细记录里，`✻ Conversation compacted` 下面就是摘要全文 |
-| `/autocompact 80%` | 历史达到窗口的 80% 时自动压缩；`/autocompact off` 关闭 |
+| `/autocompact` | 自动压缩**默认开启**，阈值和 Claude Code 一样是上下文窗口减去 33k tokens（预留给输出和摘要）。`/autocompact 80%` 改为窗口的 80%，`/autocompact off` 关闭，`/autocompact default` 恢复默认阈值 |
 | `/usage` 或 `/cost` | 打开设置对话框的 Usage 页：总费用、API 耗时、实际耗时、代码改动行数和 token 数；`/usage local` 输出 JSON |
 
 `/cost` 是 Claude Code 中对应命令的名字，显示的内容与 `/usage` 相同。`/status`、`/config`、`/cost` 不带参数时打开同一个设置对话框（Status、Config、Usage、Stats 四页，`←`/`→` 切换）。Stats 页和 Claude Code 一样显示一年内每天的使用热力图，以及全部时间、最近 7 天或 30 天（按 `r` 切换）的常用模型、总 token、会话数、最长会话、活跃天数、连续使用天数、最活跃的一天、各类 token 合计和各模型的用量：Config 页列出模型、权限模式、effort、自动压缩、主题、编辑模式（Editor mode）等设置的当前值，输入文字筛选；和 Claude Code 一样，按 `Enter` 或空格把选中的设置原地切换到下一个值，模型、提供商和状态行打开各自的选择界面。输入框上方右侧的 `● medium · /effort` 显示当前使用的 effort。
+
+## 自动处理超长上下文
+
+除了按阈值自动压缩，dcl 和 Claude Code 一样还有两层保护：
+
+- **清理较早的大工具结果**：一次请求超过上下文窗口的一半时，最近 10 条消息之前的大块工具结果在发给模型时换成占位文字。清理的位置只在再次越过阈值时才往后移，并按会话保存，中间的请求前缀保持不变，可以命中缓存。完整压缩后重新计算。存档里的记录不会被修改。
+- **超出窗口时压缩重试**：请求仍然超出模型的上下文窗口（提供商返回 `prompt is too long`、`context_length_exceeded` 等错误）时，dcl 显示 `Context limit reached; compacting the conversation and retrying…`，丢弃失败的这次请求，像自动压缩一样压缩之前的对话，再重新发送这条提示词。只重试一次；没有可以压缩的历史时照常报错。
 
 ## 费用估算
 

@@ -39,13 +39,26 @@ Warning: no stdin data received in 3s, proceeding without it; redirect stdin fro
 
 ## 权限
 
-非交互模式没有人可以回答审批请求。默认的 `ask` 模式下，如果模型调用了需要审批的工具（例如写入长期记忆的 `memory_ingest`），这次调用会被**拒绝**，模型收到
+非交互模式没有人可以回答审批请求。默认的 `ask` 模式下，如果模型调用了需要审批的工具（例如修改文件的 `Edit`、运行非只读命令的 `Bash`、访问新网站的 `WebFetch`），这次调用会被**拒绝**，模型收到
 
 ```
 Permission to use <tool> was not granted: no approval host is available in this session. Grant it with --allowed-tools or a permission mode.
 ```
 
 并继续完成本轮回答，退出码为 0。需要让工具真正执行时，用 `--allowed-tools <工具>` 单独放行，或选择合适的 `--permission-mode`。
+
+读写长期记忆（`memory_search`、`memory_ingest`）、待办和任务列表这类只影响 dcl 自身状态的工具和 Claude Code 一样不需要审批，`-p` 模式下也会直接执行。
+
+## 压缩会话
+
+`/compact` 在 `-p` 模式下也能用，和 Claude Code 一样直接压缩会话，不发给模型：
+
+```bash
+dcl -c -p "/compact 保留接口设计的讨论" < /dev/null
+```
+
+- 通常配合 `-c`（继续最近的会话）或 `--resume <ID>` 使用；后面的文字是可选的压缩要求。
+- 文本输出显示压缩了多少条消息；`json`、`stream-json` 输出一个成功的 `result`。之后继续这个会话时，已调用的技能内容仍然保留。
 
 ## 记录完整过程
 
