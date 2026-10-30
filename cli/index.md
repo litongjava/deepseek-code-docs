@@ -40,7 +40,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | 回复被截断时怎么办 | [输出上限与自动续写](./output-limit.md) |
 | 上下文快满了、花了多少钱 | [上下文用量与费用](./context-and-cost.md) |
 | 跳转定义、查引用、诊断 | [语言服务器（LSP）](./lsp.md) |
-| 把子任务交给本机的 Claude Code 或 Codex | [调用 Claude Code 与 Codex](./external-agents.md) |
+| 把子任务交给本机的 Claude Code、Codex 或另一个 dcl | [调用 Claude Code、Codex 与 dcl](./external-agents.md) |
 | 审查改动、查找安全漏洞 | [代码审查与安全审查](./code-review.md) |
 | 在脚本和 CI 中使用 | [非交互模式](./non-interactive.md) |
 | 让结果是合法 JSON | [结构化输出](./structured-output.md) |
@@ -57,7 +57,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 |---|---|
 | `dcl` | 启动交互式会话 |
 | `dcl -p "<任务>"` | 执行一次任务，结果输出到 stdout |
-| `dcl --continue` | 继续当前目录最近的会话 |
+| `dcl --continue` | 继续当前目录最近的会话（跳过没有消息的空会话） |
 | `dcl --resume <ID>` | 恢复指定会话 |
 | `dcl sessions list` | 列出保存的会话 |
 | `dcl lsp` | 查看语言服务器状态 |
@@ -65,7 +65,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 
 交互模式里输入 `/` 会列出全部斜杠命令，`/help` 查看说明。
 
-交互模式里输入 `/resume`（不带 ID），和 Claude Code 一样打开本项目其他会话的选择列表：按最近使用排序，每项显示会话名称（没有命名时显示第一条提示词），下面是多久之前、会话最后工作时所在的 Git 分支和会话记录的大小（消息、工具调用和请求快照，相当于 Claude Code 记录文件的内容），例如 `8 seconds ago · feature · 424B`。直接输入文字筛选，`Enter` 切换到选中的会话，`Esc` 取消。`空格` 预览选中会话的完整记录，`Ctrl+R` 重命名，`Ctrl+A` 在本项目和全部项目之间切换（全部项目时显示每个会话的目录），`Ctrl+B` 只显示当前分支上的会话。分支在每一轮开始时记录，不在 Git 仓库里的会话不显示分支。
+交互模式里输入 `/resume`（不带 ID），和 Claude Code 一样打开本项目其他会话的选择列表：按最近使用排序，每项显示会话名称（没有命名时显示第一条提示词），下面是多久之前、会话最后工作时所在的 Git 分支和会话记录的大小（消息、工具调用和请求快照，相当于 Claude Code 记录文件的内容），例如 `8 seconds ago · feature · 424B`。直接输入文字筛选，`Enter` 切换到选中的会话，`Esc` 取消（显示 `Resume cancelled`）。`空格` 预览选中会话的完整记录，`Ctrl+R` 重命名，`Ctrl+A` 在本项目和全部项目之间切换（全部项目时显示每个会话的目录），`Ctrl+B` 只显示当前分支上的会话。分支在每一轮开始时记录，不在 Git 仓库里的会话不显示分支。
 
 ```text
  Resume session
@@ -76,3 +76,5 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
  Ctrl+A to show all projects · Ctrl+B to only show current branch · Space to preview · Ctrl+R to rename
  Type to search · Esc to cancel
 ```
+
+和 Claude Code 一样，用 `/resume`、`--resume` 或 `--continue` 恢复会话后，屏幕先重新显示之前的对话，再出现输入框；当前的权限模式保持不变。退出 dcl 时会打印一行 `Resume this session with: dcl --resume 会话ID`，方便之后回到这个会话。

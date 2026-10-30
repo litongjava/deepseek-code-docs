@@ -34,7 +34,8 @@ Connected. DeepSeek is saved as the default provider (key stored in config.json,
    - 否则可以把 Key 粘贴进来。输入时只显示圆点，Key 不会出现在终端记录里。它保存在[数据目录](./data-directory.md)的 `config.json` 中，该文件只有你自己可读写；
    - 也可以直接回车，按提示自行设置环境变量后重新启动。
 3. **检查连接**：保存后，dcl 用第一个模型发一个很小的请求验证 Key。失败时会显示原因，可以重新粘贴。
-4. **开始会话**：验证通过后，这个提供商成为默认提供商，直接进入会话。
+4. **选择默认模型**：提供商有多个模型时，和 Claude Code 一样显示 `Choose the default model` 列表，`Enter` 确认，`Esc` 选第一个。之后新会话默认用这个模型，可以随时用 `/model` 修改。
+5. **开始会话**：这个提供商成为默认提供商，直接进入会话。
 
 ## 内置提供商
 
