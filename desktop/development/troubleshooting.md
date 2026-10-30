@@ -20,6 +20,12 @@ Get-NetTCPConnection -State Listen |
   Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
+Linux：
+
+```bash
+ss -ltnp | grep -E ':(5200|5201|3008[5-9]|30090) '
+```
+
 ## 401 或浏览器报告 CORS
 
 核对浏览器来源是否为允许的 `http://127.0.0.1:5200`，并检查 Bridge Key 是否来自当前后端实例。桌面端的存储不会自动同步到 Chrome。

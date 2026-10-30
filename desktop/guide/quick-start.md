@@ -33,12 +33,14 @@ Linux（以 Debian 12 为例）需要 Node.js 22+、Rust 稳定版，以及 Taur
 ```bash
 sudo apt install pkg-config libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
   libjavascriptcoregtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev \
-  libasound2-dev libxdo-dev
+  libasound2-dev libxdo-dev libdbus-1-dev
 ```
+
+`libdbus-1-dev` 不能省：窗口运行时和安全存储都依赖 D-Bus，缺少时编译停在 `libdbus-sys` 的构建脚本（`pkg-config` 找不到 `dbus-1`）。
 
 开发调试时用下面的 `npm run tauri -- dev`。要得到可以独立运行的 `dcd`，按[构建 release 版本](#构建-release-版本)构建。
 
-没有 root 权限时，可以用 `apt-get download` 下载上述 `-dev` 包及其依赖的 `-dev` 包，解压到用户目录并设置 `PKG_CONFIG_PATH`、`PKG_CONFIG_SYSROOT_DIR` 和 `RUSTFLAGS="-L ..."`，方法与 [CLI 的无 root 构建](../../cli/install.md#没有-root-权限时的-linux-构建)相同；`libsoup-3.0` 还需要 `libsysprof-4-dev` 提供的 `sysprof-capture-4`。前提是对应的运行库已经安装。
+没有 root 权限时，可以用 `apt-get download` 下载上述 `-dev` 包及其依赖的 `-dev` 包，解压到用户目录并设置 `PKG_CONFIG_PATH`、`PKG_CONFIG_SYSROOT_DIR` 和 `RUSTFLAGS="-L ..."`，方法与 [CLI 的无 root 构建](../../cli/install.md#没有-root-权限时的-linux-构建)相同；`libsoup-3.0` 还需要 `libsysprof-4-dev` 提供的 `sysprof-capture-4`。前提是对应的运行库已经安装。共享的 `CARGO_HOME`（如 `/usr/local/cargo`）对当前用户只读时，改用自己的目录，同样见 CLI 文档。
 
 ## 构建 release 版本
 
