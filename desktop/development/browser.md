@@ -71,6 +71,28 @@ console.log('HTTP 状态：', response.status);
 
 供应商凭据与 Bridge Key 是两类凭据。后者只负责本地接口鉴权，不能替代模型供应商的 Key。
 
+## 路线三：自动化测试连接桌面窗口
+
+自动化工具（如 dsb）通过 Chrome DevTools Protocol（CDP）连接页面。能否直接连接 `dcd` 窗口取决于平台的 WebView。
+
+**Windows（WebView2）**：启动前设置环境变量打开调试端口，只在测试时使用，端口对本机所有进程开放：
+
+```powershell
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9222'
+npm.cmd run tauri dev
+```
+
+`http://127.0.0.1:9222/json/list` 能列出页面后即可连接。开发模式窗口地址是 `http://127.0.0.1:5200`，release 版是 `http://tauri.localhost/`。以 dsb 为例：
+
+```powershell
+dsb targets --endpoint http://127.0.0.1:9222
+dsb attach --endpoint http://127.0.0.1:9222 --url http://127.0.0.1:5200/
+```
+
+窗口内 `invoke()` 可用，可以验证原生功能。测试独立构建，不要给日常使用的 App 设置该变量。
+
+**Linux（WebKitGTK）**：WebKitGTK 不提供 CDP 端口，`dcd` 只监听 Bridge 端口，自动化工具无法连接窗口。保持 `npm run tauri -- dev` 运行，按路线二在 Chrome 打开 `http://127.0.0.1:5200` 测试；依赖 `invoke()` 的功能在桌面窗口手动验证。
+
 ## 浏览器里仍然存在的限制
 
 部分知识库、MCP 管理、差异应用、Remotion 和权限操作直接调用 `invoke()`，需要逐项适配。原生窗口操作、文件对话框等也不能原样移入普通浏览器。
