@@ -1,6 +1,6 @@
 # Code 模式提示词：样本讲解、隐私清理与项目接入
 
-本文解释 `code_prompt_1.json` 的结构、可复用的设计，以及它在 DeepSeek Code Desktop 中的实际接入方式。接入日期：2026-10-14。
+本文解释 `code_prompt_1.json` 的结构、可复用的设计，以及它在 DeepSeek Code Desktop 中的实际接入方式。接入日期：2026-10-14。2026-10-29 起，Code 模式改为参照 Claude Code 2.1.302 的请求快照对齐提示词和工具（CLI 与 Desktop Code 模式共用同一引擎），本文第 4–7 节按当前实现更新。
 
 ## 1. 先认清样本是什么
 
@@ -48,7 +48,7 @@
 
 独立只读检查可以并行；读取后才能编辑、编辑后才能测试、提交后才能检查提交结果，这些操作必须顺序执行。不能机械照搬样本中宽泛的“并行调用”文字。
 
-样本还包含代理、工作流、任务管理、计划模式等能力。本次保留“任务完成后报告真实结果”“不要捏造后台结果”的原则，但不注册本项目当前请求中没有的同名工具。
+样本还包含代理、工作流、任务管理、计划模式等能力。最初接入时只保留“任务完成后报告真实结果”“不要捏造后台结果”的原则；对齐之后，这些能力已有本项目自己的实现（`Agent`、`EnterPlanMode`/`ExitPlanMode`、`CronCreate` 等），工具名和参数与参考 CLI 一致。
 
 ### 3.3 谨慎处理 Git 状态
 
@@ -64,26 +64,27 @@
 
 ## 4. 删除的信息采集与外部关联约定
 
-### 4.1 找到的明确遥测条款
+### 4.1 遥测条款的处理
 
-样本 `ScheduleWakeup` 的说明和 `input_schema.properties.reason.description` 都明确写到：
+样本 `ScheduleWakeup` 的说明和 `reason` 参数说明都写到：
 
 > Goes to telemetry and is shown to the user.
 
-意思是唤醒原因会进入遥测。此次**整项不引入 `ScheduleWakeup`**，不添加 `reason` 上报、动态唤醒循环、缓存保活策略或对应采集代码。上面的短引文仅用于解释剔除依据，不是运行时指令。
+意思是唤醒原因会进入遥测。现在本项目提供了 `ScheduleWakeup`（配合不带间隔的 `/loop` 自定节奏），但**删掉了遥测这一句**：`reason` 只显示给用户，并和下次唤醒的时间、提示词一起保存在本机会话目录，不上报。上面的短引文仅用于解释改动依据，不是运行时指令。
 
 ### 4.2 按信息最小化原则排除的能力
 
-以下并非全部都是遥测，有些是用户主动使用的本地管理工具；但它们涉及跨会话、账户、设备或设置读取，也不属于本次代码任务所需能力，因此不从样本接入：
+以下能力涉及账户、设备、设置或云端会话，不属于代码任务所需，仍不接入：
 
-- `ListAgents` 对其他本地、云端和远程会话的枚举，以及跨会话 `SendMessage`。
 - `mcp__ccd_session_mgmt__list_sessions`、`get_session`、`list_events`、`search_session_transcripts`、`export_transcript`：会话元数据、正文搜索和记录导出。
 - `mcp__ccd_session_mgmt__get_usage`：账户限额和会话上下文用量读取。
 - `mcp__ccd_settings__get_settings`、`mcp__ccd_host__get_storage_usage`：用户设置和设备存储概况读取。
 - `mcp__ccd_session_mgmt__set_remote_control`：与外部账户关联的远程控制。
-- `DesignSync` 的文件上传，以及其他宿主专有窗口、侧栏、浏览器、终端、定时任务和 PR 管理桥接工具。
+- `DesignSync` 的文件上传，以及其他宿主专有窗口、侧栏、浏览器和 PR 管理桥接工具。
 
-85 个样本 MCP 工具均未复制注册。适配采用人工审阅后的少量规则，不采用“先导入全部、再按关键词删几句”的方式。正常的项目文件读取、用户任务所需的网页搜索，不等于遥测采集；这些必要能力仍使用项目原有工具和权限机制。
+`ListAgents` 已经接入，但范围只限本机：列出本会话启动的后台代理和本项目在这台机器上的其他会话，供 `SendMessage` 发送消息；样本中的 `channel`、`q` 参数保留在 schema 里，说明为不可用。不枚举云端或其他设备上的会话。
+
+85 个样本 MCP 工具均未复制注册。
 
 ### 4.3 所有模式保留并启用原有记忆能力
 
@@ -99,13 +100,16 @@
 
 当前会话的消息、工具结果、请求快照仍由原有本地会话功能保存，相关记忆会作为上下文发送给用户选择的模型供应商。记忆默认使用本地 SQLite；用户若配置了 MemEx HTTP 后端，则继续使用其配置。本次仅排除样本中的遥测和无关信息采集约定，不移除项目原有记忆功能，也没有进行全应用隐私审计。
 
-## 5. 与本项目工具协议的具体差异
+## 5. 当前工具协议
+
+对齐后，Code 模式向模型提供的工具名称、参数和说明以参考 CLI 为准；本项目特有的工具（`memory_search`、`memory_ingest`、`git_*`、`ListDir`、`MultiEdit`、`computer_use` 等）继续保留。`prompt/code.rs` 只在原生说明后面追加一句 `Code mode:` 提示，**不改变参数 schema**。旧的 `Delegate`、`Worker`、`smart_grep`、`smart_edit`、`todo_write` 已删除，`cron` 和 `worktree` 只为旧会话记录保留执行入口，模型看不到。
 
 ### Shell
 
-样本的 `Bash` 固定描述为 Git Bash，超时单位是毫秒，支持 `run_in_background`，并声称工作目录跨调用持久化。
-
-本项目则支持多种 shell，`timeout` 单位是**秒**，每次从项目工作目录启动新进程，没有 `run_in_background` 参数。Windows 明确指定 `shell: "powershell"` 或 `"pwsh"`；上一次 `cd` 和变量不能假定持续有效。
+- `Bash` 的 `timeout` 单位是**毫秒**，前台默认 120000，最大 600000。
+- 支持 `run_in_background`：返回 `task_id` 和 `stdout_file`/`stderr_file`，用 `TaskOutput` 读取有限长度的日志和状态，用 `TaskStop` 结束整个进程树。后台命令跨轮次存活，worker 退出时结束。
+- 每次调用仍是新进程，但**工作目录跨调用保留**：bash、sh、zsh、PowerShell、Git Bash 和 Windows `cmd` 都会记住上次 `cd` 的位置；目录离开项目时重置回项目根目录。shell 变量不保留。
+- Windows 仍需显式指定 `shell: "powershell"` 或 `"pwsh"` 并使用对应语法。
 
 PowerShell 文件读取示例：
 
@@ -113,20 +117,21 @@ PowerShell 文件读取示例：
 Get-Content -LiteralPath 'D:\项目\配置.json' -Raw -Encoding UTF8
 ```
 
-应用原有 shell 包装器已设置 UTF-8 输入输出与文件 cmdlet 编码，适配版仍要求显式编码。控制台输出使用逐行文本或 JSON，不使用表格。文件写入沿用 `utf8.rs`：普通文本 UTF-8，Windows `.ps1` 按既有逻辑写入 BOM，兼容 Windows PowerShell 5.1 的 `-File`。
+应用原有 shell 包装器已设置 UTF-8 输入输出与文件 cmdlet 编码，适配版仍要求显式编码。控制台输出使用逐行文本或 JSON，不使用表格。文件写入沿用 `utf8.rs`：普通文本 UTF-8，Windows `.ps1` 按既有逻辑写入 BOM，兼容 Windows PowerShell 5.1。
 
 ### 文件与搜索
 
-- `Read` 是 UTF-8 文本读取器，支持 `file_path`、`offset`、`limit`；不复制图片、PDF 分页和 notebook 渲染承诺。
-- `Edit` 的先读后改是模型行为要求，当前实现没有新增“已读文件登记表”作为硬性前置检查；唯一匹配仍由原有编辑实现校验。
-- `Grep` 仅使用本项目的 `pattern`、`path`、`include`，不复制样本的 `output_mode`、`type`、`multiline`。此次修复 `include` 原先被忽略的问题，并将相对搜索路径解析到项目工作目录。
-- `Glob` 将模式匹配到项目相对路径及规范化分隔符的完整路径，返回文件并按路径排序；不承诺样本中的修改时间排序。非法模式返回错误。
+- `Read` 参数为 `file_path`、`offset`、`limit`、`pages`：文本带行号返回；图片作为图片内容交给支持图片的模型；PDF 按页范围读取；`.ipynb` 按单元格展示。
+- `Edit` 和覆盖已有文件的 `Write` **必须先 `Read`**，并且文件在读取之后被改动（修改时间或大小变化）时会拒绝，要求重新读取。读取记录按会话保存在运行目录，轮次之间的外部改动也能发现。
+- `Grep` 使用参考 CLI 的参数：`pattern`、`path`、`glob`、`type`、`output_mode`（`content`/`files_with_matches`/`count`）、`-i`、`-n`、`-A`/`-B`/`-C`/`context`、`multiline`、`head_limit`、`offset`。
+- `Glob` 返回匹配的文件路径；非法模式返回错误。
+- `NotebookEdit` 按单元格 id 编辑，支持 `edit_mode`（替换、插入、删除）。
 
 ### 用户提问和联网
 
-本项目 `AskUserQuestion` 使用单个 `question` 加 `options`，不是样本的 `questions` 数组。样本中的多问题、预览等字段不接入。
-
-`WebFetch` 保留原有 URL、分页和原始内容参数；`WebSearch` 保留项目搜索供应商配置。不会复制样本中不存在于本项目的鉴权与搜索能力。
+- `AskUserQuestion` 使用 `questions` 数组，一次 1–4 个问题，每个问题带 `header`、2–4 个 `options`（含 `description`，可选 `preview`），支持 `multiSelect`。
+- `WebFetch` 参数为 `url` 和 `prompt`：抓取页面后按 `prompt` 回答，页面会缓存一段时间；访问新主机前按权限规则询问，可用 `WebFetch(domain:example.com)` 规则放行。
+- `WebSearch` 参数为 `query`，可选 `allowed_domains`、`blocked_domains` 过滤结果；搜索供应商沿用项目配置，没有配置时如实报告。
 
 ## 6. 代码接入链路
 
@@ -143,27 +148,41 @@ HTTP / 原生聊天请求
   → 模型供应商与本地请求快照
 ```
 
-Code 的拼接顺序为：项目中立身份 → 通用 `desktop.md` → `code.md` → `memory.md` → 当前模型、日期、操作系统 → 请求自定义提示词 → 工作目录与可信项目说明。检索到的相关记忆由执行器加入请求消息。
+Code 的系统提示词按参考 CLI 的布局分三块：
+
+1. 一行身份 `You are deepseek-code, an agentic coding tool for DeepSeek models.`，单独带缓存断点。
+2. `code.md` + `memory.md`，单独带缓存断点。
+3. `# Environment`（工作目录、是否 Git 仓库、平台、shell、系统版本、模型、日期）和请求自定义提示词（放在 `<additional_instructions>` 中），不带缓存标记。
+
+其余上下文不再放进系统提示词，而是像参考 CLI 一样附在用户消息上：
+
+- **第一条用户消息**开头附上项目说明（`Codebase and user instructions are shown below…`，含 `AGENTS.md`、`CLAUDE.md` 和记忆索引）和会话开始时的 **Git 状态快照**（当前分支、主分支、`git status`、最近提交，状态最多 2000 字符）。快照每个会话只取一次，之后的请求复用，保证前缀稳定可缓存。
+- **每轮用户消息**后面附上该轮的钩子附加内容、`/技能` 展开的技能正文、召回的相关记忆。这些内容按会话保存，之后的每次请求都放回同一条消息后面，不会在下一轮丢失。
+- 压缩之后，已调用技能的正文会作为提醒重新附上。
+
+Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话中最后一个用户块再放一个滚动断点。
 
 `chat`、`work`、`study` 沿用 Desktop 提示词与原有记忆行为。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话仍须关联有效、已信任、未归档的项目。
 
 主要源码（相对于应用仓库）：
 
-- `src-tauri/src/prompt/code.md`：人工整理后的 Code 行为规则，编译时嵌入。
-- `src-tauri/src/prompt/code.rs`：9 项原生工具的说明补充；保留完整工具列表及实际参数 schema，包括记忆工具。
-- `src-tauri/src/prompt/mod.rs`：提示词 profile 和组装入口，保留原有 Desktop 调用接口。
-- `src-tauri/src/native_engine/workspace.rs`：从已保存会话选择 profile。
-- `src-tauri/src/native_engine/engine_core.rs`：将同一 profile 传给提示词组装和工具执行器，为所有模式初始化记忆客户端。
-- `src-tauri/src/native_engine/tool_loop.rs`：两种协议使用同一工具适配逻辑，记忆工具调用统一交给真实客户端执行。
-- `src-tauri/src/tools/mod.rs`：搜索过滤与项目相对路径修复。
+提示词和引擎已移到共享引擎 `crates/core`，CLI 与 Desktop 共用：
+
+- `crates/core/src/prompt/code.md`：Code 行为规则，编译时嵌入。
+- `crates/core/src/prompt/code.rs`：8 项原生工具的 `Code mode:` 说明补充；保留实际参数 schema，包括记忆工具。
+- `crates/core/src/prompt/mod.rs`：提示词 profile、组装入口和缓存分块。
+- `crates/core/src/native_engine/engine_core.rs`：选择 profile，组装项目说明、Git 快照和每轮附加内容。
+- `crates/core/src/services/turn_context.rs`、`services/git_snapshot.rs`、`project_instructions.rs`：随用户消息附带的上下文。
+- `crates/core/src/native_engine/tool_loop.rs`：两种协议使用同一工具适配逻辑。
+- `crates/core/src/tools/`：工具定义与实现（`read.rs`、`search.rs`、`web.rs`、`wakeup.rs` 等）。
 
 前端已经保存 `workspace_mode`，不需要新增提示词文本框或在浏览器里拼接大段规则。请求中的自定义提示词仍保留，不将其替换成样本的探测消息。
 
 ## 7. 如何维护与验证
 
-修改 `code.md` 后重新编译 Rust 应用，下一轮 Code 请求才会使用新版本。仅重启 Vite 前端无法更新编译嵌入的文本。
+修改 `crates/core/src/prompt/code.md` 后重新编译 Rust 应用，下一轮 Code 请求才会使用新版本。仅重启 Vite 前端无法更新编译嵌入的文本。
 
-新增能力时先确认工具实现和 schema，再写规则。不要直接复制另一个宿主的工具名、单位或后台完成承诺。采集类约定应在人工审阅时排除，不能依赖模型自行忽略。
+新增能力时先实现工具，再写说明：可以沿用参考 CLI 的工具名、参数和单位，但说明里承诺的行为（后台完成通知、工作目录保留等）必须有对应实现。采集类约定应在人工审阅时排除，不能依赖模型自行忽略。
 
 自动化验证包括：
 
@@ -177,20 +196,17 @@ Code 的拼接顺序为：项目中立身份 → 通用 `desktop.md` → `code.m
 
 本次验证使用本地自动化测试，不调用付费模型，也不需要浏览器测试。因此没有新增浏览器截图。后续若进行可视化回归，应使用用户指定的 `D:\code\project\project-browser-use\deepseek-browser-use`，显示测试过程，截图放文档站 `assets` 下。
 
-复现命令（在应用仓库的 `src-tauri` 目录执行）：
+复现命令（在应用仓库根目录执行）：
 
 ```powershell
-cargo test --lib native_engine::tool_loop::code_prompt_tests
-cargo test --lib prompt::
-cargo test --lib memory::
-cargo test --lib native_engine::workspace::tests
-cargo test --test code_search
-cargo test --lib tools::utf8::tests
+cargo test --locked -p claude-core --lib prompt::
+cargo test --locked -p claude-core --lib memory::
+cargo test --locked -p claude-core --lib --tests
 ```
 
 文档站在其根目录执行 `npm.cmd run build`。
 
-### 2026-10-14 验证结果
+### 2026-10-14 验证结果（初次接入时）
 
 - `cargo test --lib native_engine::tool_loop::code_prompt_tests`：2 项通过，覆盖四种模式 × 两种协议共 8 种组合的自动召回、真实工具读写、回复后自动入库，以及不同初始化顺序下的配置保留。
 - `cargo test --lib prompt::`：13 项通过。
