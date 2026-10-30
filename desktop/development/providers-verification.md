@@ -69,6 +69,15 @@ cargo test --manifest-path src-tauri/Cargo.toml --bin claude-desktop-tauri provi
 npm.cmd run build
 ```
 
+以上是验证当时的命令。之后 Rust 包改名为 `deepseek-code-desktop`（可执行文件 `dcd`），两个 `provider-runtime` 脚本已不在当前仓库中。现在在仓库根目录运行：
+
+```powershell
+npx.cmd tsc --noEmit --pretty false
+npx.cmd vitest run src/utils/modelConfig.test.ts
+cargo test --locked -p deepseek-code-desktop provider_
+npm.cmd run build
+```
+
 ## 验证边界
 
 40 个目录供应商没有逐一连接外部生产服务。云平台身份认证、真实账户权限、计费、各模型推理等级支持范围仍由实际供应商决定。Windows 开发运行与 worker 打包已验证，未执行完整安装包安装回归。图片内容转换与能力校验已验证，未对每个远程视觉模型进行实际识图测试。

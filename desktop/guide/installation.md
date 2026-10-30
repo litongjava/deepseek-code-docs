@@ -6,7 +6,7 @@
 
 准备与系统架构匹配的客户端安装包，以及可用的模型服务账号或 API 凭据。桌面界面需要 WebView2 Runtime；涉及 Git 和命令行工具的工作流还可能需要 Git for Windows / Git Bash。
 
-当前源码包含 Windows 专属依赖，本文以 Windows 为主，不承诺其他平台可直接安装或构建。
+当前源码包含 Windows 专属依赖，本文以 Windows 为主。Linux（Debian 12）可以从源码构建，见[从源码运行](./quick-start.md#linux-构建)；macOS 未经验证。
 
 ## 使用安装包
 
@@ -15,7 +15,7 @@
 3. 启动客户端，完成主题、运行模式和工作目录引导。
 4. 按[模型配置](../configuration/models.md)接入服务，发送简单消息确认可用。
 
-本文未核实公开发布下载地址，因此不提供猜测的下载链接。手中只有源码时，使用[从源码运行](./quick-start.md)；维护者可运行 `npm.cmd run tauri build` 构建分发包，安装包类型以实际构建产物为准。
+本文未核实公开发布下载地址，因此不提供猜测的下载链接。手中只有源码时，使用[从源码运行](./quick-start.md)；维护者构建 release 版本和安装包见[构建 release 版本](./quick-start.md#构建-release-版本)，安装包类型以实际构建产物为准。
 
 ## 验收安装
 

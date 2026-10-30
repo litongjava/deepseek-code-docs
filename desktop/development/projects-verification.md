@@ -27,7 +27,7 @@
 - `npm run build`：通过。
 - `npx tsc --noEmit --pretty false`：通过。
 - `npm run test:run`：20 项通过，包含 4 项新增项目交互组件测试。原有国际化测试有 React `act(...)` 提示。
-- `cargo test --lib db::project_repo::tests`：4 项目录持久化与信任测试通过。
+- `cargo test --lib db::project_repo::tests`：4 项目录持久化与信任测试通过。该模块现已移到共享引擎，当前命令为 `cargo test --locked -p claude-core --lib db::project_repo::tests`。
 - `python scripts/test-project-workflow.py`：通过正在运行的 Tauri 后端及 Vite 本地代理验证真实 HTTP 请求。覆盖必填校验、多目录创建、未信任拒绝、逐目录信任、项目聊天关联、新增目录信任重置、至少一个目录、非法更新回滚，以及关联聊天工作目录同步。
 
 HTTP 验证仅创建临时目录、测试项目及空会话，不调用模型；测试完成后已清理这些测试记录。
