@@ -16,14 +16,14 @@ DeepSeek Code Desktop 使用 React 19、TypeScript、Tauri 2 和 Rust 构建桌�
 
 ## 三个需要区分的工程
 
-**应用工程 `claude-rust-desktop`**：包含 React 前端与 `src-tauri` Rust 后端，是桌面客户端的源码。
+**应用仓库 `deepseek-code`**：包含 React 前端（`src/`）、Desktop 的 Tauri 外壳（`src-tauri/`，可执行文件 `dcd`）、命令行版本（`crates/cli/`，可执行文件 `dcl`），以及两者共用的 Rust 引擎（`crates/core/`）。
 
 **可选网关 `api-proxy`**：应用工程内的 Node 服务，监听 `30090`，部分登录、用户、支付和 GitHub 等请求路由到这里。它不是 Rust Bridge。
 
-**文档工程 `claude-rust-desktop-docs`**：当前独立 VitePress 站点。安装和构建只需要本目录，不需要应用目录、Rust 或真实模型凭据。部署本站不会部署 AI 客户端。
+**文档仓库 `deepseek-code-docs`**：当前独立 VitePress 站点。安装和构建只需要本目录，不需要应用目录、Rust 或真实模型凭据。部署本站不会部署 AI 客户端。
 
 ## 当前运行边界
 
-主开发路线为 Windows。源码直接依赖部分 Windows API，因此不要把通用 Tauri 的跨平台能力理解为该项目已经完成所有平台适配。
+主开发路线为 Windows，Linux（Debian 12）也可以从源码构建运行，见[从源码运行](./quick-start.md)。源码直接依赖部分 Windows API，macOS 未经验证，不要把通用 Tauri 的跨平台能力理解为该项目已经完成所有平台适配。
 
 浏览器可以展示 React 页面，并调用已暴露的 HTTP / SSE 接口。原生 `invoke()`、安全存储、原生窗口与部分文件对话框仍依赖桌面环境。详见[浏览器调试](../development/browser.md)。

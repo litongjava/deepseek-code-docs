@@ -20,7 +20,7 @@ npm.cmd run preview
 
 生产预览：http://127.0.0.1:4174 。发布目录：`.vitepress/dist`。
 
-子路径部署设置 `DOCS_BASE=/claude-rust/` 后再构建。完整步骤见 `deployment.md`。
+子路径部署设置 `DOCS_BASE=/deepseek-code/` 后再构建。完整步骤见 `deployment.md`。
 
 ## 目录
 

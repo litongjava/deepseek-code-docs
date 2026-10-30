@@ -1,6 +1,6 @@
 # 构建与部署
 
-本站是独立 VitePress 工程。复制或单独管理整个 `claude-rust-desktop-docs` 目录，即可安装、开发和部署；没有对应用源码目录的运行依赖。
+本站是独立 VitePress 工程。复制或单独管理整个 `deepseek-code-docs` 目录，即可安装、开发和部署；没有对应用源码目录的运行依赖。
 
 ## 本地开发与预览
 
@@ -28,15 +28,15 @@ GitHub Pages 等托管服务应通过其构建工作流上传该目录；如果�
 
 ## 部署到子路径
 
-例如 `https://example.com/claude-rust/`，构建前设置：
+例如 `https://example.com/deepseek-code/`，构建前设置：
 
 ```powershell
-$env:DOCS_BASE = '/claude-rust/'
+$env:DOCS_BASE = '/deepseek-code/'
 npm.cmd run build
 npm.cmd run preview
 ```
 
-此时本地预览地址为 `http://127.0.0.1:4174/claude-rust/`。服务器也应把产物放到对应 URL 前缀下。路径必须以 `/` 开头和结尾。
+此时本地预览地址为 `http://127.0.0.1:4174/deepseek-code/`。服务器也应把产物放到对应 URL 前缀下。路径必须以 `/` 开头和结尾。
 
 恢复根路径构建：
 
@@ -45,7 +45,7 @@ $env:DOCS_BASE = '/'
 npm.cmd run build
 ```
 
-Linux CI 可使用 `DOCS_BASE=/claude-rust/ npm run build`。
+Linux CI 可使用 `DOCS_BASE=/deepseek-code/ npm run build`。
 
 ## 图片与截图
 

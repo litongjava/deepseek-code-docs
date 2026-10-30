@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress';
 
 const base = process.env.DOCS_BASE || '/';
 if (!base.startsWith('/') || !base.endsWith('/')) {
-  throw new Error('DOCS_BASE 必须以 / 开头和结尾，例如 /claude-rust/');
+  throw new Error('DOCS_BASE 必须以 / 开头和结尾，例如 /deepseek-code/');
 }
 
 export default defineConfig({
