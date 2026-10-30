@@ -59,7 +59,7 @@ Remote Control disconnected.
 仓库里带有一个模拟服务端，可以在本机扮演 Remote Control 服务和远程客户端：
 
 ```bash
-cargo run -p claude-core --example remote_control_mock -- 38090 my-token
+cargo run -p deepseek-code-core --example remote_control_mock -- 38090 my-token
 ```
 
 ```text

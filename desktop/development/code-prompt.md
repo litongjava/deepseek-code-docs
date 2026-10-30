@@ -199,9 +199,9 @@ Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话�
 复现命令（在应用仓库根目录执行）：
 
 ```powershell
-cargo test --locked -p claude-core --lib prompt::
-cargo test --locked -p claude-core --lib memory::
-cargo test --locked -p claude-core --lib --tests
+cargo test --locked -p deepseek-code-core --lib prompt::
+cargo test --locked -p deepseek-code-core --lib memory::
+cargo test --locked -p deepseek-code-core --lib --tests
 ```
 
 文档站在其根目录执行 `npm.cmd run build`。

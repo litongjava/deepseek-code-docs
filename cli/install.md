@@ -53,5 +53,5 @@ export CARGO_HOME=~/.cargo
 
 ```bash
 cargo test --locked -p deepseek-code-cli
-cargo test --locked -p claude-core --lib --tests
+cargo test --locked -p deepseek-code-core --lib --tests
 ```

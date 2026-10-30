@@ -52,11 +52,11 @@ Bridge 的鉴权中间件可能在 CORS 层处理前直接返回 401，因此未
 npx.cmd tsc --noEmit
 npm.cmd run test:run
 npm.cmd run build
-cargo test --locked -p claude-core --lib --tests
+cargo test --locked -p deepseek-code-core --lib --tests
 cargo test --locked -p deepseek-code-desktop
 cargo check --locked -p deepseek-code-desktop --all-targets
 ```
 
-前端的 `build` 脚本执行 Vite 构建，不应把构建成功等同于独立 TypeScript 类型检查通过，类型检查用 `npx.cmd tsc --noEmit`。业务逻辑在共享引擎 `claude-core` 中，修改引擎时两组 Rust 测试都要跑。Rust 检查需要完整本机构建环境。
+前端的 `build` 脚本执行 Vite 构建，不应把构建成功等同于独立 TypeScript 类型检查通过，类型检查用 `npx.cmd tsc --noEmit`。业务逻辑在共享引擎 `deepseek-code-core` 中，修改引擎时两组 Rust 测试都要跑。Rust 检查需要完整本机构建环境。
 
 构建 release 版本和安装包见[从源码运行](../guide/quick-start.md#构建-release-版本)。Cargo 输出在仓库根目录的 `target/` 下（不是 `src-tauri/target`）：可执行文件 `target/release/dcd`（Windows 为 `dcd.exe`），安装包在 `target/release/bundle/`。
