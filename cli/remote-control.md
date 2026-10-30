@@ -21,6 +21,16 @@ Remote Control active: https://rc.example.com/code/session_...
 Remote Control connected.
 ```
 
+### 启动时自动连接
+
+和 Claude Code 一样，在[数据目录](./data-directory.md)的 `settings.json` 中设置：
+
+```json
+{ "remoteControlAtStartup": true }
+```
+
+之后每个交互会话启动时都会连接到已保存（`--save`）的服务端，效果和手动执行 `/remote-control` 一样。这一项只从用户设置读取，项目里提交的设置文件不能让会话连接到远程服务。连接失败时打印错误，会话照常继续。
+
 ## 连接期间
 
 **远程发来的提示词**：在本地输入框空闲时执行，本地也会显示 `Remote prompt: ...`。

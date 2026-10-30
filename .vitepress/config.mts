@@ -94,7 +94,7 @@ export default defineConfig({
         ] },
         { text: '代码智能与外部代理', items: [
           { text: '语言服务器（LSP）', link: '/cli/lsp' },
-          { text: '调用 Claude Code 与 Codex', link: '/cli/external-agents' },
+          { text: '调用 Claude Code、Codex 与 dcl', link: '/cli/external-agents' },
           { text: '代码审查与安全审查', link: '/cli/code-review' }
         ] },
         { text: '自动化', items: [

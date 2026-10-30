@@ -1,6 +1,6 @@
-# 调用 Claude Code 与 Codex
+# 调用 Claude Code、Codex 与另一个 dcl
 
-如果本机装有 Claude Code（`claude`）或 OpenAI Codex（`codex`），dcl 的模型可以把一个独立的子任务交给它们去做，再把结果带回当前对话。典型用法：
+如果本机装有 Claude Code（`claude`）、OpenAI Codex（`codex`），或者安装了 dcl 本身（`dcl` 在 `PATH` 上），dcl 的模型可以把一个独立的子任务交给它们去做，再把结果带回当前对话。典型用法：
 
 - 请另一个代理**复核**刚写好的代码，获得第二意见；
 - 把一个边界清楚的子任务交给它完成；
@@ -12,6 +12,7 @@
 |---|---|
 | `ClaudeCode` | `PATH` 上能找到 `claude` |
 | `Codex` | `PATH` 上能找到 `codex` |
+| `DeepSeekCode` | `PATH` 上能找到 `dcl`；由这个工具启动的 dcl 不再提供它，避免无限嵌套 |
 
 没有安装时，模型看不到这个工具。**登录和账号由你自己处理**，dcl 不保存、也不传递它们的凭据。
 
@@ -23,14 +24,15 @@
 | `mode` | `read-only`（默认）只读和分析；`edit` 允许修改项目里的文件 |
 | `model` | 可选，对方使用的模型；不填时用它自己的默认值 |
 | `timeout_secs` | 可选，默认 600 秒，最多 3600 秒，超时后结束对方的进程 |
+| `session_id` | 仅 `DeepSeekCode` 和 `ClaudeCode`。填上次结果返回的会话 ID，会用 `--resume` 继续那个会话，保留之前的上下文；不填则开始新会话。Codex 不支持 |
 
 你也可以直接对模型说："用 Codex 以只读方式检查一下 calc.py 有没有 bug"。
 
 ## 两种模式实际做什么
 
-| 模式 | Claude Code | Codex |
+| 模式 | Claude Code / dcl | Codex |
 |---|---|---|
-| `read-only` | `claude -p --output-format json --permission-mode default`：非交互运行时，需要审批的操作（改文件、运行命令）都会被拒绝 | `codex exec --sandbox read-only` |
+| `read-only` | `claude`（或 `dcl`）`-p --output-format json --permission-mode default`：非交互运行时，需要审批的操作（改文件、运行命令）都会被拒绝 | `codex exec --sandbox read-only` |
 | `edit` | `--permission-mode acceptEdits`：可以改文件，仍然不能运行命令 | `codex exec --sandbox workspace-write`：可以在项目目录内修改文件 |
 
 两者都在当前项目目录中运行，没有标准输入，不能向你提问。
@@ -45,11 +47,12 @@
      … +5 lines (Ctrl+O to expand)
 ```
 
-返回给模型的内容包括：对方的最终回答（超过 60000 字节会截断）、耗时，以及 Claude Code 的费用和会话 ID。
+返回给模型的内容包括：对方的最终回答（超过 60000 字节会截断）、耗时，以及 Claude Code 或 dcl 的费用和会话 ID。模型可以把会话 ID 作为下一次调用的 `session_id`，让对方接着上次的工作继续。
 
 调用失败时，返回对方自己的错误信息，并附上登录提示：
 - Claude Code：在终端运行一次 `claude` 并登录，或设置 `ANTHROPIC_API_KEY`；
-- Codex：运行 `codex login`，或在 `~/.codex/config.toml` 中配置模型提供商。
+- Codex：运行 `codex login`，或在 `~/.codex/config.toml` 中配置模型提供商；
+- dcl：在终端运行一次 `dcl` 并配置模型提供商，见[首次启动](./first-run.md)。
 
 ## 权限
 
