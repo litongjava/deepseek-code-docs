@@ -244,7 +244,124 @@ dcl
 
 Mac 的模型配置、数据目录和会话属于 Mac，不会自动共享 Windows 的配置。需要长时间运行时可在 Mac 使用已安装的 tmux：`tmux new -s mac-dev`，在其中运行 dcl；断线后重新 SSH 登录，再 `tmux attach -t mac-dev`。这比假定 SSH 断开后所有任务都能继续更可靠。
 
-已有兼容 Remote Control 服务时，可在这个 Mac 会话中执行 `/remote-control mac-dev --server https://rc.example.com`，再从 Windows 的兼容客户端接入。服务端、客户端和 token 的准备见[远程控制](./remote-control.md)；文档中的 mock 服务只用于测试，不能视作生产服务。
+### 通过 Remote Control 从 Windows 接入 Mac 会话
+
+这种方式中，模型请求、文件操作、shell 命令和构建都由 **Mac 上的 dcl** 执行。Windows 使用服务方提供的兼容客户端：如果是网页客户端，就在 Windows 打开会话链接；如果是独立客户端，则按服务方的登录与会话选择流程操作。当前 dcl 没有 `dcl connect <会话链接>` 这样的客户端命令。
+
+```mermaid
+flowchart LR
+    W[Windows 兼容客户端] <-->|提示词、回复、审批| R[Remote Control 服务]
+    M[Mac 上的 dcl 会话] <-->|HTTPS 与 WebSocket| R
+    M --> P[Mac 项目文件与构建工具]
+    M --> L[模型服务]
+```
+
+#### 服务端必须提供什么
+
+需要准备三项信息：
+
+| 信息 | 示例 | 用途 |
+|---|---|---|
+| Remote Control API 地址 | `https://rc-api.example.com` | Mac 注册环境、创建会话、轮询任务 |
+| 网页客户端地址（如有） | `https://rc.example.com` | Windows 打开 `/code/<session-id>` |
+| 该服务签发的访问 token | 由服务管理员提供 | Mac 认证，不是模型 API key |
+
+“兼容”意味着支持 dcl 使用的环境注册、会话创建、任务租约/心跳、session ingress WebSocket 以及控制消息协议。仅提供一个聊天网页、OpenAI/Anthropic 模型 API 或任意 WebSocket 服务都不够。不要将模型 API 的 base URL 填作 Remote Control API 地址，也不能假定官方 Claude 网页能接入自建 dcl 会话。
+
+Mac 会主动连接服务端，通常无需向 Windows 开放 Mac 的入站 HTTP 端口。Mac 和 Windows 都必须能访问相应服务地址；反向代理需要支持 WebSocket。非本机地址必须使用 HTTPS，并提供 token；`http://192.168.x.x` 会被拒绝，只有 loopback 地址允许 HTTP。
+
+#### 第一步：在 Mac 启动会话
+
+先确认 Mac 的 dcl、模型配置、项目目录和构建环境可正常工作。以下命令在 **Mac 的 zsh/bash** 中执行，不是在 Windows PowerShell 中：
+
+```bash
+cd /Users/dev/code/my-app
+export CLAUDE_BRIDGE_BASE_URL='https://rc-api.example.com'
+export CLAUDE_BRIDGE_WEB_URL='https://rc.example.com'
+# 从交互输入读取 token，不把真实 token 写进 shell 历史。
+printf 'Remote Control token: '
+read -r -s CLAUDE_BRIDGE_OAUTH_TOKEN
+printf '\n'
+export CLAUDE_BRIDGE_OAUTH_TOKEN
+dcl
+```
+
+如果服务端与网页客户端同域，可省略 `CLAUDE_BRIDGE_WEB_URL`；生成链接默认使用 API 地址作为前缀。API 与网页分离部署时需要设置它，否则注册成功后仍可能打开错误网页地址。
+
+进入 **Mac 的 dcl 输入框** 后执行：
+
+```text
+/remote-control mac-dev --server https://rc-api.example.com --save
+```
+
+`--save` 保存服务地址到 Mac 数据目录的 `remote-control.json`，不会保存 token。重新启动 dcl 时仍需提供 token；模型的 API key 与 Remote Control token 分别配置。
+
+连接建立后会显示类似：
+
+```text
+Remote Control active: https://rc.example.com/code/<session-id>
+```
+
+使用 `/remote-control status` 检查状态。`waiting for the server` 表示尚在等待工作分配；应确认后续进入 `connected`，再进行远端操作验证。
+
+#### 第二步：在 Windows 接入并验证执行位置
+
+在 Windows 打开上一步输出的链接，按服务方方式登录有权限的账号，进入该会话。链接的具体登录方式和页面按钮由兼容客户端提供，dcl 不内置这个网页。
+
+先发送一条只读验证任务：
+
+```text
+请执行 pwd、sw_vers、uname -m、git rev-parse HEAD。
+只报告实际输出，不修改文件。确认当前是在 Mac 的 /Users/dev/code/my-app 中执行。
+```
+
+检查回复中的工作目录、macOS 版本、架构和提交号。这一步通过后，再让它修改代码或构建：
+
+```text
+检查当前项目在 macOS 上的构建要求，说明计划后修复兼容性问题。
+按项目文档执行测试和构建，报告实际退出码与产物路径。
+不要自动推送、签名、公证或发布；需要 GUI 验证时明确列出待人工检查项。
+```
+
+需要工具审批时，Mac 本地和远程客户端都可回答，先到达的有效回答生效。远程客户端可发送中断或切换权限模式；是否提供对应按钮取决于客户端。主任务运行期间的新提示词会等待本地输入空闲后执行，不应将其当成任意时刻的并行 shell 控制。
+
+#### 第三步：维持会话与取回产物
+
+Mac 上的 dcl 前端必须持续运行；退出 dcl 会断开、归档远程会话并注销环境。电脑睡眠或网络中断会影响连接，断线重连不等于任务一定成功，恢复后检查日志和状态。
+
+如果通过 SSH 在 Mac 启动 dcl，建议先进入 Mac 上的 tmux，再设置上述环境变量和运行 dcl；关闭 Windows SSH 窗口前按 tmux 的 `Ctrl+B`、`D` 分离。需要时重新登录 Mac，用 `tmux attach -t mac-dev` 回到本地前端。tmux 不负责唤醒睡眠中的 Mac。
+
+代码和产物仍保存在 Mac 上。Remote Control 不会自动把 `.app`、ZIP 或整个项目同步到 Windows，可按本文“取回产物与日志”一节使用 SCP，或使用已授权的 Git/制品仓库流程。
+
+只有连接后新增的消息会被该实现镜像到远端；不要假定启用 Remote Control 后会完整回填过去的本地聊天记录。Mac 本地会话 ID 与服务端创建的远程 session ID 也不是同一个标识。
+
+断开远程控制，在 Mac 的 dcl 输入框执行：
+
+```text
+/remote-control disconnect
+```
+
+如果希望以后自动连接，在 Mac 数据目录 `settings.json` 中合并：
+
+```json
+{"remoteControlAtStartup":true}
+```
+
+服务地址和 token 必须事先准备好；该设置不会自动安装服务、创建客户端或凭据。更多命令见[远程控制](./remote-control.md)。
+
+#### 连接故障排查
+
+| 现象 | 检查 |
+|---|---|
+| 提示没有 server 配置 | 使用 `--server`，或配置 `CLAUDE_BRIDGE_BASE_URL`；已有保存地址优先于此环境变量 |
+| token 缺失、401/403 | 检查 Mac 进程继承的 `CLAUDE_BRIDGE_OAUTH_TOKEN` 和服务授权；不要换成模型 API key |
+| 注册接口 404 或响应字段缺失 | 服务可能不兼容，确认支持环境注册与会话 API，而非只有模型接口 |
+| 链接打开 404 | 检查网页客户端是否提供 `/code/<session-id>`，API 与网页分离时配置 `CLAUDE_BRIDGE_WEB_URL` |
+| 长时间 waiting/reconnecting | 检查服务工作分配、Mac 网络、WebSocket 代理及租约心跳 |
+| 客户端不显示旧聊天 | 当前实现仅镜像连接后的新增消息 |
+| Windows 看到会话但无法操作 | 检查账号权限、客户端协议实现，以及 Mac 的 dcl 是否仍运行 |
+
+仓库的 `remote_control_mock` 用于本机协议测试，不包含可直接用于日常开发的完整生产网页客户端。本文没有指定某个已验收的第三方服务；接入前应向服务提供方确认协议兼容性。
 
 ## 8. macOS 图形界面、签名与验收
 
