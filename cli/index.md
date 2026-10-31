@@ -84,3 +84,5 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 ```
 
 和 Claude Code 一样，用 `/resume`、`--resume` 或 `--continue` 恢复会话后，屏幕先重新显示之前的对话，再出现输入框；当前的权限模式保持不变。退出 dcl 时会打印一行 `Resume this session with: dcl --resume 会话ID`，方便之后回到这个会话。
+
+在 Windows 上编写并在 Mac 上构建程序，见[Windows 远程开发 macOS](./windows-macos-development.md)。

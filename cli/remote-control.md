@@ -75,3 +75,7 @@ cargo run -p deepseek-code-core --example remote_control_mock -- 38090 my-token
 | `GET /mock/state` | 查看 dcl 发来的全部事件 |
 | `POST /mock/drop` | 断开所有客户端连接 |
 | `POST /mock/fail` | 让接下来的若干次轮询失败，例如 `{"status":503,"count":2}` |
+
+## Windows 开发 macOS 程序
+
+远程构建、SSH 文件传输与 Mac 会话接入的完整步骤见[Windows 远程开发 macOS](./windows-macos-development.md)。

@@ -112,6 +112,7 @@ export default defineConfig({
         { text: '协作', items: [
           { text: '团队同步', link: '/cli/team-sync' },
           { text: '远程控制', link: '/cli/remote-control' },
+          { text: 'Windows 远程开发 macOS', link: '/cli/windows-macos-development' },
           { text: '会话消息', link: '/cli/session-messages' },
           { text: '代理团队', link: '/cli/agent-teams' }
         ] },
