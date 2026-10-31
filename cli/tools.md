@@ -28,7 +28,7 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 | `git_status`、`git_diff`、`git_log`、`git_add`、`git_commit` | Git 操作。`git_commit` 会暂存全部改动，有无关修改时模型应改用 shell 提交 |
 | `ListDir`、`MultiEdit`、`smart_project_scan` | 列目录、一次多处编辑、项目概览 |
 | `DeepSeekCode`、`ClaudeCode`、`Codex` | 把子任务交给本机的另一个 dcl、Claude Code 或 Codex，见[外部代理](./external-agents.md) |
-| `computer_use` | 操作桌面 |
+| `computer_use` | 鼠标、键盘、滚动、等待与截图，见[桌面操作](./computer-use.md) |
 
 ## 几个需要知道的行为
 

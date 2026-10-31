@@ -78,6 +78,7 @@ export default defineConfig({
           { text: '交互界面与快捷键', link: '/cli/interface' },
           { text: '工具调用与改动详情', link: '/cli/tool-calls' },
           { text: '内置工具', link: '/cli/tools' },
+          { text: '桌面操作与截图', link: '/cli/computer-use' },
           { text: '! 命令模式', link: '/cli/shell-mode' },
           { text: '@ 引用文件', link: '/cli/file-mentions' },
           { text: '图片', link: '/cli/images' },
