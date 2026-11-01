@@ -2,19 +2,26 @@
 
 模型通过工具读文件、改文件、运行命令。本页说明这些调用在终端里怎样显示，以及怎样查看完整的输出和改动。
 
-## 调用结束时打印一次
+## 调用就地显示，结果原位替换
 
-每个工具调用在**结束时**打印一行标题，下面用 `⎿` 显示结果摘要。运行期间不单独打印"开始"行，状态行会显示正在运行什么，例如 `Running Bash(npm test)…`。
+工具调用一开始就以它在记录里的样子出现在工作区：上一段内容的正下方是标题，下面一行 `⎿  Running…`，运行超过 2 秒时附上已用时间。调用结束后，结果在同一位置替换 `Running…`，整个画面不跳动，阅读的视线自然往下走：
+
+```text
+● #3 Bash(npm test)
+  ⎿  Running… (5s)
+```
+
+Shell 命令（`Bash`、`PowerShell`）在命令左边带编号，本次会话从 `#1` 开始依次递增，讨论"第 3 条命令的输出"时一眼就能找到。结束后的记录如下：
 
 ```text
 ● Read(README.md) · 0.5s
   ⎿  Read 2 lines
-● Bash(ls -la) · 0.2s
+● #1 Bash(ls -la) · 0.2s
   ⎿  total 16
      drwxr-xr-x 2 dev dev 4096 Oct 21 17:24 .
      drwxr-xr-x 4 dev dev 4096 Oct 21 17:24 ..
      … +2 lines (Ctrl+O to expand)
-● Bash(cat missing.txt) · 0.0s
+● #2 Bash(cat missing.txt) · 0.0s
   ⎿  cat: missing.txt: No such file or directory
      Exit code 1
 ```
@@ -29,7 +36,7 @@
   ```
 
 - `WebFetch` 和 `WebSearch` 的标题和 Claude Code 一样写成 `Fetch(https://example.com/)` 和 `Web Search("rust 1.85")`。
-- 多个工具并行运行时，各自在结束时打印，标题里带着参数，不会混淆。
+- 多个工具并行运行时，按开始顺序依次显示，各自在结束时原位换成结果，标题里带着参数，不会混淆。
 
 ## 修改前必须先读取
 
@@ -68,7 +75,7 @@
 ● 项目里有 3 个 Python 文件……
 ```
 
-模型思考时，工作区和 Claude Code 一样显示思考时长和最新的思考内容（合并成一段，只保留最后几行）：
+模型思考时，工作区和 Claude Code 一样显示思考时长和最新的思考内容（合并成一段，只预览最后 2 行）。思考结束后这三行收成一行 `Thought for 4s`，接下来的调用或回答紧接在它下方出现，过渡平稳：
 
 ```text
 ● Thinking for 4s…
@@ -133,6 +140,8 @@
 
 ✻ Churned for 6s · done 6:17 PM
 ```
+
+最后一行 `✻ …` 是本轮的结束状态。单击它即可选中并复制整行，例如失败时的 `Request failed. Details: /tasks show <ID>`，方便粘贴查询。
 
 数据来自 `Write` 和 `Edit` 成功执行后校验过的文件变更记录。查看具体 diff 按 `Ctrl+O`；查看整个工作区相对 Git 的差异用 `/diff`。
 

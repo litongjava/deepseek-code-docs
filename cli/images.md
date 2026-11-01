@@ -33,6 +33,8 @@
 | Linux（Wayland） | `wl-paste`（wl-clipboard） |
 | Linux（X11） | `xclip` |
 | macOS | `pngpaste`（`brew install pngpaste`），没有时用系统自带的 `osascript` |
-| Windows | PowerShell，系统自带 |
+| Windows | 无需额外工具，dcl 直接读取剪贴板 |
 
-剪贴板里没有图片时，`Ctrl+V` 什么也不做；粘贴文字仍按终端的正常方式进行，粘贴的内容不是单个图片文件的路径时也照原样插入。
+Windows 上 dcl 直接读取剪贴板，响应迅速：浏览器、截图工具复制的 PNG、位图，以及在资源管理器里复制的图片文件都能粘贴。有的终端会把 `Ctrl+V` 留作自己的文字粘贴，这时改按 `Alt+V`，效果相同。
+
+剪贴板里没有图片时，`Ctrl+V` 粘贴剪贴板里的文字；终端自己完成文字粘贴时照常进行，粘贴的内容不是单个图片文件的路径时也照原样插入。

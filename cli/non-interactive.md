@@ -15,7 +15,7 @@ dcl -m deepseek-flash --api-format anthropic -p "总结 README 的安装步骤" 
 | `-C, --path <dir>` | 项目目录，默认当前目录 |
 | `--output-format text\|json\|stream-json` | 输出格式；`stream-json` 每行一个事件 |
 | `--verbose` | 输出更多事件（配合 `stream-json` 记录完整过程） |
-| `--max-turns <n>` | 限制工具循环轮数 |
+| `--max-turns <n>` | 限制工具循环轮数；默认不限，模型一直工作到完成任务 |
 | `--json-schema <schema>` | 要求最终回复是符合该 JSON Schema 的 JSON，结果在 `json` 输出的 `structured_output` 字段；见[结构化输出](./structured-output.md) |
 | `--permission-mode <mode>` | 权限模式，见[权限模式与工具审批](./permissions.md) |
 | `--allowed-tools <规则>` | 本次启动无需确认即可使用的工具 |

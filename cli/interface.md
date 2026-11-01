@@ -41,14 +41,14 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 ```
 
 **状态行**：
-- 开头的符号是动画；后面是本轮随机选的动词，运行工具时改为工具名，例如 `Running Bash(npm test)…`。
+- 开头的符号是动画；后面是本轮随机选的动词，运行工具时显示 `Working…`，调用本身以 `● #1 Bash(npm test)` 的形式显示在工作区，见[工具调用](./tool-calls.md)。
 - 括号里依次是：已用时间、本轮输出的 token 数（`↓`），以及模型是否正在思考。
 
 **提示行**：轮换显示的小技巧，见[运行提示](./tips.md)。
 
 **窗口标题**：和 Claude Code 一样，启动后终端窗口标题为 `✳ DeepSeek Code`；发送第一条提示词后，dcl 在后台让模型用几个词概括话题，下一次出现输入框时标题改为 `✳ 话题`；退出时清空。这会多发一次很短的模型请求。
 
-**底部**：运行中在模式标签后面追加 `· esc to interrupt`；ask 模式只显示 `esc to interrupt`。右侧是模型、effort 和会话的工作目录；终端较窄时只显示目录名，再窄只显示模型。输入框和底部始终固定在屏幕最下面几行，输出还很少时也是如此。
+**底部**：运行中在模式标签后面追加 `· esc to interrupt`；ask 模式只显示 `esc to interrupt`。右侧是模型、effort 和会话的工作目录；终端较窄时只显示目录名，再窄只显示模型。输入框和底部始终固定在屏幕最下面几行，输出还很少时也是如此；从运行中回到等待输入时输入框原地不动，记录、结束行和输入框之间的间距与等待输入时完全一致。
 
 **运行中仍然可以输入**：
 - 直接输入并回车：和 Claude Code 一样，这条消息先显示在工作区下方（`❯ 你的消息`），输入框提示 `Press up to edit queued messages`。模型下一次拿到工具结果时就会读到它，并在这一轮里照着调整；记录里它出现在读到的位置，之后的对话也会带上。这一轮没有再调用工具就结束时，它作为下一条提示词执行。
@@ -58,7 +58,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 - `/btw 问题`：问一个旁支问题，不打断主任务。
 - `/background`：把当前任务转到后台，释放终端。
 
-**长时间运行的命令**：Bash 命令运行超过 3 秒时，下方提示 `(ctrl+b to run in background)`。这时按 `Ctrl+B`，命令转到后台继续运行，记录里显示 `Running in the background (↓ to manage)`，模型接着工作；没有命令在运行时，`Ctrl+B` 仍然是把整个会话转到后台。排队的消息下方提示 `ctrl+x ctrl+s to send now`：按下后正在运行的命令转到后台，模型马上读到这条消息。
+**长时间运行的命令**：Bash 命令运行超过 3 秒时，命令下方提示 `Ctrl+B to run in background · click to show output`，单击命令可以展开或收起它的最新输出。这时按 `Ctrl+B`，命令转到后台继续运行，记录里显示 `Running in the background (↓ to manage)`，模型接着工作；没有命令在运行时，`Ctrl+B` 仍然是把整个会话转到后台。排队的消息下方提示 `ctrl+x ctrl+s to send now`：按下后正在运行的命令转到后台，模型马上读到这条消息。
 
 **后台命令**：有后台命令在运行时，一轮结束的那一行末尾显示 `· 1 shell still running`，输入框下方显示 `1 shell · ↓ to manage`。在空输入框、已经是最新一条历史时按 `↓`，或输入 `/tasks`，打开任务视图：只有一个任务时直接显示它的详情（状态、运行时间、命令、最新输出），按 `x` 停止；有多个时先列出，选中后查看。
 
@@ -103,7 +103,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `Esc` `Esc` | 输入框有内容时：清空（第一次按下提示 `Esc again to clear`）；为空时：[回退](./rewind.md) |
 | `?` | 输入框为空时：显示或关闭快捷键面板 |
 | `@` | 补全项目文件，见[`@` 引用文件](./file-mentions.md) |
-| `Ctrl+V` | 粘贴剪贴板中的图片，见[图片](./images.md) |
+| `Ctrl+V` | 粘贴剪贴板中的图片，没有图片时粘贴文字；`Alt+V` 同样粘贴图片，见[图片](./images.md) |
 
 输入框的特殊前缀：
 
