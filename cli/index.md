@@ -20,7 +20,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | 从源码构建 `dcl` | [安装与构建](./install.md) |
 | 第一次启动、内置的提供商 | [首次启动与内置提供商](./first-run.md) |
 | 使用 DeepSeek 官方接口 | [接入 DeepSeek](./deepseek.md) |
-| 保存和切换模型提供商 | [模型与提供商](./providers.md) |
+| 同时保存多个提供商、随时切换 | [模型与提供商](./providers.md) |
 | 会话和配置存在哪里 | [数据目录](./data-directory.md) |
 | 所有可调的设置项 | [设置项参考](./settings.md) |
 | 输入框、快捷键、运行中的操作 | [交互界面与快捷键](./interface.md) |
