@@ -26,7 +26,9 @@ auto 模式需要先**显式**配置用哪个模型做判断，否则启动时�
 dcl -m deepseek-flash --api-format anthropic --permission-mode auto -p "创建 hello.txt，内容为 hi"
 ```
 
-交互模式里用 `/permissions auto` 切换。
+交互模式里用 `/permissions auto` 切换。也可以在工具审批菜单选择启用并切换到 Auto；首次配置会选择当前模型及 `manual` 失败策略，已有配置保持不变。成功提交后，状态栏即时显示 Auto 模式。
+
+`manual` 支持前台终端、连接前台的 worker 及 SDK 审批宿主。没有审批宿主时仍拒绝执行；`deny` 策略始终直接拒绝分类器失败的调用。
 
 ## 限制
 

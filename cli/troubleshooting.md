@@ -50,6 +50,8 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 **处理**：先用 `/permissions auto-config show` 检查分类器和输入预算。对于 `InputLimit`，可在新会话中携带必要需求及授权约束重试，或在支持人工审批的交互流程中审核操作。增加预算仍受分类器上下文容量限制。重试前应先处理具体失败原因。
 
+没有出现审批菜单时，检查 `failure_policy`：`deny` 会直接拒绝，`manual` 才会转人工审批；无审批宿主时也会拒绝。先用 `/permissions auto-config show` 查看完整配置，将其中的 `failure_policy` 改为 `manual`，再用 `/permissions auto-config set <完整 JSON>` 保存（此命令替换整个配置）。连接前台的 worker 支持此回退。错误信息会分别标明策略拒绝、缺少审批宿主或正在请求人工审批。
+
 旧版协议兼容问题也曾导致相同的最终提示：思考内容块被当作无效回复，或接口不支持 `json_schema`。应依据前面的失败记录区分，不能仅凭最终提示确定原因。
 
 ## database is locked

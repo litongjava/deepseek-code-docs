@@ -69,13 +69,13 @@ src/calc.py
 
 ### 切换到自动模式
 
-已经配置了[自动权限模式](./auto-mode.md)时，菜单多一项：
+当前模型可用于[自动权限模式](./auto-mode.md)时，菜单多一项：
 
 ```text
-   3. Yes, and switch to auto mode · auto mode handles these prompts for you
+   3. Yes, do not ask again · enable and switch to auto mode
 ```
 
-选它会批准这次调用，并把本会话切换到 `auto` 模式，之后的调用由分类模型判断。没有配置自动模式时不显示这一项，审批菜单不会替你开启它。
+选它会批准这次调用，并在审批成功提交后把本会话切换到 `auto` 模式，底部状态栏同步更新。首次配置时使用当前模型，并采用 `failure_policy: "manual"`：分类器超出输入预算、超时或不可用时转为人工审批。已有配置保持不变，包括明确设置的 `deny`。
 
 Bash 命令的审批和 Claude Code 一样，第 2 项记住的是命令前缀：
 
