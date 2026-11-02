@@ -140,5 +140,6 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/vim` | 切换 [vim 模式](./vim-mode.md) |
 | `/rename 名称` | 给会话命名 |
 | `/clear` | 开始新的对话；别名 `/new`、`/reset` |
+| `/restart` | 重启 dcl：替换当前进程并在当前对话里继续，启动参数保留，改过的 `config.json` 和更新后的二进制会重新加载 |
 | `/config` | 设置对话框；别名 `/settings` |
 | `/exit` | 退出，并提示用 `dcl --resume 会话ID` 恢复 |
