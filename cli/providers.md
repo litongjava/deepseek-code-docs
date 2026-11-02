@@ -1,6 +1,6 @@
 # 模型与提供商
 
-**提供商**（provider）是一组连接信息：协议、接口地址、API Key 所在的环境变量，以及可用的模型列表。dcl 有三种使用方式：
+**提供商**（provider）是一组连接信息：协议、接口地址、凭据（Key 本身或保存 Key 的环境变量），以及可用的模型列表。dcl 有三种使用方式：
 
 | 方式 | 特点 |
 |---|---|
@@ -39,14 +39,15 @@ Model exists in several providers; select --provider or provider::model
 
 ```text
 ❯ /provider add
-Provider setup; /cancel cancels. Enter environment variable NAMES, never API keys.
+Provider setup; /cancel cancels. Enter an API key directly, or the NAME of an environment variable that holds it.
 Provider ID: deepseek
 Protocol (openai / anthropic / gemini): anthropic
 Base URL: https://api.deepseek.com
   DeepSeek serves the Anthropic protocol at https://api.deepseek.com/anthropic; using that URL.
-API key environment variable name [DEEPSEEK_API_KEY]:
+API key, or environment variable name (key:<key> forces a literal key) [DEEPSEEK_API_KEY]: sk-...
+  The key will be saved in config.json, readable only by you.
 Model IDs (comma separated; first is default): deepseek-flash,deepseek-v4-pro
-Saved deepseek (2 models); the API key is read from DEEPSEEK_API_KEY.
+Saved deepseek (2 models); the API key is stored in config.json (readable only by you).
 Switch this session to deepseek now? [Y/n]:
 ```
 
@@ -57,11 +58,12 @@ Switch this session to deepseek now? [Y/n]:
 | Provider ID | 字母、数字、`-`、`_`，例如 `deepseek` |
 | Protocol | `openai`、`anthropic` 或 `gemini`，不区分大小写 |
 | Base URL | `http://` 或 `https://` 开头，不能包含账号密码、查询参数或片段。DeepSeek 选择 Anthropic 协议时自动补成 `/anthropic` |
-| API key 环境变量名 | 填**变量名**，不是 Key 本身。DeepSeek 地址默认建议 `DEEPSEEK_API_KEY`，直接回车即可采用 |
+| API Key / 环境变量名 | 可以直接粘贴 Key，也可以填保存 Key 的**环境变量名**。全大写的名字（如 `DEEPSEEK_API_KEY`）按变量名处理，其余输入（如 `123456`、`sk-...`）按 Key 直接保存；有歧义时用 `key:` 或 `env:` 前缀强制指定。DeepSeek 地址默认建议 `DEEPSEEK_API_KEY`，直接回车即可采用 |
 | Model IDs | 逗号分隔，第一个是默认模型 |
 
 - **答错时**：会说明原因并重新询问，最多 3 次；3 次都不合格时放弃，不保存任何内容。
-- **误粘贴了 API Key**：向导能识别出来，**不会保存**，并提示先设置环境变量：
+- **直接填 Key**：Key 写入数据目录 `config.json` 的 `api_key` 字段，只有当前用户可读，Desktop 也直接使用，不需要再设置环境变量。换 Key 时重新运行 `/provider edit <ID>`。
+- **填环境变量名**：配置里只保存名字，Key 留在环境变量中。变量尚未设置时会提示，选择该提供商前先设置：
   - bash / zsh：`export DEEPSEEK_API_KEY=sk-...`
   - Windows：`setx DEEPSEEK_API_KEY sk-...`，设置后需要打开新的终端。
 - **保存后切换**：可以直接把当前会话切换到新的提供商，对话历史保留；再用 `/test` 验证连通性。
@@ -75,7 +77,9 @@ dcl 不把 API Key 写进会话记录，使用时按下面的顺序确定读哪�
 3. 内置提供商目录为它约定的变量，例如 OpenRouter 用 `OPENROUTER_API_KEY`；
 4. 模型来源的默认变量，例如 `deepseek` 开头的模型用 `DEEPSEEK_API_KEY`。
 
-前两项属于显式指定：变量不存在或为空时，dcl 直接报错 `API key environment variable ... is empty or unset`，不会用空 Key 发请求。Desktop 保存的供应商把 Key 直接写在 `config.json` 的 `api_key` 字段里，命令行会直接使用，不需要设置环境变量。
+前两项属于显式指定：变量不存在或为空时，dcl 直接报错 `API key environment variable ... is empty or unset`，不会用空 Key 发请求。
+
+如果提供商在 `config.json` 里直接保存了 `api_key`（即在 `/provider add` 中直接填 Key，或由 Desktop 添加），且没有设置对应的环境变量时，dcl 会直接使用它，不需要再配置环境变量。该字段是明文，请确保数据目录只有本人可读，不要在共享机器上保存正式 Key。
 
 ## 切换提供商和模型
 

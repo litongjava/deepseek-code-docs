@@ -90,11 +90,11 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 **处理**：当前版本 DeepSeek 默认上限为 32000，被截断时会自动续写，最多 3 次，被截断的工具调用不会执行，见[交互模式 · 输出上限](./output-limit.md)。仍然提示时，发送一条后续消息让模型继续，或用 `--max-tokens` 调高上限。
 
-## `/provider add` 报 Invalid environment variable name
+## `/provider add` 填了 Key，之后却报 API key environment variable ... is empty or unset
 
-**原因**：API Key 一栏要求填写环境变量的**名字**（如 `DEEPSEEK_API_KEY`），旧版本在填入 Key 本身时只报这一句就退出了。
+**原因**：Key 一栏既接受 Key 本身，也接受环境变量名。全大写的输入（如 `ABC123`）会被当作变量名保存，使用时 dcl 会去找同名环境变量，于是报这个错。
 
-**处理**：当前版本会说明原因并重新询问。先在终端设置环境变量，再填写变量名，见[交互模式 · 配置模型](./providers.md)。
+**处理**：重新运行 `/provider edit <ID>`，在 Key 一栏加上 `key:` 前缀强制按 Key 保存，例如 `key:ABC123`；也可以改为设置同名环境变量，见[交互模式 · 配置模型](./providers.md)。
 
 ## 运行时界面闪烁、滚轮只能滚动一小块区域
 
