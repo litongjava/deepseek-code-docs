@@ -61,9 +61,9 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 - 直接输入并回车：和 Claude Code 一样，这条消息先显示在工作区下方（`❯ 你的消息`），输入框提示 `Press up to edit queued messages`。模型下一次拿到工具结果时就会读到它，并在这一轮里照着调整；记录里它出现在读到的位置，之后的对话也会带上。这一轮没有再调用工具就结束时，它作为下一条提示词执行。
 - 输入框为空时按 `↑`，把还没被读到的消息取回输入框修改。
 - 以 `/`、`!`、`# ` 开头的输入不会插进这一轮，等这一轮结束后执行。
-- 运行中输入 `/`，弹出的列表只包含运行中就能执行的命令：`/btw`、`/background`、`/goal`、`/status`、`/tasks`。
+- 运行中输入 `/`，弹出的列表只包含运行中就能执行的命令：`/btw`、`/background`、`/goal`、`/list-agents`、`/status`、`/tasks`。
 
-运行中输入 `/tasks` 或 `/tasks list` 查看任务 ID 与状态，再用 `/tasks show ID` 读取该任务的最新输出。这些查询立即响应，当前请求继续执行；再次查询即可刷新输出。列表和输出保留在会话记录中，可用 `Ctrl+O` 查看详细记录。`Ctrl+T` 显示的是待办列表。
+运行中输入 `/tasks` 或 `/tasks list` 查看任务 ID 与状态，再用 `/tasks show ID` 读取该任务的最新输出。这些查询立即响应，当前请求继续执行；结果显示在运行中工具下方的最新消息块，再次查询即可刷新输出。列表和输出保留在会话记录中，可用 `Ctrl+O` 查看详细记录。`Ctrl+T` 显示的是待办列表。
 
 `/background` 分离的是当前请求的终端视图，同一会话仍由原 worker 执行。分离后可用 `/tasks attach ID` 返回；需要独立对话时用 `/clear` 创建新会话。
 - `/btw 问题`：问一个旁支问题，不打断主任务。
@@ -83,6 +83,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 - 一轮结束的那一行显示 `Waiting for 1 background agent to finish`；
 - 输入框下方列出 `● main` 和每个运行中的子代理（类型、说明、已用时间、输出 token 数），提示 `↓ to manage`；
+- 运行期间双击 Agent 行，在右侧查看该子代理的执行记录，内容定期刷新；按 `Esc` 关闭，方向键可滚动。
+- 前台子代理执行时，状态行显示 `Waiting for foreground agent`；后台子代理允许主任务继续。Token 统计尚未返回时显示 `pending`，前台子代理显示最近一次返回的输出统计，后台子代理显示已保存的累计输出统计。
 - 页脚显示 `← for agents`：在空输入框按 `←`，提示 `Press ← again to open agents`，再按一次打开任务视图，可以查看或停止（`x`）子代理。
 
 子代理结束时显示 `● Agent "说明" completed`，它的报告写入会话记录，输入框空闲时自动开始新的一轮，让模型查看结果。
@@ -174,3 +176,5 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 `/tools`、`/lsp list`、状态文本和配置等本地命令输出会同步保留在屏幕历史中，点击、拖选和滚动时可还原对应内容。状态、配置等临时面板关闭后恢复原视图，不重复插入输出。
 
 屏幕历史是当前 CLI 进程的显示缓存，与发给模型的会话消息分开，不会自动增加模型上下文或 token 用量。手动发送的文字、模型调用工具获得的结果仍按正常会话流程进入上下文。
+
+`Agent message received` 是消息投递通知。运行中可用 `/list-agents`、`/list-agents inbox` 和 `/list-agents sent` 查看会话与消息状态；待投递内容在模型的下一个安全边界进入上下文。消息投递状态与模型是否已处理消息分别记录。
