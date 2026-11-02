@@ -129,3 +129,5 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 ## 请求失败时查看 HTTP 状态
 
 结束状态显示 `HTTP 400`、`HTTP 401` 等错误类别时，可用同一行的 `/tasks show <ID>` 查看详情。`tool call ID exceeds the provider length limit` 表示接口拒绝了过长的工具调用标识；更新客户端并重启后，可以继续原会话重试。客户端在发送时保持调用和结果的标识一致，无需删除历史消息。
+
+使用 Anthropic 协议连接转换网关时，上游也可能返回 `input[n].call_id` 的长度限制。客户端对 Anthropic 的 `tool_use.id` 与 `tool_result.tool_use_id` 成对处理，兼容最多 64 字节的调用标识；工具参数、结果正文与思考签名保持原样。错误字段名称本身不能用来判断客户端选择的协议。

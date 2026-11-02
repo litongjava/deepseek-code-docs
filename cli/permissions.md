@@ -11,7 +11,7 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 | `plan` | 只调查不修改，见[计划模式](./plan-mode.md) |
 | `auto` | 由一个分类模型判断是否放行，见[自动权限模式](./auto-mode.md) |
 | `dont-ask` | 不询问：需要审批的调用一律拒绝，已放行的规则照常生效 |
-| `bypass` | 不检查，全部放行。只在隔离环境中使用 |
+| `bypass` | 自动批准工具调用，允许访问工作目录之外的路径；显式 ask、deny 规则仍生效 |
 
 只读的 shell 命令指 `ls`、`cat`、`grep`、`find`（不含 `-exec`、`-delete`）、`git status`/`log`/`diff` 等只查看内容的命令，用管道或 `&&` 连接时每一段都必须只读，判断规则与[计划模式](./plan-mode.md)相同。在 ask 和 accept-edits 模式下，这类命令的路径参数还必须都在工作目录内：`cat /etc/hosts`、`ls ..`、以 `~` 开头或含 `$` 变量的参数仍然会询问。显式的 ask 或 deny 规则（例如 `/permissions ask Bash(ls *)`）优先。
 
