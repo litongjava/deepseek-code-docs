@@ -72,6 +72,12 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 
 在[计划模式](./plan-mode.md)中，工具元数据的 `annotations.readOnlyHint` 默认是 `true`：没有提供该字段或提供布尔值 `true` 的工具可以调用；显式 `false` 或类型不正确时会被拒绝。该字段来自 MCP 服务的工具定义，调用参数中的同名字段不影响权限判断。显式 ask、deny 和工具禁用设置仍然有效。
 
+### 终端中的调用摘要
+
+运行中、完成后的调用记录、历史记录和非实时文本输出都显示简洁摘要。CodeGraph explore 显示为 `Exploration: 查询内容`；其他 MCP 工具显示服务名、可读工具名和主要参数，例如 `docs / search pages: Rust`。
+
+摘要会折叠空白、清理终端控制序列并截短过长参数。展开详情保留真实的 `mcp__服务名__工具名` 和完整输入 JSON；显示名称不会改变工具路由、权限规则或保存的原始参数。
+
 ## 服务的提示词
 
 服务提供的 prompt 和 Claude Code 一样作为斜杠命令出现：`/mcp__服务名__提示词名`。
