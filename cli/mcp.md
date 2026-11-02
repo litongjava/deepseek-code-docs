@@ -81,3 +81,7 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 - 后面的词按顺序填入提示词的参数，最后一个参数接收剩下的整段文字。上例中 `pr` 为 `42`，`focus` 为"重点看错误处理"。
 - 缺少必填参数时提示 `Missing required argument(s): ...`；名称写错时列出所有可用的 MCP 提示词。
 - 服务端返回的内容作为这一轮的提示词发送给模型。
+
+## CodeGraph
+
+运行 `dcl init-env codegraph` 可安装、初始化当前项目并添加 MCP，详见[初始化开发环境](./environment-init.md)。

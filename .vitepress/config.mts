@@ -76,6 +76,7 @@ export default defineConfig({
         ] },
         { text: '交互模式', items: [
           { text: '交互界面与快捷键', link: '/cli/interface' },
+          { text: '初始化开发环境', link: '/cli/environment-init' },
           { text: '工具调用与改动详情', link: '/cli/tool-calls' },
           { text: '内置工具', link: '/cli/tools' },
           { text: '桌面操作与截图', link: '/cli/computer-use' },
