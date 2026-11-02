@@ -70,6 +70,8 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 /permissions allow mcp__docs__search
 ```
 
+在[计划模式](./plan-mode.md)中，工具元数据的 `annotations.readOnlyHint` 默认是 `true`：没有提供该字段或提供布尔值 `true` 的工具可以调用；显式 `false` 或类型不正确时会被拒绝。该字段来自 MCP 服务的工具定义，调用参数中的同名字段不影响权限判断。显式 ask、deny 和工具禁用设置仍然有效。
+
 ## 服务的提示词
 
 服务提供的 prompt 和 Claude Code 一样作为斜杠命令出现：`/mcp__服务名__提示词名`。
@@ -85,3 +87,5 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 ## CodeGraph
 
 运行 `dcl init-env codegraph` 可安装、初始化当前项目并添加 MCP，详见[初始化开发环境](./environment-init.md)。
+
+CodeGraph 接入后可在 Plan 中查询符号、源码和调用关系；即使服务未声明 `readOnlyHint`，也按默认只读工具处理。
