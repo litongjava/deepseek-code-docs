@@ -44,9 +44,13 @@ Model API error 400: messages.2:`tool_use` ids were found without `tool_result` 
 Error: Engine execution failed: Auto permission denial limit reached; stopping the headless turn
 ```
 
-**原因**：旧版本的分类器要求回复只有一个内容块，而 DeepSeek 会先返回思考块，因此每次判断都被当作无效回复，按拒绝处理。OpenAI 协议下则因为不支持 `json_schema` 而直接失败。
+**含义**：这是旧的 Auto 拒绝次数上限提示。当前实现已取消连续 3 次、累计 20 次的限制，拒绝次数只用于统计，不再因此停止轮次或阻止后续审批。仍看到此提示时，应确认运行程序已更新并重启。分类器不可用也会计入拒绝统计，应检查工具结果和 `auto_permission.failure`，确定具体原因。
 
-**处理**：升级到当前版本。如果仍然报错，先用 `/permissions auto-config show` 确认已经配置了分类器。
+如果工具结果为 `Auto classifier unavailable (InputLimit)`，且事件显示 `failure: "input_limit"`、`decision: null`、`elapsed_ms: 0`，表示审批输入在本地超过预算，尚未请求分类器；这不表示模型认为命令危险。审批输入包括会话内容、工具参数和审批策略。`max_input_tokens` 默认值为 8192，当前采用保守的 UTF-8 字节上限检查，因此不能直接当作供应商实际 token 数理解。取消次数上限后，此类调用仍按配置拒绝或转人工审批，后续调用可以继续处理。
+
+**处理**：先用 `/permissions auto-config show` 检查分类器和输入预算。对于 `InputLimit`，可在新会话中携带必要需求及授权约束重试，或在支持人工审批的交互流程中审核操作。增加预算仍受分类器上下文容量限制。重试前应先处理具体失败原因。
+
+旧版协议兼容问题也曾导致相同的最终提示：思考内容块被当作无效回复，或接口不支持 `json_schema`。应依据前面的失败记录区分，不能仅凭最终提示确定原因。
 
 ## database is locked
 
