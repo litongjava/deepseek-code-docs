@@ -22,7 +22,9 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 ### 完全访问
 
-`dcl --full-access` 是更彻底的 bypass：除了不询问，还**忽略 deny 规则**，并且命令在[沙箱](./sandbox.md)之外运行。首次使用时显示一次单独的警告。只在可以随时丢弃的机器上使用。
+`dcl --yolo`（等同于 `--full-access`）是更彻底的 bypass：除了不询问，还**忽略 deny 规则**，并且命令在[沙箱](./sandbox.md)之外运行。首次使用时显示一次单独的警告。只在可以随时丢弃的机器上使用。
+
+`--dangerously-skip-permissions` 和 `--yolo` 在 bypass 模式下都跳过 Bash 工具内部的危险命令关键字过滤，例如 `shutdown`、`diskpart`。前者仍遵守显式 ask/deny 规则和配置的沙箱；`--yolo` 同时关闭这些限制。切回 ask、plan 等模式后重新按当前权限模式检查。操作系统权限和命令本身的错误仍可能导致执行失败。
 
 ## 审批提示
 
