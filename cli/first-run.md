@@ -52,7 +52,7 @@ Connected. DeepSeek is saved as the default provider (key stored in config.json,
 
 - **配置来源**：除 DeepSeek 外，这些提供商的接口地址、协议、上下文窗口和输出上限，都来自与 Desktop 共用的内置提供商目录，两端行为一致。
 - **DeepSeek**：直接使用官方的 OpenAI 兼容接口 `https://api.deepseek.com`。
-- **其他接口**：选择最后一项，进入[`/provider add` 向导](./providers.md)，手动填写协议、地址和模型。
+- **其他接口**：选择最后一项，进入[`/provider add` 向导](./providers.md)，按编号选择协议，填写地址和凭据，再从接口返回的模型列表中选择要用的模型。
 
 ## 之后修改
 

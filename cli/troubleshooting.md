@@ -125,3 +125,7 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 ## 构建报错 `failed to create directory .../registry/cache`
 
 共享的 `CARGO_HOME` 不可写。设置 `CARGO_HOME=~/.cargo` 并复制镜像源配置，见[安装与构建](./install.md#没有-root-权限时的-linux-构建)。
+
+## 请求失败时查看 HTTP 状态
+
+结束状态显示 `HTTP 400`、`HTTP 401` 等错误类别时，可用同一行的 `/tasks show <ID>` 查看详情。`tool call ID exceeds the provider length limit` 表示接口拒绝了过长的工具调用标识；更新客户端并重启后，可以继续原会话重试。客户端在发送时保持调用和结果的标识一致，无需删除历史消息。

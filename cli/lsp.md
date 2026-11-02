@@ -44,13 +44,16 @@ Vue 使用 2.x 版本的语言服务器：3.x 只能通过 TypeScript 服务器�
 ## 一键安装：`/lsp install <语言>`
 
 ```text
-❯ /lsp install java
-Install jdtls for Java? This downloads Red Hat's Java language support from open-vsx.org
-(about 140 MB: jdtls plus its own Java runtime), under ~/.deepseek-code/lsp. [y/N] y
-Installing jdtls for Java…
-  Downloading redhat.java 1.59.2026102108 (linux-x64)
+❯ /lsp install typescript
+Install typescript-language-server for TypeScript/JavaScript?
+  This installs typescript and typescript-language-server from npm.
+  Location: ~/.deepseek-code/lsp
+Continue? [y/N] y
+Installing typescript-language-server for TypeScript/JavaScript... (Ctrl+C to cancel)
   …
-Installed. Java starts as ~/.deepseek-code/lsp/jre/bin/java
+Installed TypeScript/JavaScript (4.2s).
+  Command: ~/.deepseek-code/lsp/node/node_modules/.bin/typescript-language-server
+  Use /lsp list to check availability.
 ```
 
 - **先说明再确认**：安装前会说明要下载什么、装到哪里，确认后才执行。命令行中用 `dcl lsp install java --yes` 跳过确认。
@@ -87,3 +90,5 @@ Or ask the user to run `/lsp install java` in dcl (or `dcl lsp install java`) ..
 这些插件只是配置，服务端程序本身仍需安装好。`/lsp` 的 "From plugins" 一节会标出它们的命令能否找到。
 
 插件方式也能接入内置列表之外的语言，例如官方市场中的 Kotlin、Lua、PHP、Ruby、Swift 插件。
+
+列表、安装进度和完成信息会保留在本地屏幕历史中，便于滚动查看和鼠标复制。此显示缓存不会自动作为对话消息发送给模型。

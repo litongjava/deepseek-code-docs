@@ -40,15 +40,24 @@ Model exists in several providers; select --provider or provider::model
 ```text
 ❯ /provider add
 Provider setup; /cancel cancels. Enter an API key directly, or the NAME of an environment variable that holds it.
-Provider ID: deepseek
-Protocol (openai / anthropic / gemini): anthropic
-Base URL: https://api.deepseek.com
-  DeepSeek serves the Anthropic protocol at https://api.deepseek.com/anthropic; using that URL.
-API key, or environment variable name (key:<key> forces a literal key) [DEEPSEEK_API_KEY]: sk-...
+Provider ID: llm-proxy
+Protocol:
+  1. openai — OpenAI Chat Completions-compatible endpoints
+  2. anthropic — Claude and Anthropic-compatible endpoints
+  3. gemini — Google Gemini
+  4. responses — OpenAI Responses-compatible endpoints
+Protocol (1-4) [1]: 1
+Base URL: http://127.0.0.1:8318/v1
+API key, or environment variable name (key:<key> forces a literal key): 123456
   The key will be saved in config.json, readable only by you.
-Model IDs (comma separated; first is default): deepseek-flash,deepseek-v4-pro
-Saved deepseek (2 models); the API key is stored in config.json (readable only by you).
-Switch this session to deepseek now? [Y/n]:
+  Listing models from http://127.0.0.1:8318/v1…
+Models available from http://127.0.0.1:8318/v1:
+   1. deepseek-chat
+   2. deepseek-reasoner
+   3. qwen3-coder
+Model numbers (comma separated; first is default, all for every model) [1]: 1,3
+Saved llm-proxy (2 models); the API key is stored in config.json (readable only by you).
+Switch this session to llm-proxy now? [Y/n]:
 ```
 
 各项的含义和校验规则：
@@ -56,11 +65,13 @@ Switch this session to deepseek now? [Y/n]:
 | 项目 | 说明 |
 |---|---|
 | Provider ID | 字母、数字、`-`、`_`，例如 `deepseek` |
-| Protocol | `openai`、`anthropic` 或 `gemini`，不区分大小写 |
+| Protocol | 输入 `1`、`2`、`3`、`4` 选择 `openai`、`anthropic`、`gemini` 或 `responses`；直接回车选 `1`。也可以直接输入协议名 |
 | Base URL | `http://` 或 `https://` 开头，不能包含账号密码、查询参数或片段。DeepSeek 选择 Anthropic 协议时自动补成 `/anthropic` |
 | API Key / 环境变量名 | 可以直接粘贴 Key，也可以填保存 Key 的**环境变量名**。全大写的名字（如 `DEEPSEEK_API_KEY`）按变量名处理，其余输入（如 `123456`、`sk-...`）按 Key 直接保存；有歧义时用 `key:` 或 `env:` 前缀强制指定。DeepSeek 地址默认建议 `DEEPSEEK_API_KEY`，直接回车即可采用 |
-| Model IDs | 逗号分隔，第一个是默认模型 |
+| Model IDs | 先列出接口返回的模型，按编号选择；可以输入多个编号（如 `1,3`）、`all`，也可以直接输入模型 ID。第一个是默认模型 |
 
+- **选择模型**：填好地址和凭据后，dcl 会先向该接口查询可用模型，按 `1`、`2`、`3` 编号列出，输入编号即可，例如 `1,3` 保存第 1 和第 3 个，输入 `all` 保存全部，直接回车保存第 1 个。编号顺序就是列表顺序，排在前面的编号是默认模型。
+- **查询不到模型时**：地址不通、凭据还只是未设置的环境变量、或接口不提供模型列表时，dcl 会说明原因，并改为手动输入逗号分隔的模型 ID。手动输入同样有效，不会因此中断保存。
 - **答错时**：会说明原因并重新询问，最多 3 次；3 次都不合格时放弃，不保存任何内容。
 - **直接填 Key**：Key 写入数据目录 `config.json` 的 `api_key` 字段，只有当前用户可读，Desktop 也直接使用，不需要再设置环境变量。换 Key 时重新运行 `/provider edit <ID>`。
 - **填环境变量名**：配置里只保存名字，Key 留在环境变量中。变量尚未设置时会提示，选择该提供商前先设置：
@@ -199,3 +210,9 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 - [接入 DeepSeek](./deepseek.md)
 - [数据目录](./data-directory.md)：`config.json` 和会话数据的位置
 - [状态查看](./status.md)：查看当前使用的提供商、模型和接口地址
+
+## 使用 Responses 接口
+
+在 `/provider add` 或 `/provider edit <ID>` 中选择 `4`（`responses`，也接受 `openai-responses`）。填写服务商提供的 API 根地址，例如 `https://api.openai.com/v1`，再选择模型。请求发送至该根地址下的 `/responses`；模型列表仍通过 `/models` 查询，不提供列表的服务可以手动输入模型 ID。
+
+`openai` 使用 Chat Completions 协议。第三方声明兼容 OpenAI 时，请按其文档选择实际支持的接口。Responses 支持工具调用及流式输出，切换协议后保留会话历史。发送历史时会把过长的工具调用标识映射为稳定的短标识，保持调用与结果配对。
