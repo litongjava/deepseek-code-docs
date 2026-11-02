@@ -40,6 +40,10 @@ Here is DeepSeek Code's plan:
 - **可以**：读文件、搜索、列目录、联网查资料，以及运行只读的 Shell 命令。
 - **不可以**：修改项目文件。唯一可写的是这个会话专属的计划文件，保存在[数据目录](./data-directory.md)的 `plans/` 下。
 
+`EnterPlanMode` 返回的 `planFilePath` 可直接用于 Read、Write、Edit，无需把整个数据目录加入工作目录。Windows 的正反斜杠、盘符大小写和扩展路径前缀可以等价使用。切换权限模式后仍可访问本会话的计划文件，访问继续遵守显式权限规则；其他会话的计划文件不享有这一专属范围。
+
+`--dangerously-skip-permissions` 指定的是启动权限模式。之后进入计划模式或手动切换到 auto，工具会遵守当前模式。`ExitPlanMode` 用于审批当前处于计划模式的会话；已切换到其他模式时，需要先重新进入计划模式。
+
 ### Shell 命令
 
 下面这类只读命令会**直接执行**：
