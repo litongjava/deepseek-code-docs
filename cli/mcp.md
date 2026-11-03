@@ -97,3 +97,7 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 运行 `dcl init-env codegraph` 可安装、初始化当前项目并添加 MCP，详见[初始化开发环境](./environment-init.md)。
 
 CodeGraph 接入后可在 Plan 中查询符号、源码和调用关系；即使服务未声明 `readOnlyHint`，也按默认只读工具处理。
+
+### Plan 中初始化参考目录索引
+
+需要查询尚未索引的外部参考目录时，可以通过 Shell 运行 `codegraph init --yes "../reference-library"`，完成后再使用 CodeGraph MCP 查询该目录。已有索引用 `codegraph index "../reference-library"` 刷新。生成索引遵守 Plan 的 Shell 权限规则；显式 ask、deny 和危险命令过滤仍然生效。参见[计划模式](./plan-mode.md)。

@@ -10,7 +10,7 @@
 
 进入计划模式时，工具结果会显示已有计划；尚未生成计划时会明确提示正在调查、随后编写计划。进入模式本身不代表计划已经写好。
 
-模型写完计划后会请求审批。和 Claude Code 一样，输入框的位置显示计划和三个选项：
+模型写完计划后会请求审批。批准后，计划正文会作为独立内容显示并保留在对话历史中，方便滚动查看；工具详情也保留完整计划。和 Claude Code 一样，输入框的位置显示计划和三个选项：
 
 ```text
 Ready to code?
@@ -57,9 +57,10 @@ MCP 工具的 `annotations.readOnlyHint` 缺省时按 `true` 处理，因此 Cod
 
 - 查看与搜索：`ls`、`cat`、`head`、`tail`、`grep`、`rg`、`find`（不带 `-exec`、`-delete`）、`wc`、`tree`、`stat`、`which` 等；
 - Git 查询：`git status`、`git log`、`git diff`、`git show`、`git branch -a`、`git blame` 等；
-- PowerShell 查询：`Get-ChildItem`、`Get-Content`、`Select-String`、`Select-Object`、`Format-Table`、`Out-String` 等；
+- PowerShell 查询：`Get-ChildItem`、`Get-Content`、`Select-String`、`Select-Object`、`Out-String` 等；
 - 构建与测试：`cargo build`、`cargo test`、`npm run build`、`npm test`；
 - 安装依赖：`npm install`；
+- CodeGraph 索引：`codegraph init --yes "../reference-library"`，已初始化的目录可用 `codegraph index "../reference-library"` 更新。外部参考目录同样适用，无需退出 Plan 或先添加工作目录；索引工具可生成自身的索引及配置文件。建议在命令中明确指定目标目录；
 - 任何程序的 `--version`。
 
 Plan 使用共用的危险命令过滤器拦截破坏性命令，例如删除系统目录、格式化磁盘和关机。显式 ask 规则仍要求确认，显式 deny 或禁用工具仍然拒绝；没有交互审批入口时，要求确认的调用不会自动执行。管道、重定向和脚本块不再仅因语法形式而要求审批。

@@ -216,3 +216,28 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 在 `/provider add` 或 `/provider edit <ID>` 中选择 `4`（`responses`，也接受 `openai-responses`）。填写服务商提供的 API 根地址，例如 `https://api.openai.com/v1`，再选择模型。请求发送至该根地址下的 `/responses`；模型列表仍通过 `/models` 查询，不提供列表的服务可以手动输入模型 ID。
 
 `openai` 使用 Chat Completions 协议。第三方声明兼容 OpenAI 时，请按其文档选择实际支持的接口。Responses 支持工具调用及流式输出，切换协议后保留会话历史。发送历史时会把过长的工具调用标识映射为稳定的短标识，保持调用与结果配对。
+
+## 请求追踪与思考强度
+
+模型请求会携带真实客户端信息和追踪 ID，便于在代理日志中按会话定位请求：
+
+- `user-agent`、`x-app`、`originator` 标识 dcl 或 Desktop；`x-dcl-runtime`、`x-dcl-os`、`x-dcl-arch` 描述运行环境。
+- `session-id`、`x-session-id`、`x-dcl-session-id` 对应当前会话 ID，恢复会话后保持不变。
+- `thread-id` 与当前会话 ID 相同，表示持续的对话线程，不是操作系统线程。子代理使用自己的会话 ID；可取得父会话关系时，附带 `x-parent-session-id`。
+- `x-dcl-turn-id` 标识一次引擎执行。同一轮工具循环中的多个模型请求共享它；新一轮或恢复执行会生成新值。
+- `x-request-id` 与 `x-client-request-id` 标识一次模型请求，主循环中的值与请求详情中的 ID 一致。同一请求的网络重试保留此 ID；`x-dcl-retry-count` 从 `0` 开始递增。
+
+工具调用 ID、消息 ID、供应商响应 ID 各自用于工具配对、消息存储和响应定位，不能代替会话 ID。一个模型请求可能包含多条历史消息和多个工具结果，因此不使用单一消息 ID 作为请求头。
+
+使用 `/effort xhigh` 可以将强度保存到当前会话；`--effort xhigh` 用于启动时指定。走 Anthropic Messages 兼容接口的非 Claude 模型或别名会发送：
+
+```json
+{
+  "thinking": { "type": "adaptive" },
+  "output_config": { "effort": "xhigh" }
+}
+```
+
+支持自适应思考的 Claude 型号使用相同的 effort 字段；旧式 Claude 型号继续使用其支持的 `thinking.budget_tokens`。结构化输出的 `output_config.format` 与 effort 可同时保留。OpenAI Chat Completions 使用 `reasoning_effort`，Responses 使用 `reasoning.effort`。最终可用级别由所选模型和服务端决定。
+
+排查代理链路时，用会话 ID 找到请求，再分别查看入口请求体与上游请求体；协议转换后字段名称可能不同。
