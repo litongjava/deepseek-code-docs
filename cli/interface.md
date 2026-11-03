@@ -84,7 +84,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 - 一轮结束的那一行显示 `Waiting for 1 background agent to finish`；
 - 输入框下方列出 `● main` 和每个运行中的子代理（类型、说明、已用时间、输出 token 数），提示 `↓ to manage`；
 - 运行期间双击 Agent 行，在右侧查看该子代理的执行记录，内容定期刷新；按 `Esc` 关闭，方向键可滚动。
-- 前台子代理执行时，状态行显示 `Waiting for foreground agent`；后台子代理允许主任务继续。Token 统计尚未返回时显示 `pending`，前台子代理显示最近一次返回的输出统计，后台子代理显示已保存的累计输出统计。
+- 前台子代理执行时，状态行显示 `Waiting for foreground agent`；后台子代理允许主任务继续。面板累计子代理各次请求的输出 token，实时记录与已保存记录按请求 ID 去重。前台流式输出尚未收到精确统计时显示带 `~` 的估算值，精确统计到达后替换；没有输出与统计时显示 `pending`。子代理统计独立于主会话。
 - 页脚显示 `← for agents`：在空输入框按 `←`，提示 `Press ← again to open agents`，再按一次打开任务视图，可以查看或停止（`x`）子代理。
 
 子代理结束时显示 `● Agent "说明" completed`，它的报告写入会话记录，输入框空闲时自动开始新的一轮，让模型查看结果。

@@ -34,7 +34,7 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 
 **Read**：读取文本时带行号返回，默认最多 2000 行，可以用 `offset`、`limit` 读取一部分。图片作为图片交给当前模型，是否支持由服务端判断并返回错误；PDF 用 `pages` 按页读取；`pages` 留空、仅含空白或为 `null` 时视为未指定，读取 Markdown 等文本请省略页码并使用 `offset`、`limit`；`.ipynb` 按单元格显示。
 
-**Edit 与 Write**：必须先 `Read`；文件在读取后被改过时会拒绝，见[修改前必须先读取](./tool-calls.md#修改前必须先读取)。
+**Edit 与 Write**：修改已有文件前必须有读取记录；`Read` 和经过核对的 CodeGraph 源码响应均可建立记录。文件在读取后被改过时会拒绝，见[修改前必须先读取](./tool-calls.md#修改前必须先读取)。
 
 **Grep**：参数和 Claude Code 相同：`pattern`、`path`、`glob`、`type`、`output_mode`（`content`、`files_with_matches`、`count`）、`-i`、`-n`、`-A`/`-B`/`-C`、`multiline`、`head_limit`、`offset`。
 
@@ -49,6 +49,8 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 **Agent**：默认在后台运行（`run_in_background` 默认为 `true`），子代理结束时通知模型；设为 `false` 时本轮等待结果。可以用 `subagent_type` 选择代理类型，`isolation: "worktree"` 让子代理在独立的 Git worktree 中工作。
 
 前台和后台子代理均支持 `model`、`effort` 和 `isolation`。`model` 留空时沿用代理的模型，指定时须使用当前供应商中配置的模型；思考等级按工具说明和用户要求指定。独立工作树绑定到子会话，父会话目录保持原样，同一父会话继续子代理时保留其模型、权限和工作树绑定。
+
+`isolation` 省略或设为 `null` 时使用当前工作目录；`worktree` 创建并绑定独立工作树后再启动后台子进程。后台返回的 `to`、`session_id` 都可以用于 `SendMessage`，父会话也可以直接使用返回的 `agent_id`。
 
 **AskUserQuestion**：一次 1–4 个问题，每个问题 2–4 个选项，可以带预览和多选，见[模型向你提问](./tool-calls.md#模型向你提问)。
 

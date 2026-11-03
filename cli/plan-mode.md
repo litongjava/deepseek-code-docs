@@ -40,8 +40,8 @@ Here is DeepSeek Code's plan:
 
 ## 计划期间能做什么
 
-- **可以**：读文件、搜索、列目录、联网查资料，以及运行只读的 Shell 命令。`Read`、`Glob`、`Grep` 可以访问当前项目之外的文件和目录，无需先添加工作目录，便于参考相邻项目、用户文档和系统配置；操作系统访问权限和显式工具规则仍然适用。
-- **不可以**：修改项目文件。唯一可写的是这个会话专属的计划文件，保存在[数据目录](./data-directory.md)的 `plans/` 下。
+- **可以**：读文件、搜索、列目录、联网查资料，以及执行未被危险命令过滤器拒绝的 Shell 命令，包括构建、测试和安装依赖。`git_status`、`git_diff`、`git_log` 也是可直接执行的只读工具。`Read`、`Glob`、`Grep` 可以访问当前项目之外的文件和目录，无需先添加工作目录；操作系统访问权限和显式工具规则仍然适用。
+- **直接编辑工具**：`Edit`、`Write` 等在计划期间只允许修改本会话专属的计划文件，保存在[数据目录](./data-directory.md)的 `plans/` 下。Shell 命令可能生成文件或修改依赖，Plan 并非文件系统只读沙箱。
 
 `EnterPlanMode` 返回的 `planFilePath` 可直接用于 Read、Write、Edit，无需把整个数据目录加入工作目录。Windows 的正反斜杠、盘符大小写和扩展路径前缀可以等价使用。切换权限模式后仍可访问本会话的计划文件，访问继续遵守显式权限规则；其他会话的计划文件可以在 Plan 中读取，但不能修改。
 
@@ -53,16 +53,16 @@ MCP 工具的 `annotations.readOnlyHint` 缺省时按 `true` 处理，因此 Cod
 
 ### Shell 命令
 
-下面这类只读命令会**直接执行**：
+除危险命令外，Shell 命令默认**直接执行**，例如：
 
 - 查看与搜索：`ls`、`cat`、`head`、`tail`、`grep`、`rg`、`find`（不带 `-exec`、`-delete`）、`wc`、`tree`、`stat`、`which` 等；
 - Git 查询：`git status`、`git log`、`git diff`、`git show`、`git branch -a`、`git blame` 等；
 - PowerShell 查询：`Get-ChildItem`、`Get-Content`、`Select-String`、`Select-Object`、`Format-Table`、`Out-String` 等；
+- 构建与测试：`cargo build`、`cargo test`、`npm run build`、`npm test`；
+- 安装依赖：`npm install`；
 - 任何程序的 `--version`。
 
-判断规则偏保守：管道或 `&&` 连接的每一段都必须是只读命令；含有重定向（`>`）、命令替换（`$(...)`、反引号）、PowerShell 脚本块（`{ }`）或后台运行（`&`）的，都不算只读。
-
-**其他命令会先询问你**，例如 `npm install`、`cargo build`，由你决定是否允许。非交互模式下没有人回答，这类命令会被拒绝。
+Plan 使用共用的危险命令过滤器拦截破坏性命令，例如删除系统目录、格式化磁盘和关机。显式 ask 规则仍要求确认，显式 deny 或禁用工具仍然拒绝；没有交互审批入口时，要求确认的调用不会自动执行。管道、重定向和脚本块不再仅因语法形式而要求审批。
 
 ## 相关文档
 

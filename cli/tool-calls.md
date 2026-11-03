@@ -11,17 +11,19 @@
   ⎿  Running… (5s)
 ```
 
-Shell 命令（`Bash`、`PowerShell`）在命令左边带编号，本次会话从 `#1` 开始依次递增，讨论"第 3 条命令的输出"时一眼就能找到。结束后的记录如下：
+所有工具调用都带编号，本次会话从 `#1` 开始依次递增，讨论"第 3 次调用的输出"时一眼就能找到。结束后的记录如下：
 
 ```text
-● Read(README.md) · 0.5s
+● #1 Read(README.md) · 0.5s
   ⎿  Read 2 lines
-● #1 Bash(ls -la) · 0.2s
+
+● #2 Bash(ls -la) · 0.2s
   ⎿  total 16
      drwxr-xr-x 2 dev dev 4096 Oct 21 17:24 .
      drwxr-xr-x 4 dev dev 4096 Oct 21 17:24 ..
      … +2 lines (Ctrl+O to expand)
-● #2 Bash(cat missing.txt) · 0.0s
+
+● #3 Bash(cat missing.txt) · 0.0s
   ⎿  cat: missing.txt: No such file or directory
      Exit code 1
 ```
@@ -38,9 +40,15 @@ Shell 命令（`Bash`、`PowerShell`）在命令左边带编号，本次会话�
 - `WebFetch` 和 `WebSearch` 的标题和 Claude Code 一样写成 `Fetch(https://example.com/)` 和 `Web Search("rust 1.85")`。
 - 多个工具并行运行时，按开始顺序依次显示，各自在结束时原位换成结果，标题里带着参数，不会混淆。
 
+MCP 调用只显示一个包含工具名和参数的标题，完成后在原位置补上结果，不附加 `Exploration: ...` 摘要。响应直接显示文本正文和嵌入资源的文本，去掉 `content`、`type`、`text` 等协议包装；图片、音频显示附件说明，资源链接保留名称和地址。展开结果、详细记录和恢复会话沿用同一正文展示方式。正文自身是 JSON 时保留原文。
+
+同时返回正文与结构化数据时，终端优先展示正文；模型及 SDK 的结构化工具结果仍保留原始内容块和图片。输出替换钩子会同步更新两种表示。
+
 ## 修改前必须先读取
 
 和 Claude Code 一样，`Edit` 和覆盖已有文件的 `Write` 只能用在本会话已经 `Read` 过的文件上；读取之后文件在磁盘上被改过（例如你在编辑器里保存了，或者另一个程序改了它），调用会失败，模型需要重新读取后再改。读取记录按会话保存，两轮之间的外部修改也能发现。这样不会覆盖掉你在外面做的修改。
+
+CodeGraph 探索返回的带行号源码也可作为读取记录：系统会核对项目内的文件路径和展示的源码行，内容与磁盘一致后登记。只有调用关系或文件名、没有实际源码的结果不登记；登记后的外部修改仍要求重新读取。
 
 ## 模型向你提问
 
