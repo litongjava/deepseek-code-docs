@@ -11,7 +11,7 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 | `plan` | 允许非危险 Shell 命令和查询工具，直接编辑仅限计划文件，见[计划模式](./plan-mode.md) |
 | `auto` | 普通任务操作由分类器放行；不能自动批准时请求人工确认，见[自动权限模式](./auto-mode.md) |
 | `dont-ask` | 不询问：需要审批的调用一律拒绝，已放行的规则照常生效 |
-| `bypass` | 自动批准工具调用，允许访问工作目录之外的路径；显式 ask、deny 规则仍生效 |
+| `bypass` | 自动批准工具调用，允许访问工作目录之外的路径；跳过 ask，显式 deny 规则仍生效 |
 
 只读的 shell 命令指 `ls`、`cat`、`grep`、`find`（不含 `-exec`、`-delete`）、`git status`/`log`/`diff` 等只查看内容的命令，用管道或 `&&` 连接时每一段都必须只读。在 ask 和 accept-edits 模式下，这类命令的路径参数还必须都在工作目录内：`cat /etc/hosts`、`ls ..`、以 `~` 开头或含 `$` 变量的参数仍然会询问。显式的 ask 或 deny 规则（例如 `/permissions ask Bash(ls *)`）优先。Plan 模式允许更广泛的非危险 Shell 命令，包括构建、测试和依赖安装，同时保留危险命令拦截和显式规则。
 
@@ -24,7 +24,9 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 `dcl --yolo`（等同于 `--full-access`）是更彻底的 bypass：除了不询问，还**忽略 deny 规则**，并且命令在[沙箱](./sandbox.md)之外运行。首次使用时显示一次单独的警告。只在可以随时丢弃的机器上使用。
 
-`--dangerously-skip-permissions` 和 `--yolo` 在 bypass 模式下都跳过 Bash 工具内部的危险命令关键字过滤，例如 `shutdown`、`diskpart`。前者仍遵守显式 ask/deny 规则和配置的沙箱；`--yolo` 同时关闭这些限制。切回 ask、plan 等模式后重新按当前权限模式检查。操作系统权限和命令本身的错误仍可能导致执行失败。
+`--dangerously-skip-permissions` 和 `--yolo` 在 bypass 模式下都跳过 Bash 工具内部的危险命令关键字过滤，例如 `shutdown`、`diskpart`。前者仍遵守显式 deny 规则和配置的沙箱；`--yolo` 同时关闭这些限制。切回 ask、plan 等模式后重新按当前权限模式检查。操作系统权限和命令本身的错误仍可能导致执行失败。
+
+bypass 也跳过 `PreToolUse` Hook 提出的 ask 审批，Hook 的明确拒绝仍会阻止执行。父会话切换权限模式时，运行中的子代理跟随新模式；切到 bypass 后，等待中的工具审批会自动继续。详见[子代理协作](./plan-mode.md#子代理协作)。
 
 ## 审批提示
 
