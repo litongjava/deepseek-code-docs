@@ -63,7 +63,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 - 以 `/`、`!`、`# ` 开头的输入不会插进这一轮，等这一轮结束后执行。
 - 运行中输入 `/`，弹出的列表只包含运行中就能执行的命令：`/btw`、`/background`、`/goal`、`/list-agents`、`/status`、`/subagents`、`/tasks`。
 
-运行中输入 `/tasks` 或 `/tasks list` 查看任务 ID 与状态，再用 `/tasks show ID` 读取该任务的最新输出。这些查询立即响应，当前请求继续执行；结果显示在运行中工具下方的最新消息块，再次查询即可刷新输出。列表和输出保留在会话记录中，可用 `Ctrl+O` 查看详细记录。`Ctrl+T` 显示的是待办列表。
+运行中输入 `/tasks` 或 `/tasks list` 打开独立任务页，按任务名称和状态查看后台命令与 Agent；列表不展示当前主请求的长提示词。用 `/tasks show ID` 读取最新输出，按 `Esc` 返回对话，再次查询可刷新。查询时当前请求继续执行。`/status` 同样打开独立状态页，包括附着到 Worker 的运行状态。`Ctrl+T` 显示的是待办列表。
 
 `/background` 分离的是当前请求的终端视图，同一会话仍由原 worker 执行。分离后可用 `/tasks attach ID` 返回；需要独立对话时用 `/clear` 创建新会话。
 - `/btw 问题`：问一个旁支问题，不打断主任务。
