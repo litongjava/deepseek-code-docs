@@ -200,6 +200,7 @@ dcl config reset                     # 只删除 CLI 管理的提供商和偏好
 - `models[].id`：发给接口的真实模型 ID；`name` 只用于显示。
 - `models[].enabled`：设为 `false` 后不出现在 `/model` 列表里。
 - `models[].context_window`：上下文窗口，用来判断什么时候压缩历史；`max_tokens` 是单次输出上限，不填时按 8192 处理。
+- `gpt-6-astra` 未填写 `context_window` 时默认使用 256000 tokens（256K），已保存但未设置窗口的模型也会在运行时使用该默认值；显式设置的窗口保持优先。上下文窗口与单次输出上限分别配置。
 - `enabled`：整个提供商设为 `false` 后，`/provider` 不再列出。
 - `default_provider_id`：新会话默认使用的提供商，也可以给某个提供商写 `is_default: true`。
 
