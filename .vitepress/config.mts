@@ -83,6 +83,7 @@ export default defineConfig({
           { text: '! 命令模式', link: '/cli/shell-mode' },
           { text: '@ 引用文件', link: '/cli/file-mentions' },
           { text: '图片', link: '/cli/images' },
+          { text: '生成和编辑图片', link: '/cli/image-generation' },
           { text: '# 写入项目说明', link: '/cli/memory-notes' },
           { text: 'vim 模式', link: '/cli/vim-mode' },
           { text: '回退', link: '/cli/rewind' },
