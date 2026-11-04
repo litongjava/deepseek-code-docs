@@ -2,6 +2,8 @@
 
 模型工作时，状态行下方会显示一条 dcl 的使用技巧：
 
+普通视图和 `Alt+M` Compact 视图都会显示。需要回答问题或确认目标时，该行优先显示相应操作说明；没有可用提示时显示排队和引导消息的快捷键。
+
 ```text
 ✢ Simmering… (8s · ↓ 1.3k tokens · thinking)
   ⎿  Tip: Use /plan for larger changes: the model investigates read-only and asks before editing
