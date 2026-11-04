@@ -106,6 +106,10 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 滚轮和翻页键用于浏览对话历史，`Ctrl+Home` 回到最早的记录。长指令点击展开后可继续滚动查看全文，窗口调整大小后仍保留历史。按 `Esc` 返回输入框。
 
+通过 `/resume` 恢复后，如果最早看到的是分配给 Agent 的任务，先核对 `/status` 中的会话 ID：子代理有独立的记录，要查看最初向主代理提出的问题，应恢复主会话。若已到达正确会话的开头，但长输入只显示前两行，点击消息的展开提示即可查看全文，见[恢复会话](./index.md#常用命令)。
+
+恢复会话后显示 `Session restored; waiting for input` 时，可以先浏览历史，再发送 `/continue` 或新的任务消息。待处理的后台通知会保留到继续执行时；`--continue` 启动参数只负责恢复最近的会话。
+
 直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
 
 ## 计划模式下 Bash 被禁用

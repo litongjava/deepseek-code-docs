@@ -91,6 +91,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 子代理结束时显示 `● Agent "说明" completed`，它的报告写入会话记录，输入框空闲时自动开始新的一轮，让模型查看结果。
 
+恢复会话后会先等待输入：上述后台通知保留在队列里，不自动启动模型。发送 `/continue` 或新的任务消息后恢复正常执行；等待期间也暂停定时任务、异步 Hook 的自动模型唤醒和提示词建议请求。详见[恢复会话](./index.md#常用命令)。
+
 **`/memory` 和 `/agents`**：`/memory` 列出用户、项目、本地三份说明文件（位置和大小），选中后打开编辑，也可以查看当前加载的项目说明。`/agents` 显示当前会话家族中正在执行的 Agent（包含父级、同级和子级），逐项列出会话 ID、运行状态、任务及可用的当前工具信息；等待审批时给出提示。空闲和模型执行期间均可使用，不会启动模型。仅有保存记录或打开终端的空闲会话不算活跃；没有活跃项时明确显示空状态。`/agents definitions` 查看可委派的代理类型，原有 `/list-agents definitions` 也可使用。
 
 **需要你回答时**：工具审批在输入框的位置显示选项菜单，用 `↑`/`↓` 和 `Enter` 或数字键选择，见[审批提示](./permissions.md#审批提示)。计划审批等需要输入文字的问题，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
@@ -160,6 +162,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/restart` | 重启 dcl：替换当前进程并在当前对话里继续，启动参数保留，改过的 `config.json` 和更新后的二进制会重新加载 |
 | `/config` | 设置对话框；别名 `/settings` |
 | `/exit` | 退出，并提示用 `dcl --resume 会话ID` 恢复 |
+
+`/resume [ID]` 恢复历史并等待输入；`/continue` 显式继续当前会话。
 
 ## 思考等级、状态与粘贴
 
