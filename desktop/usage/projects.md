@@ -4,7 +4,7 @@
 
 ## 建立项目
 
-侧栏顶部的模式切换与 New Chat、Search、Tools、Extensions 固定显示，账户入口固定在底部。中间剩余空间由 Projects 和 Recents 各占一半，两区独立滚动；展开 Tools 或 Extensions 使用浮层，不会挤走列表。协作面板仍可从 Tools 打开。
+侧栏顶部固定显示模式切换、New Chat 和 Search，账户入口固定在底部。Tools 和 Extensions 位于窗口顶部工具栏，收起侧栏后仍可使用。菜单支持方向键、Home / End 和 Escape；Escape 关闭菜单并返回原按钮。中间剩余空间由 Projects 和 Recents 各占一半，两区独立滚动。协作面板仍可从 Tools 打开。
 
 会话按创建时的模式分类，分支会话保留原会话模式。没有模式信息的旧会话默认归入 Chat。切换模式不会改变会话所属项目，Recents 折叠状态按模式保存。
 
@@ -24,7 +24,7 @@
 
 ## 在侧栏管理项目与会话
 
-Projects 标题右侧的 **All projects** 打开项目总览，加号用于创建项目。点击项目行选择该项目并进入新聊天，输入区与 Recents 同步使用所选项目；不会修改原有会话所属项目。项目行不再嵌套会话。选择 **No project** 查看未关联项目的会话并开始独立聊天；没有项目时显示 **No projects yet**。
+Projects 标题右侧的 **All projects** 打开项目总览，加号用于创建项目。点击项目行展开或收起其未归档会话，包含不同模式下的会话；点击子会话才打开聊天。展开项目不会切换当前会话、改变草稿或筛选 Recents。每个项目默认显示五条会话，可用 **Show more** 展开其余记录。Projects 只列出实际项目，不显示 **No project**；没有项目时显示 **No projects yet**。未关联项目的历史会话仍可从 Recents 查看。
 
 ![项目列表、右侧 All projects 和左对齐的 Recents](../../assets/projects-sidebar/01-grouping.png)
 
@@ -36,7 +36,7 @@ Projects 标题右侧的 **All projects** 打开项目总览，加号用于创�
 
 ![编辑项目与源目录](../../assets/projects-sidebar/04-edit-project.png)
 
-**Recents** 只显示当前项目在当前模式分组中的未归档会话（Home 合并 Chat、Work、Study，Code 单独显示），固定会话也保留在列表中，不额外占用第三个分区。列表沿用现有会话顺序，没有额外的日期截止；默认显示五条，点击 **Show more** 展开。空列表显示 **No recent chats**，标题与半区仍保留。打开会话后选择标记跟随该会话的项目；New Chat 保留当前项目供下次发送使用。项目固定、分区折叠和手动未读标记保存在当前客户端；会话固定与归档保存在数据库。
+**Recents** 独立显示当前模式分组中最近的未归档会话（Home 合并 Chat、Work、Study，Code 单独显示），不按展开或选中的项目过滤。按最后更新时间排列，缺少更新时间时使用创建时间；默认显示五条，点击 **Show more** 展开。固定会话保留在列表中，不额外占用第三个分区。空列表显示 **No recent chats**，标题与半区仍保留。打开会话后选择标记跟随该会话的项目；New Chat 保留当前项目供下次发送使用。项目固定、分区折叠和手动未读标记保存在当前客户端；会话固定与归档保存在数据库。
 
 会话标题、工作区标签及 Chat / Trajectory 位于同一行；长标题截断显示，悬停可查看完整标题。标题下拉保留重命名、导出、删除，并提供 **Copy session ID**：复制完整的当前会话 ID，剪贴板实际成功后才显示成功提示，失败则提示重试。顶部工具栏的 Terminal 按钮与会话工具栏的 H5、竖向更多按钮已移除；会话 Terminal 按钮和 Tools 中的 Terminal 仍可打开统一右侧终端，H5 仍可从 Extensions 打开。
 
@@ -54,11 +54,13 @@ Projects 标题右侧的 **All projects** 打开项目总览，加号用于创�
 
 **Archive chats** 归档该项目所有模式下的会话；记录保留，可在会话总览中查询。**Remove project** 需要确认，只解除应用中的项目关联，会话保留，磁盘目录与文件不会被删除。
 
-以上截图记录旧版分组与菜单，其中嵌套会话和 Pinned 布局不代表当前的双列表布局。截图中的 Sidebar QA 项目与英文会话为临时验证数据；旧版验证结果见[侧栏项目管理验证](../development/projects-sidebar-verification.md)。
+以上截图记录早期菜单样式，具体位置以当前界面为准：顶部提供 Tools / Extensions，侧栏 Projects 展开项目会话，Recents 独立展示最近记录。截图中的 Sidebar QA 项目与英文会话为临时验证数据；旧版验证结果见[侧栏项目管理验证](../development/projects-sidebar-verification.md)。
 
 ## 确认执行位置
 
 聊天输入框上方显示 **Local**、当前项目和源目录标签。点击项目名称可以选择已创建的项目，或直接创建新项目。发送新聊天时，会话会关联到所选项目；已有聊天也可以更换项目。
+
+Desktop 的 Code 模式发送前必须选择项目，并确认源目录信任。未选项目时发送按钮不可用，按发送快捷键会打开项目菜单并保留草稿；界面不显示常驻警告。New Chat 沿用已有项目选择。Home 的普通聊天仍可使用独立会话工作目录。
 
 第一个源目录作为默认工作目录，其他源目录的完整路径会随项目上下文提供给模型。项目说明也会用于该项目的聊天。
 
