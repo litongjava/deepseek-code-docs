@@ -33,10 +33,10 @@
 - 绿色圆点表示成功，红色圆点表示失败。失败时直接显示原因，比如错误输出和退出码。
 - 结果最多显示 3 行，其余的用 `… +N lines` 标明。和 Claude Code 一样，**用鼠标点击**这个结果会在原位置展开全部内容，再点一次收起；一轮进行中和结束后回到输入框时都可以点。也可以按 `Ctrl+O` 查看整个会话的详细记录。
 - `Read` 只显示读了多少行，不重复打印文件内容。
-- 修改文件的工具（`Write`、`Edit`）只显示一行摘要，点击后展开带颜色的 diff：
+- 修改文件的工具（`Write`、`Edit`）显示一行带 `(click to expand)` 提示的摘要和 diff 预览，点击后展开完整的彩色 diff，底部的 `(click to collapse)` 表示再点一次可以收起：
 
   ```text
-  ● Updated src/calc.py (+7 -0)
+  ● Updated src/calc.py (+7 -0) (click to expand)
   ```
 
 - `WebFetch` 和 `WebSearch` 的标题和 Claude Code 一样写成 `Fetch(https://example.com/)` 和 `Web Search("rust 1.85")`。

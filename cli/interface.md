@@ -60,7 +60,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 **运行中仍然可以输入**：
 - 直接输入并回车：和 Claude Code 一样，这条消息先显示在工作区下方（`❯ 你的消息`），输入框提示 `Press up to edit queued messages`。模型下一次拿到工具结果时就会读到它，并在这一轮里照着调整；记录里它出现在读到的位置，之后的对话也会带上。这一轮没有再调用工具就结束时，它作为下一条提示词执行。
-- 输入框为空时按 `↑`，把还没被读到的消息取回输入框修改。
+- 输入框为空时按 `↑`，把还没被模型读到的消息全部取回输入框，可以修改后重发，也可以清空来撤回。`Enter` 发送和 `Tab` 排队的消息都能取回。
 - 以 `/`、`!`、`# ` 开头的输入不会插进这一轮，等这一轮结束后执行。
 - 运行中输入 `/`，弹出的列表只包含运行中就能执行的命令：`/agents`、`/btw`、`/background`、`/copy-session-id`、`/goal`、`/list-agents`、`/status`、`/subagents`、`/tasks`。
 
@@ -105,7 +105,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | 按键 | 作用 |
 |---|---|
 | `Enter` | 发送；运行中交给这一轮在下一个工具结果之后读取 |
-| `Alt+Enter` | 换行（运行中也可用 `Shift+Enter`）；也可以在行尾输入 `\` 再按 `Enter` |
+| `Ctrl+J` | 换行，空闲和运行中都可用；也可以用 `Alt+Enter`、`Shift+Enter`（终端能区分时），或在行尾输入 `\` 再按 `Enter` |
 | `Esc` / `Ctrl+C` | 中断当前这一轮，已有的对话保留 |
 | `Shift+Tab` | 切换权限模式：ask → accept-edits → plan → bypass → auto（已配置才有），见[权限模式](./permissions.md#权限模式) |
 | `Ctrl+O` | 打开整个会话的详细记录，见[工具调用](./tool-calls.md) |
@@ -157,7 +157,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/export` | 导出整个对话：选择复制到剪贴板或保存为文件；`/export 文件名` 直接保存 |
 | `/rewind` | [回退](./rewind.md)代码或对话；别名 `/checkpoint` |
 | `/ide` | 选择要连接的编辑器（列出打开了当前项目的编辑器，最后一项 None 断开）；没有可连接的编辑器时只提示一行。`/ide status` 显示详细状态 |
-| `/terminal-setup` | 说明如何在提示词里换行：任何终端都可以用 `\` + `Enter` 或 `Alt+Enter`；终端能区分时 `Shift+Enter` 也可以 |
+| `/terminal-setup` | 说明如何在提示词里换行：任何终端都可以用 `Ctrl+J`、`\` + `Enter` 或 `Alt+Enter`；终端能区分时 `Shift+Enter` 也可以 |
 | `/code-review`、`/security-review` | [代码审查与安全审查](./code-review.md) |
 | `/vim` | 切换 [vim 模式](./vim-mode.md) |
 | `/rename 名称` | 给会话命名 |
@@ -166,7 +166,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/config` | 设置对话框；别名 `/settings` |
 | `/exit` | 退出，并提示用 `dcl --resume 会话ID` 恢复 |
 
-`/resume [ID]` 恢复历史并等待输入；`/continue` 显式继续当前会话。
+`/resume [ID]` 恢复历史并等待输入；`/continue` 显式继续当前会话。任务还在后台运行时，`/continue` 直接接回这个任务，不会重新执行。
 
 ## 思考等级、状态与粘贴
 

@@ -110,6 +110,13 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 恢复会话后显示 `Session restored; waiting for input` 时，可以先浏览历史，再发送 `/continue` 或新的任务消息。待处理的后台通知会保留到继续执行时；`--continue` 启动参数只负责恢复最近的会话。
 
+模型运行到一半时关闭终端，同样可以恢复：
+
+- 只关闭了终端、任务还在后台运行时，恢复后会显示任务 ID。发送 `/continue` 回到这个任务，正在执行的请求不会重来。
+- 任务进程也已退出时，恢复后发送 `/continue` 开始新的请求。模型会知道上次的工具调用没有结果，先检查当前状态，再决定是否重新执行。
+
+任务长时间没有响应但进程还在时，可以用 `/tasks show ID` 查看，或用 `/clear` 开始新会话。
+
 直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
 
 ## 计划模式下 Bash 被禁用

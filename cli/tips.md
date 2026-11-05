@@ -24,7 +24,7 @@
 当前的提示覆盖这些主题：
 
 - **运行中的操作**：`/btw` 提问、排队输入、`Esc` 中断、`/background`；
-- **界面操作**：`Ctrl+O` 展开详情、`Shift+Tab` 切换模式、`Ctrl+R` 搜索历史、`Alt+Enter` 换行；
+- **界面操作**：`Ctrl+O` 展开详情、`Shift+Tab` 切换模式、`Ctrl+R` 搜索历史、`Ctrl+J` 换行；
 - **会话与模型**：`/plan`、`/compact`、`dcl --continue`、`/rename`、`/provider` 与 `/model`、`/test`、`/status`；
 - **代码智能**：`/lsp`；
 - **自动化与协作**：`--max-tokens`、`--json-schema`、`/remote-control`、`dcl team-sync`。
