@@ -67,6 +67,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 运行中的命令菜单支持 `↑`、`↓` 跨过当前五条可见项继续选择，也可用 `PageUp`、`PageDown` 移动五项；选中项始终保持可见。`/copy-session-id` 将完整会话 ID 复制到系统剪贴板。
 
+空闲时输入 `/tasks` 打开后台任务列表：每个任务一行，最新的在前。`↑`/`↓` 选择，`Enter` 看详情，`x` 直接停止，`Esc` 关闭。
+
 运行中输入 `/tasks` 或 `/tasks list` 打开独立任务页，按任务名称和状态查看后台命令与 Agent；列表不展示当前主请求的长提示词。用 `/tasks show ID` 读取最新输出，按 `Esc` 返回对话，再次查询可刷新。查询时当前请求继续执行。`/status` 同样打开独立状态页，包括附着到 Worker 的运行状态。`Ctrl+T` 显示的是待办列表。
 
 `/background` 分离的是当前请求的终端视图，同一会话仍由原 worker 执行。分离后可用 `/tasks attach ID` 返回；需要独立对话时用 `/clear` 创建新会话。

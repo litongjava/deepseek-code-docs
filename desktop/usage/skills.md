@@ -45,3 +45,35 @@ Skill 使用同一套会话执行与持久化流程。切换页面或断开流�
 流程变化后更新正文，用相同示例复测。只在当前会话提出要求，不一定会修改已保存的 Skill。
 
 源码参考：`CustomizePage.tsx`、`PluginsPage.tsx`、`McpSettingsPage.tsx`、`SkillImportPanel.tsx`、`crates/core/src/skills`、`src-tauri/src/bridge/routes/skills.rs`。
+
+## 提示词与工具
+
+自定义页的**提示词与工具**决定模型收到什么、能用什么。修改后点击保存，下一次对话请求开始生效。Desktop 和 dcl 共用这些设置。
+
+![提示词与工具页面](/desktop-customize-prompt.png)
+
+**系统提示词**有三种使用方式：
+
+- 使用内置提示词：可以展开查看完整内容。
+- 在内置提示词后追加：保留内置行为，再加上你的规则。
+- 完全替换内置提示词：编辑框从内置内容开始，改错了可以一键恢复。工作目录、操作系统等环境信息仍会自动附加。
+
+**内置工具**可以逐个开关。关闭后模型看不到这个工具，也无法调用。工具的说明也可以修改，用来调整模型何时使用它，随时可以恢复默认。
+
+![内置工具的开关和说明](/desktop-customize-tools.png)
+
+**自定义工具**把你的命令变成模型可以调用的工具。填写名称、说明、命令和输入参数的 JSON Schema，例如：
+
+```json
+{
+  "type": "object",
+  "properties": { "order_id": { "type": "string" } },
+  "required": ["order_id"]
+}
+```
+
+模型调用时，命令在当前工作目录运行：参数以 JSON 传入标准输入和环境变量 `TOOL_INPUT`，标准输出就是工具结果，退出码非 0 时错误输出会交给模型。默认超时 120 秒，可以修改。
+
+![添加自定义工具](/desktop-customize-add-tool.png)
+
+命令以当前用户的权限运行，和其他工具一样经过[权限审批](/desktop/configuration/permissions)。

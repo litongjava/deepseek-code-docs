@@ -67,3 +67,9 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 | `worktree` | `EnterWorktree`、`ExitWorktree` |
 
 `cron` 和 `worktree` 仍能执行旧会话记录里的调用，但不再提供给模型。
+
+## 调整工具和系统提示词
+
+工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 的[提示词与工具](/desktop/usage/skills#提示词与工具)页面编辑，dcl 自动生效，下一次模型请求开始使用。
+
+这个文件有语法错误时，dcl 会报告错误并停止这一轮，不会悄悄恢复已关闭的工具。

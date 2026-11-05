@@ -96,6 +96,7 @@ export default defineConfig({
           { text: '图片', link: '/cli/images' },
           { text: '生成和编辑图片', link: '/cli/image-generation' },
           { text: '# 写入项目说明', link: '/cli/memory-notes' },
+          { text: '长期记忆', link: '/cli/memory' },
           { text: 'vim 模式', link: '/cli/vim-mode' },
           { text: '回退', link: '/cli/rewind' },
           { text: '权限模式与工具审批', link: '/cli/permissions' },

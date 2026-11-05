@@ -65,3 +65,13 @@ VitePress 会处理 Markdown 中的图片引用，将资源包含在构建产物
 - 若部署到子路径，按实际 `DOCS_BASE` 再构建和验收。
 
 部署文档只会发布说明和静态图片，不会让访问者直接操作你的 Rust 后端。若要交付客户端，请另行提供应用安装包；若要交付完整 Web 应用，需要完成浏览器能力适配和服务部署。
+
+## 部署到 Cloudflare Pages
+
+正式站点 <https://deepseek-code.io.nexus/> 托管在 Cloudflare Pages，项目名 `deepseek-code-docs`。更新时构建后直接上传：
+
+```bash
+npm ci
+npx vitepress build .
+npx wrangler pages deploy .vitepress/dist --project-name deepseek-code-docs --branch main
+```
