@@ -16,9 +16,9 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 只读的 shell 命令指 `ls`、`cat`、`grep`、`find`（不含 `-exec`、`-delete`）、`git status`/`log`/`diff` 等只查看内容的命令，用管道或 `&&` 连接时每一段都必须只读。在 ask 和 accept-edits 模式下，这类命令的路径参数还必须都在工作目录内：`cat /etc/hosts`、`ls ..`、以 `~` 开头或含 `$` 变量的参数仍然会询问。显式的 ask 或 deny 规则（例如 `/permissions ask Bash(ls *)`）优先。Plan 模式允许更广泛的非危险 Shell 命令，包括构建、测试和依赖安装，同时保留危险命令拦截和显式规则。
 
 - 启动时指定：`dcl --permission-mode accept-edits`。
-- 运行中切换：`Shift+Tab` 和 Claude Code 一样按 ask → accept-edits → plan → bypass → auto → ask 循环；也可以用 `/permissions <模式>`。bypass 只在启动时允许了才出现在循环里（见下文）；auto 没有配置分类模型时跳过，直接回到 ask。
+- 运行中切换：`Shift+Tab` 按 ask → accept-edits → plan → bypass → auto → ask 循环；也可以用 `/permissions <模式>`。普通 `dcl` 启动即可切换到 bypass，无需额外参数；auto 没有配置分类模型时跳过，直接回到 ask。
 - 不带参数的 `/permissions` 和 Claude Code 一样打开分页管理：Recently denied（本会话被拒绝的调用）、Allow、Ask、Deny（`Add a new rule…` 添加规则，选中规则可以删除；命令行和设置文件里的规则只读）、Auto mode（自动模式配置）、Workspace（工作目录和 `Add directory…`），`←`/`→` 切换。
-- `bypass` 必须在启动时允许：`--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 以普通模式启动，只是让 bypass 进入 `Shift+Tab` 循环。以 bypass 启动时会先确认一次。
+- `--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 保留兼容，普通启动已经允许切换。默认仍以 ask 开始，切换为 bypass 后才按该模式执行。首次以 bypass 启动时会先确认一次。
 
 ### 完全访问
 

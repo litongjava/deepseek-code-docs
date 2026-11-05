@@ -47,7 +47,7 @@
 | `--max-tokens` | 输出上限 | [输出上限与自动续写](./output-limit.md) |
 | `--permission-mode` | 权限模式 | [权限模式与工具审批](./permissions.md) |
 | `--allowed-tools` | 本次免确认的工具 | [权限模式与工具审批](./permissions.md) |
-| `--allow-dangerously-skip-permissions` | 让 bypass 模式进入 `Shift+Tab` 循环 | [权限模式与工具审批](./permissions.md#权限模式) |
+| `--allow-dangerously-skip-permissions` | 兼容参数；普通启动已允许切换 bypass | [权限模式与工具审批](./permissions.md#权限模式) |
 | `--yolo` / `--full-access` | 完全访问：bypass 并忽略命令黑名单、deny 规则和沙箱 | [权限模式与工具审批](./permissions.md#完全访问) |
 | `--data-dir` | 数据目录 | [数据目录](./data-directory.md) |
 | `-p, --print` | 非交互执行一次 | [非交互模式](./non-interactive.md) |
