@@ -16,7 +16,15 @@ dcl config set search.model deepseek-flash
 - 配置保存在[数据目录](./data-directory.md)的 `config.json` 中（`deepseek_search`），`dcl config show` 显示时密钥会被隐藏。
 - 对话用的 API Key 不会被拿来代替搜索密钥。没有配置时，`WebSearch` 返回配置说明，模型会转告你，而不会假装搜索成功。
 - 每次搜索时读取配置，修改后不需要重启。搜索请求只包含查询词，不包含对话内容。
-- 其他提供商（OpenAI、Anthropic）使用它们接口自带的搜索，不需要这一步。
+- 其他提供商（OpenAI、Anthropic）使用它们接口自带的搜索，不需要这一步；兼容代理也需要完整支持相应的原生搜索请求与结果。
+
+## 通过代理使用原生搜索
+
+Responses 搜索使用消息数组形式的 `input`，携带 `web_search` 工具和来源引用选项，可用于 Codex 原生入口。模型能够对话与代理完整支持搜索是两个独立条件。
+
+代理将上游 SSE 转为普通 JSON 时，需要保留 `response.output_item.done` 中的搜索结果和引用；有些响应的最后一个 `response.completed` 事件不再重复这些项目。正常结果应包含已完成的 `web_search_call` 和结构化来源。只有 HTTP 200 或搜索次数统计，不能作为已取得来源的依据。
+
+遇到 HTTP 400 时可查看代理的具体错误。例如 `Input must be a list` 表示输入需要消息数组，不能据此判断模型不支持搜索。若响应成功但没有来源，应继续检查代理的结果聚合。
 
 ## WebSearch
 

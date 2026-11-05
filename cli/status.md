@@ -31,7 +31,7 @@ Status
 
 ## 各项含义
 
-**会话**：`Session name` 是会话名，没有时提示用 `/rename` 命名；`Session ID` 可用于 `dcl --resume <ID>`。`cwd` 是当前项目目录，`Data directory` 是实际使用的[数据目录](./data-directory.md)。
+**会话**：`Session name` 是会话名，没有时提示用 `/rename` 命名；`Session ID` 可用于 `dcl --resume <ID>`。输入 `/copy-session-id` 可复制完整会话 ID，空闲、运行中及附着 Worker 时均可用。`cwd` 是当前项目目录，`Data directory` 是实际使用的[数据目录](./data-directory.md)。
 
 **模型**：`Provider / Model` 表示当前使用的[提供商和模型](./providers.md)。`API endpoint` 只显示协议、主机和端口。`API key` 为 `configured` 表示本地有凭据，**不代表已验证有效**；`missing` 表示没有配置。`Permission mode` 是当前[权限模式](./permissions.md)。`Reachability` 默认不检查；`/status --check` 只探测 HTTP 连通性，不发送凭据或模型请求。
 
@@ -39,7 +39,7 @@ Status
 
 - `Context window` 单独显示模型容量。GPT-6-Astra 默认显示 `256K tokens`（256000 tokens），显式窗口配置优先；尚未发起请求或当前输入量未知时，已知容量仍然显示。
 - `Context usage` 优先使用最新请求的服务端输入统计，缺失时使用该请求的完整估算，并注明 `estimated last request`。有容量和输入量时才计算剩余百分比。
-- 包含图片或不透明压缩内容的请求可能无法在本地完整估算。服务端尚未返回输入量时，此行说明输入量未知，不用旧请求或累计用量替代。
+- 包含图片或不透明压缩内容的请求可能无法在本地完整估算。最新请求尚无完整统计时，显示同一会话、同一模型最近已报告的输入量，注明 `last reported input; latest request input not yet available`，此时不计算当前剩余百分比；没有历史统计时显示 `pending`。搜索等辅助请求的用量计入累计量，但不替代主对话的上下文占用。
 - 尚无请求时显示 `not available (no request yet)`；未知模型既无显式窗口也无默认值时，仅窗口容量显示 `unknown`。已有输入统计仍可单独查看。
 
 **工具**：`Worker` 是持久化后台进程的状态；`MCP servers` 列出运行中和已配置的服务数量，并在下方逐个展示。`Built-in tools` 是内置工具数量；`Language servers` 是已安装的语言服务器数量，详细情况用 `/lsp` 查看。
