@@ -40,6 +40,6 @@ cargo build --release -p deepseek-code-cli --target aarch64-linux-android
 ~/dcl
 ```
 
-文件读写、命令、MCP、长期记忆、定时任务和子代理都可以使用。命令在 Termux 的 shell 中运行，用 `pkg install` 装好的工具模型都能调用。
+模型可以读写文件、运行命令和使用长期记忆。命令在 Termux 的 shell 中运行，用 `pkg install` 装好的工具模型都能调用。
 
 录音、键鼠控制和工作流脚本依赖桌面环境或暂未提供的组件，在 Android 上调用时会给出提示。
