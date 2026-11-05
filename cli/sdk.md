@@ -144,3 +144,7 @@ public class DclExample {
 ```
 
 `dcl` 特有的参数用 `extraArg` 传入，例如 `.extraArg("api-format", "anthropic")`、`.extraArg("data-dir", "/path/to/data")`。SDK 仓库的 `examples/tio-boot-agent-demo` 是一个完整的 HTTP 服务示例：一次性查询、SSE 流式输出、多轮会话、JVM 内 MCP 工具和服务端工具策略。
+
+## Java SDK
+
+Java 程序可以直接使用 [Java SDK](/sdk/java/)，不需要自己实现这个协议。

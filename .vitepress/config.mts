@@ -18,6 +18,7 @@ export default defineConfig({
     nav: [
       { text: 'Desktop', link: '/desktop/guide/overview', activeMatch: '^/desktop/' },
       { text: 'CLI', link: '/cli/', activeMatch: '^/cli/' },
+      { text: 'Java SDK', link: '/sdk/java/', activeMatch: '^/sdk/' },
       { text: '文档站部署', link: '/deployment' }
     ],
     sidebar: {
@@ -61,6 +62,16 @@ export default defineConfig({
         { text: '文档站构建与部署', link: '/deployment' },
         { text: '应用界面', link: '/desktop/verification' }
       ] }
+      ],
+      '/sdk/': [
+        { text: 'Java SDK', items: [
+          { text: '概览与安装', link: '/sdk/java/' },
+          { text: '查询与多轮会话', link: '/sdk/java/sessions' },
+          { text: '工具权限与 Hook', link: '/sdk/java/permissions-hooks' },
+          { text: '进程内工具与子 Agent', link: '/sdk/java/tools-agents' },
+          { text: '会话控制与选项', link: '/sdk/java/control' },
+          { text: '测试与示例应用', link: '/sdk/java/testing' }
+        ] }
       ],
       '/cli/': [
         { text: '入门', items: [
