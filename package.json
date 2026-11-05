@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vitepress dev . --host 127.0.0.1 --port 5174 --strictPort",
     "build": "vitepress build .",
-    "preview": "vitepress preview . --host 127.0.0.1 --port 4174 --strictPort"
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
   },
-  "devDependencies": { "vitepress": "1.6.4" }
+  "devDependencies": {
+    "vitepress": "1.6.4",
+    "wrangler": "^4.158.0"
+  }
 }

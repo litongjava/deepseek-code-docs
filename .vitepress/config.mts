@@ -76,7 +76,8 @@ export default defineConfig({
       '/cli/': [
         { text: '入门', items: [
           { text: 'dcl 概览', link: '/cli/' },
-          { text: '安装与构建', link: '/cli/install' }
+          { text: '安装与构建', link: '/cli/install' },
+          { text: '在 Android 上运行', link: '/cli/android' }
         ] },
         { text: '配置', items: [
           { text: '首次启动与内置提供商', link: '/cli/first-run' },
