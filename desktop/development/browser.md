@@ -58,7 +58,7 @@ const response = await fetch('/api/providers');
 console.log('HTTP 状态：', response.status);
 ```
 
-预期为 200。供应商配置由 Rust 保存到本地文件。生产构建没有此开发代理，Tauri 通过原生初始化获取 Bridge Key；其他浏览器部署仍需要独立鉴权方案。
+预期为 200。供应商配置由 Rust 保存到本地文件。生产构建没有此开发代理：Tauri 通过原生初始化获取 Bridge Key；浏览器和手机连接 `dcd-server`，用访问令牌登录，见[在浏览器和手机上使用](../guide/web-and-mobile.md)。
 
 ### 5. 验证聊天流
 
@@ -93,13 +93,17 @@ dsb attach --endpoint http://127.0.0.1:9222 --url http://127.0.0.1:5200/
 
 **Linux（WebKitGTK）**：WebKitGTK 不提供 CDP 端口，`dcd` 只监听 Bridge 端口，自动化工具无法连接窗口。保持 `npm run tauri -- dev` 运行，按路线二在 Chrome 打开 `http://127.0.0.1:5200` 测试；依赖 `invoke()` 的功能在桌面窗口手动验证。
 
-## 浏览器里仍然存在的限制
+## 浏览器里的原生功能
 
-部分知识库、MCP 管理、差异应用、Remotion 和权限操作直接调用 `invoke()`，需要逐项适配。原生窗口操作、文件对话框等也不能原样移入普通浏览器。
+页面通过统一的适配层 `invokeDesktop` 调用原生命令：
 
-供应商设置已经统一通过 Rust 保存本地文件；其他涉及 `secureStorage` 的功能仍需逐项检查。某些流程还依赖 `30090` 网关。
+- 桌面窗口中直接调用 Tauri 命令。
+- 浏览器和手机应用中，有对应 Bridge 接口的命令走 HTTP，例如定时提示、学习、团队上下文等外围服务（`/api/peripheral`）。
+- 其余只在桌面有意义的命令（文件对话框、在文件管理器中显示、窗口和键鼠控制、录音）返回“需要桌面版”的明确错误。
 
-要确认一个按钮能否在浏览器运行，应追踪它调用 `fetch` 还是 `invoke`，而不是只看页面有没有该按钮。
+新增原生命令时，如果浏览器也需要，在 Bridge 增加路由，再在适配层登记对应的 HTTP 调用，返回值保持与 Tauri 命令一致。判断某个按钮能否在浏览器运行，看它最终调用的是 Bridge 接口还是只登记了桌面实现。
+
+用浏览器验证完整流程时，可以直接启动 `dcd-server` 并用独立的数据目录，见[在浏览器和手机上使用](../guide/web-and-mobile.md)。
 
 ## 结束本地调试
 

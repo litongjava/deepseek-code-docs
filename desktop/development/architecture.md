@@ -10,7 +10,6 @@ React 前端（Tauri WebView 或普通浏览器）
   │                           ├─ SQLite / 本地文件
   │                           ├─ 模型与工具执行
   │                           └─ SSE 流式响应 → 前端
-  ├─ 部分 HTTP 请求 ───────→ Node 网关 :30090
   └─ invoke / listen ──────→ Tauri 原生桥接 → Rust command
                               仅在桌面 WebView 中可用
 
@@ -41,7 +40,7 @@ React 前端（Tauri WebView 或普通浏览器）
 
 Rust 的 `src-tauri/src/bridge/mod.rs` 启动 Axum 服务，`bridge/routes/mod.rs` 汇总聊天、会话、模型供应商、工具、项目、终端等路由。可复用路由的存在并不代表每个前端入口都已经改成 HTTP。
 
-部分以 `/auth/`、`/user/`、`/payment/`、`/github/` 等开头的请求由前端路由到 `30090` 网关。排错时先看请求实际目标。
+全部 HTTP 请求都由 Bridge 处理，包括 GitHub 连接和数据同步。可选的托管账号功能（登录、套餐、用量）只在构建时配置了 `VITE_ACCOUNT_SERVICE_URL` 才会使用，请求发往该地址。
 
 ## SSE：流式输出
 

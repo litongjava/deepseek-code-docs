@@ -2,6 +2,8 @@
 
 dcl 可以在 Android 手机和平板上运行。配合 Termux，模型能使用 `git`、`python` 等完整的命令行工具，不需要 Root。
 
+想要图形界面，可以使用 DeepSeek Code 的 Android 应用，它自带引擎，也能连接电脑上的服务器，见[在浏览器和手机上使用](../desktop/guide/web-and-mobile.md)。
+
 ## 准备
 
 1. 安装 [Termux](https://github.com/termux/termux-app/releases)，选择与手机匹配的版本，常见手机是 `arm64-v8a`。

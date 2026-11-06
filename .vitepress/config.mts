@@ -30,7 +30,8 @@ export default defineConfig({
       ] },
       { text: '安装', collapsed: false, items: [
         { text: '安装客户端', link: '/desktop/guide/installation' },
-        { text: '从源码运行', link: '/desktop/guide/quick-start' }
+        { text: '从源码运行', link: '/desktop/guide/quick-start' },
+        { text: '在浏览器和手机上使用', link: '/desktop/guide/web-and-mobile' }
       ] },
       { text: '配置', collapsed: false, items: [
         { text: '运行模式与模型供应商', link: '/desktop/configuration/models' },

@@ -16,14 +16,14 @@
 
 ```powershell
 Get-NetTCPConnection -State Listen |
-  Where-Object { $_.LocalPort -in @(5200, 5201, 30085, 30086, 30087, 30088, 30089, 30090) } |
+  Where-Object { $_.LocalPort -in @(5200, 5201, 30085, 30086, 30087, 30088, 30089) } |
   Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
 Linux：
 
 ```bash
-ss -ltnp | grep -E ':(5200|5201|3008[5-9]|30090) '
+ss -ltnp | grep -E ':(5200|5201|3008[5-9]) '
 ```
 
 ## 401 或浏览器报告 CORS
@@ -46,9 +46,9 @@ Bridge 的鉴权中间件可能在 CORS 层处理前直接返回 401，因此未
 
 查看 `/api/chat` 的状态和响应类型，核对供应商、模型名和实际错误内容。若通过反向代理访问 SSE，确认代理没有缓冲流式响应，并设置足够的读取超时。
 
-## 30090 连接失败
+## GitHub 连接失败
 
-请求进入了可选网关。按[启动说明](../guide/quick-start.md#可选-启动-node-网关)运行 `api-proxy`，或检查当前功能是否要求网关模式。
+GitHub 请求由 Bridge 处理。“未连接”时按[GitHub 连接](../guide/quick-start.md#github-连接)填写个人访问令牌，或配置 OAuth 后重新连接；令牌被拒绝时确认它带有 `repo` 权限且未过期。
 
 ## 开发检查命令
 

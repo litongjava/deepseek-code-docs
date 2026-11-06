@@ -117,19 +117,14 @@ npm.cmd run dev
 
 浏览器访问 `http://127.0.0.1:5200`。适合调样式和布局，但此命令不会启动 Rust。需要业务接口时，请保持桌面后端运行，并按[浏览器调试指南](../development/browser.md)处理鉴权。
 
-## 可选：启动 Node 网关
+## GitHub 连接
 
-仅当要使用对应网关功能时，在另一终端运行：
+GitHub 连接由 Bridge 提供，无需另外启动服务。两种连接方式：
 
-```powershell
-cd D:\code\deepseek-code\api-proxy
-npm.cmd install
-npm.cmd run dev
-```
+- **个人访问令牌**：在“自定义 → 连接器”中填写带 `repo` 权限的令牌即可，适合浏览器和手机。
+- **OAuth 授权**：启动 `dcd` 或 `dcd-server` 前设置 `GITHUB_CLIENT_ID` 和 `GITHUB_CLIENT_SECRET`，连接按钮会打开 GitHub 授权页。OAuth 应用的回调地址填写 Bridge 的 `/api/github/callback`，例如 `http://127.0.0.1:30085/api/github/callback`。
 
-服务端口为 `30090`。代码读取 `JWT_SECRET`、`KIE_API_URL`、`KIE_API_KEY` 以及 GitHub OAuth 相关环境变量；按实际使用的服务配置。`JWT_SECRET` 未配置时会临时生成，重启可能使原有令牌失效。`better-sqlite3` 安装失败时检查 Node 版本及本机构建工具。
-
-这只是本地开发入口，不代表网关已完成生产部署配置。
+令牌保存在数据目录的 `github-token.json`，只有当前用户可读。
 
 ## 启动文档站
 

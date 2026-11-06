@@ -18,8 +18,6 @@ DeepSeek Code Desktop 使用 React 19、TypeScript、Tauri 2 和 Rust 构建桌�
 
 **应用仓库 `deepseek-code`**：包含 React 前端（`src/`）、Desktop 的 Tauri 外壳（`src-tauri/`，可执行文件 `dcd`）、命令行版本（`crates/cli/`，可执行文件 `dcl`），以及两者共用的 Rust 引擎（`crates/core/`）。
 
-**可选网关 `api-proxy`**：应用工程内的 Node 服务，监听 `30090`，部分登录、用户、支付和 GitHub 等请求路由到这里。它不是 Rust Bridge。
-
 **文档仓库 `deepseek-code-docs`**：当前独立 VitePress 站点。安装和构建只需要本目录，不需要应用目录、Rust 或真实模型凭据。部署本站不会部署 AI 客户端。
 
 ## 当前运行边界
