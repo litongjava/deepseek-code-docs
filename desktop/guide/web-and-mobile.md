@@ -123,11 +123,11 @@ python3 --version
 apt-get install -y --no-install-recommends \
   wget iproute2 iputils-ping dnsutils net-tools traceroute netcat-openbsd \
   openssh-client openssl rsync tar gzip bzip2 xz-utils zip unzip \
-  procps psmisc lsof tree tmux nano vim-tiny less file jq ripgrep \
+  procps psmisc lsof tree tmux nano vim-tiny less file jq ripgrep busybox-static \
   findutils diffutils sed gawk python3-pip python3-venv build-essential pkg-config
 ```
 
-其中 `dig`、`nslookup` 用于 DNS 查询，`ip`、`ss`、`ifconfig`、`netstat` 用于网络查看，`nc` 用于连接测试。Android 的应用权限同样适用于 Ubuntu 中的命令；需要内核权限的网络操作应以实际返回结果为准。
+其中 `dig`、`nslookup` 用于 DNS 查询，`ip`、`ss`、`ifconfig`、`netstat` 用于网络查看，`nc` 用于连接测试。可先通过 `curl` 或 `wget` 验证 HTTPS，再通过 `dig` 验证 DNS。Android 的应用权限同样适用于 Ubuntu 中的命令；部分设备上的 `ping`、`ss`、`ifconfig` 会受到系统权限限制，即使命令已经安装，也应以实际返回结果为准。
 
 软件保存在手机的 Ubuntu 数据目录，正常更新 APK 后仍可使用；清除应用数据或卸载应用会移除环境。需要加速下载时，可以在 Ubuntu 的 APT 源配置中选择国内 Ubuntu ports 镜像，保留原来的套件、组件和签名校验。
 
