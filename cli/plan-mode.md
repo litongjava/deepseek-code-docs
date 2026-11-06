@@ -8,6 +8,8 @@
 - `Shift+Tab`：切换到 plan 模式，再输入任务。
 - `--permission-mode plan`：启动时就进入。
 
+通过 `/plan` 启用时会显示计划文件位置，并提示 `DeepSeek Code will submit it for approval before implementation.`；用 `/plan open` 编辑已有计划后，会提示 DeepSeek Code 需要为更新后的文档请求审批。
+
 进入计划模式时，工具结果会显示已有计划；尚未生成计划时会明确提示正在调查、随后编写计划。进入模式本身不代表计划已经写好。
 
 模型写完计划后会请求审批。批准后，计划正文会作为独立内容显示并保留在对话历史中，方便滚动查看；工具详情也保留完整计划。和 Claude Code 一样，输入框的位置显示计划和三个选项：
