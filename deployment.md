@@ -68,10 +68,12 @@ VitePress 会处理 Markdown 中的图片引用，将资源包含在构建产物
 
 ## 部署到 Cloudflare Pages
 
-正式站点 <https://deepseek-code.io.nexus/> 托管在 Cloudflare Pages，项目名 `deepseek-code-docs`。更新时构建后直接上传：
+正式站点 <https://deepseek-code.io.nexus/> 托管在 Cloudflare Pages，项目名 `deepseek-code-docs`，连接 GitHub 仓库 `litongjava/deepseek-code-docs`。推送到 `main` 分支后，Cloudflare Pages 自动构建并发布，不需要手动上传。
 
-```bash
-npm ci
-npx vitepress build .
-npx wrangler pages deploy .vitepress/dist --project-name deepseek-code-docs --branch main
-```
+项目的构建设置：
+
+- 构建命令：`npm run build`
+- 输出目录：`.vitepress/dist`
+- 生产分支：`main`
+
+推送其他分支会生成预览部署，可以在合并前检查效果。构建记录和失败日志在 Cloudflare 控制台的项目“Deployments”页查看。
