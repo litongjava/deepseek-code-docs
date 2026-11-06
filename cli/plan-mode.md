@@ -47,6 +47,12 @@ Here is DeepSeek Code's plan:
 
 `EnterPlanMode` 返回的 `planFilePath` 可直接用于 Read、Write、Edit，无需把整个数据目录加入工作目录。Windows 的正反斜杠、盘符大小写和扩展路径前缀可以等价使用。切换权限模式后仍可访问本会话的计划文件，访问按当前权限模式检查。子代理可直接读取、修改直属父代理的计划文件，用于审阅和完善计划；Plan 中对其他独立会话的计划文件仅允许读取。
 
+### 联网查资料
+
+Plan 中 `WebFetch` 访问新的公网域名默认直接执行，无需确认，不会因此切换到 Auto 或保存域名授权。显式 ask/deny 规则、工具禁用、Hook 和沙箱限制仍然有效。
+
+本机和内网地址仍请求本次访问审批；批准后可访问本地 HTTP/HTTPS 服务，状态继续保持 Plan。
+
 ### MCP 工具
 
 MCP 工具的 `annotations.readOnlyHint` 缺省时按 `true` 处理，因此 CodeGraph 等未提供这一字段的工具也可以用于规划调查。布尔值 `true` 同样允许；显式 `false` 或字段类型不正确时，Plan 会拒绝调用。显式 ask、deny 和禁用工具的设置仍然适用。该默认值用于 Plan 的 MCP 判断，不会改变其他权限模式的审批方式。

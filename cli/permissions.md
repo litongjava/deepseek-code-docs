@@ -9,7 +9,7 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 | `ask`（默认） | 读文件、搜索等只读操作直接执行，只读的 shell 命令也直接执行；改文件、运行其他命令前询问 |
 | `accept-edits` | 文件编辑自动放行，只读的 shell 命令直接执行，其他命令仍然询问 |
 | `plan` | 允许非危险 Shell 命令和查询工具，直接编辑仅限计划文件，见[计划模式](./plan-mode.md) |
-| `auto` | 未命中危险规则的 Bash 直接放行；危险 Bash 逐次询问，其他未明确放行的工具由分类器判断，见[自动权限模式](./auto-mode.md) |
+| `auto` | 普通文件编辑和未命中危险规则的 Bash 直接放行；危险 Bash 逐次询问，其他未明确放行的工具由分类器判断，见[自动权限模式](./auto-mode.md) |
 | `dont-ask` | 不询问：需要审批的调用一律拒绝，已放行的规则照常生效 |
 | `bypass` | 自动批准工具调用，允许访问工作目录之外的路径；跳过 ask，显式 deny 规则仍生效 |
 
@@ -26,7 +26,7 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 `--dangerously-skip-permissions` 和 `--yolo` 在 bypass 模式下都跳过 Bash 工具内部的危险命令关键字过滤，例如 `shutdown`、`diskpart`。前者仍遵守显式 deny 规则和配置的沙箱；`--yolo` 同时关闭这些限制。切回 ask、plan 等模式后重新按当前权限模式检查。操作系统权限和命令本身的错误仍可能导致执行失败。
 
-bypass 也跳过 `PreToolUse` Hook 提出的 ask 审批，Hook 的明确拒绝仍会阻止执行。父会话切换权限模式时，运行中的子代理跟随新模式；切到 bypass 后，等待中的工具审批会自动继续。详见[子代理协作](./plan-mode.md#子代理协作)。
+bypass 也跳过 `PreToolUse` Hook 提出的 ask 审批，Hook 的明确拒绝仍会阻止执行。父会话切换权限模式时，运行中的子代理跟随新模式；切到 bypass 后，等待中的普通工具审批会自动继续，本机和内网 Fetch 仍等待本次授权。详见[子代理协作](./plan-mode.md#子代理协作)。
 
 ## 审批提示
 
@@ -43,7 +43,8 @@ src/calc.py
  Do you want to make this edit to calc.py?
  ❯ 1. Yes
    2. Yes, allow all edits during this session (shift+tab)
-   3. No
+   3. Allow for this session
+   4. No
  ↑↓ select · enter confirm · tab to amend · esc to cancel
 ```
 
@@ -52,6 +53,16 @@ src/calc.py
 - 回答后审批框随即清除，和 Claude Code 一样，对话记录里只留下这次调用的结果（例如修改的 diff 或命令输出）。内容超过一屏时，审批框只显示开头部分，末尾标明还有多少行。
 - 第 2 项只批准一次之外，还会放宽之后的审批：修改文件时，本会话切换到 `accept-edits` 模式；Bash 使用仅当前运行会话的 Allow for Session（见下文）；其他工具添加以工具名为规则的放行，后者仍写入项目的 `.claude/settings.local.json`。可以用 `/permissions list` 查看、`/permissions remove` 删除；写入文件失败时会提示，规则仍在本会话有效。
 - 选"No"时，这一轮停止，和 Claude Code 一样显示 `⎿ Interrupted · What should DeepSeek Code do instead?`，等你输入下一步要做什么。模型收到的结果是"用户拒绝了这次调用，停下来等待用户的指示"。
+
+### 本会话文件编辑授权
+
+文件编辑审批的 **Allow for this session** 批准当前调用，并允许当前运行会话后续的 `Write`、`Edit`、`MultiEdit`、`NotebookEdit` 普通文件编辑，保持当前权限模式。与第 2 项切换到 `accept-edits` 不同，这项授权不写配置或数据库。
+
+- 项目外编辑仅获得本次确切目标文件的访问权限，不放开整个父目录。
+- 显式 ask/deny、受保护路径、工具禁用、Hook 和沙箱继续生效；切入 Plan 后仍只能编辑获准的计划文件。
+- 同一 Worker 重连保留授权；其他会话、复制会话、子代理和冷启动恢复不继承。
+- `/permissions` 的 Allow 页显示 Session edits，选择可撤销；也可运行 `/permissions edit-session show` 或 `/permissions edit-session revoke`。
+- 只有审批及参数校验成功才保存授权；拒绝、取消、过期或重复审批不会留下授权。
 
 ### 用 Tab 补充说明
 
@@ -71,11 +82,11 @@ src/calc.py
 - 再按 `Tab` 或 `Esc` 退出输入，回到普通选项；输入框为空时按 `Enter` 等同于直接选这一项。
 - 对话记录里，被拒绝的调用显示为 `Rejected` 或 `Rejected: 你的说明`。
 
-Auto 模式允许任务相关的项目外读取，以及经过审批的确切文件编辑。分类器拒绝自动放行时，由你决定是否执行；没有审批宿主时不执行。明确的 deny、工具禁用、Plan 边界和操作系统沙箱不因回退而放宽。
+Auto 模式允许任务相关的项目外读取，普通文件编辑直接放行；受保护路径仍经过权限审批。分类器拒绝自动放行时，由你决定是否执行；没有审批宿主时不执行。明确的 deny、工具禁用、Plan 边界和操作系统沙箱不因回退而放宽。
 
 ### 切换到自动模式
 
-当前模型可用于[自动权限模式](./auto-mode.md)时，菜单多一项：
+当前模型可用于[自动权限模式](./auto-mode.md)时，菜单在 No 之前增加切换 Auto 的选项；编号随前面的选项变化，例如 Bash 的第 3 项、文件编辑的第 4 项：
 
 ```text
    3. Yes, do not ask again · enable and switch to auto mode
@@ -109,7 +120,7 @@ This command requires approval
 
 ### 访问新网站
 
-`WebFetch` 访问一个新主机前会询问：
+在 ask、accept-edits 等需要域名审批的模式下，`WebFetch` 访问一个新主机前会询问：
 
 ```text
 Fetch
@@ -124,8 +135,11 @@ Fetch
 
 - 常见文档站点（`docs.python.org`、`developer.mozilla.org`、`doc.rust-lang.org` 等）和 Claude Code 一样预先放行，不询问。
 - 第 2 项添加规则 `WebFetch(domain:example.com)`。
-- `bypass` 模式直接放行；`dont-ask` 模式和没有 `--allowed-tools` 的 `-p` 模式拒绝。
-- `/deep-research` 启动的研究代理可以访问任何网页（这是你明确发起的联网研究），deny 规则对它们仍然有效。
+- Plan 模式的公网 `WebFetch` 不因访问新域名而询问，不保存永久域名规则，也不切换模式；显式 ask/deny、工具禁用、Hook 和沙箱仍然生效。
+- `bypass` 模式直接放行公网访问；`dont-ask` 模式和没有 `--allowed-tools` 的 `-p` 模式拒绝未授权的新域名。
+- `/deep-research` 启动的研究代理可以直接访问公网网页（这是你明确发起的联网研究），deny 规则对它们仍然有效。
+
+本机和内网地址的 Fetch 使用单次审批，只显示 Yes/No，不提供域名记忆或切换 Auto 选项。普通 allow 规则不会跳过这项审批；批准后仅本次确切 URL 可访问，`dont-ask` 或没有审批宿主时不执行。已配置的审批 Hook 仍可按本次请求作出决定。
 
 沙箱中的命令访问允许列表之外的主机时，也会询问，见[沙箱](./sandbox.md#网络)。
 
