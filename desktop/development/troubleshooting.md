@@ -65,4 +65,6 @@ cargo check --locked -p deepseek-code-desktop --all-targets
 
 前端的 `build` 脚本执行 Vite 构建，不应把构建成功等同于独立 TypeScript 类型检查通过，类型检查用 `npx.cmd tsc --noEmit`。业务逻辑在共享引擎 `deepseek-code-core` 中，修改引擎时两组 Rust 测试都要跑。Rust 检查需要完整本机构建环境。
 
+插话消息支持文本、图片和附件。队列提交使用 `UserContent`（字符串或内容块数组），写入聊天状态的 `ChatMessage.content` 时保留文本字符串，并将内容块数组序列化为 JSON 字符串。消息渲染器会解析内容块，保持附件预览与恢复会话后的展示一致。遇到 `UserContent` 不能赋值给 `string` 的类型错误时，检查这两个数据格式的转换。
+
 构建 release 版本和安装包见[从源码运行](../guide/quick-start.md#构建-release-版本)。Cargo 输出在仓库根目录的 `target/` 下（不是 `src-tauri/target`）：可执行文件 `target/release/dcd`（Windows 为 `dcd.exe`），安装包在 `target/release/bundle/`。
