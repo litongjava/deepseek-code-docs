@@ -40,6 +40,8 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 
 **Bash**：
 
+- Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
+- 执行结果的 `shell` 和 `shell_path` 表示实际启动的 Shell；语法错误和非零退出码均报告失败。保存工作目录不会覆盖命令的退出码。
 - `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。
 - `run_in_background: true` 让命令在后台运行，模型用 `TaskOutput` 读取输出、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
