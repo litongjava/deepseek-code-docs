@@ -32,7 +32,7 @@
 | `DEEPSEEK_API_KEY` | DeepSeek API Key | [接入 DeepSeek](./deepseek.md) |
 | `DEEPSEEK_BASE_URL` | 覆盖 DeepSeek 接口地址 | [接入 DeepSeek](./deepseek.md) |
 | `DEEPSEEK_CODE_DATA_DIR` | 数据目录 | [数据目录](./data-directory.md) |
-| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | 启用代理团队工具 | [代理团队](./agent-teams.md) |
+| `DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | 启用代理团队工具 | [代理团队](./agent-teams.md) |
 | `CLAUDE_BRIDGE_OAUTH_TOKEN` | 远程控制服务的 token | [远程控制](./remote-control.md) |
 | `TEAM_SYNC_TOKEN` | 团队同步客户端 token | [团队同步](./team-sync.md) |
 | `TEAM_SERVER_TOKENS` | 团队同步服务端的 token 与团队映射 | [团队同步](./team-sync.md) |
@@ -54,3 +54,14 @@
 | `--json-schema` | 结构化输出 | [结构化输出](./structured-output.md) |
 
 完整列表用 `dcl --help` 查看。
+
+## 环境变量名称迁移
+
+运行控制变量统一使用 `DEEPSEEK_CODE_` 前缀，旧的 `CLAUDE_CODE_` 名称不再生效。
+
+- `DEEPSEEK_CODE_MAX_TOOL_USE_CONCURRENCY`：工具并发上限，默认 10，必须为正整数。
+- `DEEPSEEK_CODE_SESSIONEND_HOOKS_TIMEOUT_MS`：退出 Hook 总等待预算，默认 1500 毫秒，必须为正整数。
+- `DEEPSEEK_CODE_STOP_HOOK_BLOCK_CAP`：Stop Hook 阻止次数上限，默认 8；0 表示不设上限。
+- `DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS`：启用团队功能，支持 1、true、yes、on。
+
+修改进程环境变量后，重新启动应用及对应 Worker。外部引擎协议变量和敏感信息脱敏中的旧名称不属于旧配置兼容。
