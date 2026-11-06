@@ -104,11 +104,40 @@ dcd-server --host 0.0.0.0 --allow-http
 
 应用内置一个 Ubuntu 环境，模型的命令在其中运行，`bash`、`apt` 等都可以直接使用，需要的软件让模型用 `apt-get install` 安装即可，例如 `git`、`python3`、`nodejs`。整个环境无需 Root。首次打开时应用会在后台下载约 30 MB 的 Ubuntu 基础系统并校验，完成前命令使用系统自带的 Shell。
 
+Ubuntu 就绪后，在右侧面板打开“Terminal”即可新建交互终端。终端与模型命令共享已安装的软件和工作区文件，可以手动运行程序，再让模型继续处理结果。手机终端底部提供 Esc、Tab、Ctrl+C 和方向键，便于补全、查看历史和中断命令；关闭终端前会确认是否结束其中的进程。
+
+例如，在终端中安装开发工具：
+
+```bash
+apt-get update
+apt-get install -y ca-certificates curl git nodejs npm python3
+curl --version
+node --version
+npm --version
+python3 --version
+```
+
+常用网络、文件处理和开发命令也可以一次安装：
+
+```bash
+apt-get install -y --no-install-recommends \
+  wget iproute2 iputils-ping dnsutils net-tools traceroute netcat-openbsd \
+  openssh-client openssl rsync tar gzip bzip2 xz-utils zip unzip \
+  procps psmisc lsof tree tmux nano vim-tiny less file jq ripgrep \
+  findutils diffutils sed gawk python3-pip python3-venv build-essential pkg-config
+```
+
+其中 `dig`、`nslookup` 用于 DNS 查询，`ip`、`ss`、`ifconfig`、`netstat` 用于网络查看，`nc` 用于连接测试。Android 的应用权限同样适用于 Ubuntu 中的命令；需要内核权限的网络操作应以实际返回结果为准。
+
+软件保存在手机的 Ubuntu 数据目录，正常更新 APK 后仍可使用；清除应用数据或卸载应用会移除环境。需要加速下载时，可以在 Ubuntu 的 APT 源配置中选择国内 Ubuntu ports 镜像，保留原来的套件、组件和签名校验。
+
+手机聊天页将会话标题与视图切换分行显示，输入区使用适合触控的按钮。侧边栏可通过顶部关闭按钮或外侧遮罩收起；设置分类可横向滑动，内容区域单独滚动。
+
 任务进行时，应用在通知栏显示“正在本机运行”，切到其他应用后任务继续执行；从最近任务中划掉应用即停止。
 
-需要使用电脑上的项目和工具时，在左下角用户菜单选择“连接服务器”，填写服务器地址（如 `https://server.example:8443`）和访问令牌，以后自动连接。登录页的“在本机运行”可以随时切回手机上的引擎。
+需要使用电脑上的项目和工具时，在左下角用户菜单选择“连接服务器”，填写服务器地址（如 `https://server.example:8443`）和访问令牌，以后自动连接。登录页或用户菜单中的“在本机运行”可以随时切回手机上的引擎。切换引擎后进入新聊天页，各端历史会话保留，可从侧边栏重新打开。
 
-构建 Android 应用需要 Android SDK、NDK 和 Java，设置 `ANDROID_HOME`、`NDK_HOME`、`JAVA_HOME` 后执行：
+构建 Android 应用需要 Android SDK Platform 36、build-tools、NDK 和 Java，并安装对应 Rust 目标（arm64 真机为 `aarch64-linux-android`）。设置 `ANDROID_HOME`、`NDK_HOME`、`JAVA_HOME` 后，在 Linux 环境执行：
 
 ```bash
 npm run build:android
@@ -117,6 +146,8 @@ npm run build:android
 该命令先下载 Ubuntu 环境所需的 PRoot 组件（按固定的 SHA-256 校验），再构建 APK。Android 工程已在仓库中，应用会自动避开状态栏、导航栏和键盘，不会被遮挡。
 
 调试安装包可以先运行 `npm run android:proot`，再执行 `npx tauri android build --apk --debug --target x86_64`，在模拟器上运行。
+
+Windows 可在同一份工作树中分两步执行：先在 WSL 中运行 `bash scripts/fetch-android-proot.sh`，再在配置了 Windows SDK、NDK 和 Java 的 PowerShell 中运行 `npx tauri android build --apk --debug --target aarch64`，生成 arm64 真机调试包。PRoot 准备脚本依赖 Linux 的 `ar` 和随脚本下载的 `patchelf`，仅安装 Git Bash 不足以完成这一步。脚本换行由仓库固定为 LF，便于 Windows 与 WSL 共用。
 
 ## 哪些功能只在桌面版提供
 
