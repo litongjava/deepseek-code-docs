@@ -36,7 +36,7 @@ dcd-server --print-token
 
 ## 让其他设备访问
 
-监听网络地址时必须使用 HTTPS，否则 `dcd-server` 拒绝启动。有两种方式。
+监听网络地址时，需要选择以下一种方式，否则 `dcd-server` 拒绝启动。推荐使用 HTTPS。
 
 **直接提供 HTTPS**，使用 PEM 格式的证书链和私钥：
 
@@ -50,7 +50,43 @@ dcd-server --host 0.0.0.0 --port 8443 --tls-cert cert.pem --tls-key key.pem
 dcd-server --behind-https-proxy
 ```
 
-代理需要转发 `Host` 头，并关闭响应缓冲，以便聊天内容逐字显示。
+代理需要转发 `Host` 头，并关闭响应缓冲，以便聊天内容逐字显示。Nginx 示例：
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name dcd.example.com;
+    ssl_certificate     /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+    client_max_body_size 100m;          # 上传附件
+
+    location / {
+        proxy_pass http://127.0.0.1:30085;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;   # 保留端口，与浏览器的 Origin 一致
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_buffering off;                # 聊天内容逐字显示
+        proxy_read_timeout 1h;              # 长时间运行的任务
+    }
+}
+```
+
+`Host` 要用 `$http_host`：HTTPS 不在 443 端口时，它带上端口，`dcd-server` 据此确认请求来自本站页面。Nginx 和 `dcd-server` 不在同一台机器时，`dcd-server` 加 `--host <内网地址>`，并只允许 Nginx 所在机器访问该端口。
+
+**直接使用 HTTP**，适合局域网、Tailscale 等可信网络，或者 HTTPS 由其他设备统一提供的场景：
+
+```bash
+dcd-server --host 0.0.0.0 --allow-http
+```
+
+之后在浏览器打开 `http://<服务器地址>:30085`。启动时会提示令牌以明文传输。浏览器只允许 HTTPS 页面使用部分功能，在 HTTP 页面上：
+
+- 复制按钮照常可用。
+- 语音输入不可用，点击麦克风时弹窗说明原因。
+- “添加到主屏幕”生成的是普通书签，打开时带浏览器地址栏，不能全屏。
+
+需要这些功能时改用 HTTPS。
 
 安全设计：
 
@@ -90,7 +126,20 @@ npm run build:android
 - 窗口、托盘、键鼠控制和屏幕截图。
 - 麦克风语音输入。
 
-在浏览器中新建项目时，直接填写服务器上的目录路径。
+## 在浏览器中选择项目文件夹
+
+新建或编辑项目时点击“浏览文件夹”，选择框列出服务器上的目录：点击文件夹进入下一级，“上一级”和“主目录”快速跳转，也可以在顶部输入路径后点“打开”。到达目标目录后点“使用此文件夹”。默认不显示以点开头的隐藏文件夹，需要时勾选“显示隐藏文件夹”。
+
+选择框只读取目录名称，不读取文件内容，同样需要登录后才能使用。
+
+## 弱网下使用
+
+网页版为慢速和不稳定的网络做了优化：
+
+- 网页和接口数据压缩传输，首次打开约 1.5 MB；之后再打开，网页文件直接使用浏览器缓存，不再下载。
+- 会话中重复的系统提示词和工具定义只传一份，长会话打开更快。
+- 页面空闲时几乎不发请求：回答生成期间才频繁检查状态，切到后台的标签页停止检查。
+- 网络断开时提示“无法连接服务器”，已输入的内容保留在输入框中，恢复后直接发送即可。
 
 ## 常见问题
 
@@ -99,3 +148,5 @@ npm run build:android
 **提示访问令牌不正确**：在服务器上运行 `dcd-server --print-token`，复制完整内容，不要带空格。
 
 **聊天内容一次性出现，而不是逐字显示**：检查反向代理是否缓冲了响应。
+
+**打开页面是白屏**：在浏览器开发者工具的 Network 中查看 `/assets/` 下的文件。返回 403 时，检查反向代理是否用 `$http_host` 转发了 `Host` 头。

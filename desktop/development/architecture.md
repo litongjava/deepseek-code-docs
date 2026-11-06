@@ -72,7 +72,21 @@ const key = await invoke<string>('get_bridge_api_key');
 
 Rust 通过 `#[tauri::command]` 定义命令，并在 `src-tauri/src/main.rs` 注册。前端封装集中在 `src/utils/tauriAPI.ts`，部分组件也直接 `invoke`。
 
-普通 Chrome 没有 `window.__TAURI_INTERNALS__`，无法直接执行这些命令。要支持完整浏览器版，应为所需能力增加 HTTP 适配，并处理桌面专属能力的替代交互。
+组件通过 `invokeDesktop` 调用原生命令：桌面版直接走 Tauri IPC；浏览器和手机应用对已登记的命令改走 Bridge 的 HTTP 接口，其余命令给出“需要桌面版”的明确提示，界面不必区分运行环境。
+
+大块二进制数据（如录音）直接作为原始 IPC 请求体传递，附带的参数放在请求头里：
+
+```ts
+await invokeDesktop<string>('voice_transcribe', audioBytes, {
+  headers: { 'x-voice-id': id, 'x-voice-mime': 'audio/webm' },
+});
+```
+
+Rust 命令接收 `tauri::ipc::Request`，从 `InvokeBody::Raw` 读取字节。与 JSON 数字数组相比，体积约为四分之一，也省去了两端的序列化开销。
+
+后台定时刷新使用 `startVisiblePolling`：上一次请求完成后才开始计时，页面隐藏时暂停，可见时立即刷新一次，适合面板状态这类轮询。
+
+Desktop、移动端和 `dcd-server` 使用同一个 Tokio 运行时配置，工作线程栈为 16 MiB。工具调用会嵌套较深的异步调用，这个大小在代码中显式设置，直接运行构建产物时同样生效。
 
 ## 鉴权和跨域
 
@@ -82,11 +96,9 @@ Bridge 创建时生成随机 API Key。受保护接口接受 `Authorization: Bea
 
 Bridge 的允许来源列表包含 `http://127.0.0.1:5200` 与 `http://localhost:5200`，但这是两个独立的浏览器存储来源。使用其中一个地址配置 Key 后，不要误以为另一个也已配置。
 
-## 为什么不能直接让手机访问
+## 从手机和其他电脑访问
 
-Bridge 绑定 `127.0.0.1`，前端也把后端地址写成本机回环地址。手机上的 `127.0.0.1` 指的是手机本身。
-
-远程使用需要专门调整后端监听、可配置 API 地址、认证、跨域和部署方式。目前这些属于后续适配工作。部署本文档站不需要开放 Rust Bridge。
+桌面版的 Bridge 只监听 `127.0.0.1`，供本机窗口使用。需要从手机或其他电脑访问时，运行 `dcd-server`：它启动同一个 Bridge，并提供网页界面、访问令牌登录和来源校验，见[在浏览器和手机上使用](../guide/web-and-mobile.md)。部署本文档站不需要开放 Rust Bridge。
 
 ## 排错顺序
 
