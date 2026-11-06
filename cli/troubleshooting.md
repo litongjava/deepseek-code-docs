@@ -58,9 +58,15 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 **现象**：旧版本在计划模式中选择"清空上下文"、Desktop 与 dcl 同时写同一个会话，或多个 dcl 并发运行时，偶发 `database is locked`。
 
-**原因**：先读后写的事务在 SQLite WAL 模式下升级写锁失败时会立即报错，不会等待 `busy_timeout`。
+**原因**：先读后写的事务在 SQLite WAL 模式下升级写锁失败时会立即报错，不会等待 `busy_timeout`。即使使用即时写事务，其他连接长时间持锁也可能超过等待上限。仅凭这条错误不能判定是用户取消或 Worker 崩溃。
 
-**处理**：升级到当前版本。所有写事务都改为一开始就获取写锁，遇到并发时会等待，最长 5 秒。
+**处理**：升级到当前版本。写事务在开始时获取写锁，普通写操作最多等待 5 秒。前台目标提案心跳只等待 25 毫秒；遇到数据库忙时保留任务视图、继续显示输出，并在后续刷新恢复心跳。等待失败不会标记心跳成功，也不会批准目标或重放工具。
+
+`Frontend observation deferred` 表示可恢复的观察端争用，原始错误保存在任务的 `stderr.log`。其他不可恢复的视图错误仍会明确报告；只要 Worker 仍运行，前台退出视图不会取消它，可用 `/tasks attach <ID>` 重新连接。若同时出现 Worker 退出，请分别检查 `/tasks show <ID>` 的状态、退出码和日志，不能把两个现象直接归为同一原因。
+
+## Windows 任务审批文件访问失败
+
+Windows 在审批文件被删除或短暂独占时可能返回 `Access is denied` 或共享冲突。读取 `pending-question.json` 会以 10 毫秒间隔重试，最多等待 50 毫秒；文件已删除表示该审批已处理。持续失败会报告操作和文件路径，便于检查访问权限或文件占用，不会自动批准或取消任务。任务输出文件打开失败也会附带路径。
 
 ## Another skills import is running
 

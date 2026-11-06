@@ -5,7 +5,7 @@
 代理团队目前是**实验功能**，需要设置环境变量开启：
 
 ```bash
-export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+export DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ```
 
 ## 相关工具
@@ -20,7 +20,7 @@ export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ## 示例
 
 ```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 dcl -m deepseek-flash --api-format anthropic \
+DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1 dcl -m deepseek-flash --api-format anthropic \
   --permission-mode bypass -p "
 1) TeamCreate 团队 docs。
 2) TeamSpawn 两个成员：alice 写 alice.txt，介绍 Rust 所有权；bob 写 bob.txt，介绍 Rust trait，写完用 SendMessage 通知 alice。

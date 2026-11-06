@@ -8,6 +8,8 @@
 - `Shift+Tab`：切换到 plan 模式，再输入任务。
 - `--permission-mode plan`：启动时就进入。
 
+通过 `/plan` 启用时会显示计划文件位置，并提示 `DeepSeek Code will submit it for approval before implementation.`；用 `/plan open` 编辑已有计划后，会提示 DeepSeek Code 需要为更新后的文档请求审批。
+
 进入计划模式时，工具结果会显示已有计划；尚未生成计划时会明确提示正在调查、随后编写计划。进入模式本身不代表计划已经写好。
 
 模型写完计划后会请求审批。批准后，计划正文会作为独立内容显示并保留在对话历史中，方便滚动查看；工具详情也保留完整计划。和 Claude Code 一样，输入框的位置显示计划和三个选项：
@@ -44,6 +46,12 @@ Here is DeepSeek Code's plan:
 - **直接编辑工具**：`Edit`、`Write` 等在计划期间可以修改本会话的计划文件；子代理也可以修改直属父代理的计划文件。计划保存在[数据目录](./data-directory.md)的 `plans/` 下。Shell 命令可能生成文件或修改依赖，Plan 并非文件系统只读沙箱。
 
 `EnterPlanMode` 返回的 `planFilePath` 可直接用于 Read、Write、Edit，无需把整个数据目录加入工作目录。Windows 的正反斜杠、盘符大小写和扩展路径前缀可以等价使用。切换权限模式后仍可访问本会话的计划文件，访问按当前权限模式检查。子代理可直接读取、修改直属父代理的计划文件，用于审阅和完善计划；Plan 中对其他独立会话的计划文件仅允许读取。
+
+### 联网查资料
+
+Plan 中 `WebFetch` 访问新的公网域名默认直接执行，无需确认，不会因此切换到 Auto 或保存域名授权。显式 ask/deny 规则、工具禁用、Hook 和沙箱限制仍然有效。
+
+本机和内网地址仍请求本次访问审批；批准后可访问本地 HTTP/HTTPS 服务，状态继续保持 Plan。
 
 ### MCP 工具
 
