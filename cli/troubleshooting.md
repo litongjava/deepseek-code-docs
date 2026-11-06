@@ -64,6 +64,10 @@ Error: Engine execution failed: Auto permission denial limit reached; stopping t
 
 `Frontend observation deferred` 表示可恢复的观察端争用，原始错误保存在任务的 `stderr.log`。其他不可恢复的视图错误仍会明确报告；只要 Worker 仍运行，前台退出视图不会取消它，可用 `/tasks attach <ID>` 重新连接。若同时出现 Worker 退出，请分别检查 `/tasks show <ID>` 的状态、退出码和日志，不能把两个现象直接归为同一原因。
 
+## Windows 任务审批文件访问失败
+
+Windows 在审批文件被删除或短暂独占时可能返回 `Access is denied` 或共享冲突。读取 `pending-question.json` 会以 10 毫秒间隔重试，最多等待 50 毫秒；文件已删除表示该审批已处理。持续失败会报告操作和文件路径，便于检查访问权限或文件占用，不会自动批准或取消任务。任务输出文件打开失败也会附带路径。
+
 ## Another skills import is running
 
 **现象**：没有并发导入时，导入技能偶发报 `Another skills import is running`。编辑 MCP 配置时报 `MCP configuration is being edited; retry`，原因相同。
