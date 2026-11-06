@@ -53,6 +53,21 @@ Bash 路径优先级：`DEEPSEEK_CODE_BASH_PATH` 环境变量 → `shell.bashPat
 
 `dcl config show` 的 `shell` 项显示保存值、实际程序路径和来源（`environment`、`settings`、`detected`），解析失败时显示原因。文件配置对下一条命令生效；环境变量变更需要重启应用和 Worker。
 
+### WSL
+
+WSL 是独立的 Shell 选项 `wsl`，由 `wsl.exe` 启动所选 Linux 发行版中的 Bash；它不是 Git Bash 的另一个路径。
+
+```powershell
+dcl config set shell.wsl.distribution dcl-linux-test
+dcl config set shell.wsl.bashPath /bin/bash
+dcl config set shell.toolDefault wsl
+dcl config set shell.terminalDefault wsl
+```
+
+必须明确指定已经安装的发行版，不会使用系统默认发行版。发行版内需要 Bash、`wslpath` 和 `setsid`；`wsl.bashPath` 是 Linux 绝对路径。Windows 项目路径通过所选发行版的 `wslpath` 转换，包含空格和中文的路径按独立参数传递。工作目录按会话和发行版分别保存。
+
+前台超时、取消、后台任务停止会结束本次调用拥有的 Linux 进程组，不会终止整个发行版。主动脱离进程组的守护进程不在这一保证内。启用的沙箱目前不能隔离 WSL 时会明确拒绝执行，不能通过指定 WSL 绕过沙箱。
+
 ## 环境变量
 
 | 变量 | 作用 | 文档 |
