@@ -4,7 +4,7 @@
 
 ## 1. 先认清样本是什么
 
-来源文件：`D:\document\dev-docs\25_Artificial_Intelligence\111_llm\提示词\claude-code\code_prompt_1.json`。
+来源文件：维护者资料库中的 `code_prompt_1.json`。
 
 这个文件是一次模型请求的 JSON 样本，**没有 `system` 字段**，因此不能把它称为完整的 Claude Code 系统提示词。真正包含大量行为指令的部分，是 `tools[].description` 和 `tools[].input_schema` 中的参数说明。
 
@@ -194,7 +194,7 @@ Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话�
 - `Grep.include`、中文文本、相对路径、`Glob` 文件匹配与非法模式。
 - 原有 UTF-8 文件和 PowerShell 回归检查。
 
-本次验证使用本地自动化测试，不调用付费模型，也不需要浏览器测试。因此没有新增浏览器截图。后续若进行可视化回归，应使用用户指定的 `D:\code\project\project-browser-use\deepseek-browser-use`，显示测试过程，截图放文档站 `assets` 下。
+本次验证使用本地自动化测试，不调用付费模型，也不需要浏览器测试。因此没有新增浏览器截图。后续若进行可视化回归，应使用 deepseek-browser-use，显示测试过程，截图放文档站 `assets` 下。
 
 复现命令（在应用仓库根目录执行）：
 

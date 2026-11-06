@@ -12,7 +12,7 @@
 
 ## 可见浏览器验证
 
-通过指定的 `D:\code\project\project-browser-use\deepseek-browser-use` 对应 dsb 服务，使用可见 Chrome（headless=false）访问 `http://127.0.0.1:5200`，连接真实本地后端。
+通过 deepseek-browser-use 的 dsb 服务，使用可见 Chrome（headless=false）访问 `http://127.0.0.1:5200`，连接真实本地后端。
 
 - 修复前：首页直接创建、空会话之间连续创建均为一条工作区栏；从已有消息的项目会话点击新建后，DOM 中出现两个 Create PR 按钮，同时记录到重复 key 错误。
 - 修复后：刷新页面，重新打开同一个已有消息的会话，再点击相同的新建入口。DOM 中只有一个 Create PR 按钮，重复 key 错误为零。

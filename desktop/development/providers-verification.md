@@ -33,7 +33,7 @@
 
 验证日期：2026-10-13。环境：Windows、Chrome 可见窗口、Vite 5200、Rust Bridge 30085、Node.js 22.23.2。
 
-浏览器操作通过 `D:\code\project\project-browser-use\deepseek-browser-use` 的 `dsb\dsb.exe` 执行，任务 ID 为 `2026101302`。测试供应商指向本机 18317 端口的模拟服务，没有调用外部付费模型。
+浏览器操作通过 deepseek-browser-use 的 `dsb` 执行，任务 ID 为 `2026101302`。测试供应商指向本机 18317 端口的模拟服务，没有调用外部付费模型。
 
 ## 已验证结果
 

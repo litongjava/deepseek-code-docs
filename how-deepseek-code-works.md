@@ -9,7 +9,7 @@ deepseek-code 的工作过程可以概括为：宿主程序把行为规则、用
 两份文件位于：
 
 ```text
-D:\document\dev-docs\08_Operation-maintenance\101_ai-assistant\01_claude-code\
+维护者资料库中的抓包文件：
   claude-code-2.1.302-system_prompt-step-1.json
   claude-code-2.1.302-system_prompt-step-final.json
 ```

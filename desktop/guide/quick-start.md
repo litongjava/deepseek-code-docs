@@ -94,7 +94,7 @@ Tauri 只有在启用 `custom-protocol` 特性时才使用打包进程序的前�
 ## 启动完整桌面开发环境
 
 ```powershell
-cd D:\code\deepseek-code
+cd deepseek-code
 npm.cmd ci
 npm.cmd run tauri dev
 ```
@@ -129,7 +129,7 @@ GitHub 连接由 Bridge 提供，无需另外启动服务。两种连接方式�
 ## 启动文档站
 
 ```powershell
-cd D:\code\deepseek-code-docs
+cd deepseek-code-docs
 npm.cmd ci
 npm.cmd run dev
 ```
