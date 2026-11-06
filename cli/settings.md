@@ -20,10 +20,38 @@
 | `editorMode` | `normal` | 设为 `vim` 时使用 vim 风格编辑，见[vim 模式](./vim-mode.md) |
 | `hooks` | 无 | 工具调用前后执行的 hooks |
 | `sandbox` | 无 | 在沙箱中运行 Bash 命令，见[沙箱](./sandbox.md) |
+| `shell` | 工具使用 Bash，手动终端保留原默认值 | 共用 Shell 配置，见下文 |
 | `permissions` | 无 | `allow`、`ask`、`deny` 规则列表，见[权限](./permissions.md#规则) |
 | `remoteControlAtStartup` | `false` | 交互会话启动时自动连接远程控制，见[远程控制](./remote-control.md#启动时自动连接) |
 
 这两个开关和 Claude Code 的同名设置含义一致。
+
+## Shell 配置
+
+`shell` 与其他设置共用数据目录的 `settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
+
+```json
+{
+  "shell": {
+    "toolDefault": "bash",
+    "terminalDefault": "auto",
+    "bashPath": "D:\\Program Files\\Git\\bin\\bash.exe"
+  }
+}
+```
+
+```powershell
+dcl config set shell.bashPath 'D:\Program Files\Git\bin\bash.exe'
+dcl config set shell.toolDefault bash
+dcl config set shell.terminalDefault bash
+dcl config show
+```
+
+Shell 名称支持 `bash`、`sh`、`zsh`、`fish`、`cmd`、`powershell`、`pwsh`，所选程序需要已安装。`terminalDefault: "auto"` 保留入口原有默认行为；dcl 在 Windows 优先使用 PowerShell 7，找不到时使用 Windows PowerShell。
+
+Bash 路径优先级：`DEEPSEEK_CODE_BASH_PATH` 环境变量 → `shell.bashPath` → 自动发现。显式路径必须是存在的绝对文件路径；不能填 System32 或 WindowsApps 中的 WSL Bash 别名。路径失效时直接报错。将 `bashPath` 设为 `null` 或删除该字段可恢复自动发现。
+
+`dcl config show` 的 `shell` 项显示保存值、实际程序路径和来源（`environment`、`settings`、`detected`），解析失败时显示原因。文件配置对下一条命令生效；环境变量变更需要重启应用和 Worker。
 
 ## 环境变量
 
