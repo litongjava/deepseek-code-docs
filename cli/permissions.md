@@ -50,7 +50,7 @@ src/calc.py
 - `↑`/`↓` 选择、`Enter` 确认，也可以直接按数字键。
 - `Esc` 等同于选"No"：这次调用不执行，这一轮停止，模型知道是你拒绝的。
 - 回答后审批框随即清除，和 Claude Code 一样，对话记录里只留下这次调用的结果（例如修改的 diff 或命令输出）。内容超过一屏时，审批框只显示开头部分，末尾标明还有多少行。
-- 第 2 项只批准一次之外，还会放宽之后的审批：修改文件时，本会话切换到 `accept-edits` 模式；Bash 命令添加放行规则（见下文）；其他工具添加以工具名为规则的放行。和 Claude Code 一样，规则立即在本会话生效，同时写入项目的 `.claude/settings.local.json`，之后在这个项目里启动的会话也会沿用。可以用 `/permissions list` 查看、`/permissions remove` 删除；写入文件失败时会提示，规则仍在本会话有效。
+- 第 2 项只批准一次之外，还会放宽之后的审批：修改文件时，本会话切换到 `accept-edits` 模式；Bash 使用仅当前运行会话的 Allow for Session（见下文）；其他工具添加以工具名为规则的放行，后者仍写入项目的 `.claude/settings.local.json`。可以用 `/permissions list` 查看、`/permissions remove` 删除；写入文件失败时会提示，规则仍在本会话有效。
 - 选"No"时，这一轮停止，和 Claude Code 一样显示 `⎿ Interrupted · What should DeepSeek Code do instead?`，等你输入下一步要做什么。模型收到的结果是"用户拒绝了这次调用，停下来等待用户的指示"。
 
 ### 用 Tab 补充说明
@@ -60,7 +60,7 @@ src/calc.py
 ```text
  Do you want to proceed?
  ❯ 1. Yes, use -5 instead
-   2. Yes, and don’t ask again for: git *
+   2. Allow for Session
    3. No
  enter confirm · esc to cancel amend
 ```
@@ -83,7 +83,7 @@ Auto 模式允许任务相关的项目外读取，以及经过审批的确切文
 
 选它会批准这次调用，并在审批成功提交后把本会话切换到 `auto` 模式，底部状态栏同步更新。首次配置时使用当前模型，并采用 `failure_policy: "manual"`：分类器超出输入预算、超时或不可用时转为人工审批。已有分类器、超时和预算配置保持不变；旧配置中的 `deny` 也会在有交互审批宿主时转人工确认。
 
-Bash 命令的审批和 Claude Code 一样，第 2 项记住的是命令前缀：
+Bash 命令的第 2 项允许当前会话后续所有未命中危险规则的 Bash，包括复合命令：
 
 ```text
 Bash command
@@ -95,14 +95,14 @@ This command requires approval
 ───────────────────────────────────────────
  Do you want to proceed?
  ❯ 1. Yes
-   2. Yes, and don’t ask again for: npm run *
+   2. Allow for Session
    3. No
 ```
 
-- **记住前缀**：命令以程序名加子命令开头时（例如 `npm run`、`git status`、`cargo test`），添加规则 `Bash(npm run *)`，之后以 `npm run` 开头的命令都直接执行。
-- **记住程序**：程序后面先跟选项时（例如 `git -C src log`、`ls -la`），和 Claude Code 一样添加 `Bash(git *)`，放行这个程序的所有用法。
-- **记住整条命令**：程序后面直接跟参数时（例如 `touch notes.txt`），以及会删除、覆盖文件、执行代码或访问网络的程序（`rm`、`mv`、`cp`、`chmod`、`curl`、`ssh`、`bash`、`python`、`node`、`find`、`xargs` 等），只记住这条命令本身。
-- **只有"是/否"**：多行命令，以及含有 `&&`、`|`、`;`、`$`、重定向、括号或 `*` 的命令。放行规则永远不会匹配这类命令，记住也没有用。
+- **Allow for Session**：只在当前进程的当前会话内生效，不写入项目配置或数据库。新会话、复制会话、子代理和冷启动恢复均不继承；重新连接仍在运行的同一个 Worker 会保留。
+- **危险命令**：不显示此选项，已有会话授权也不会覆盖危险规则，每条命令单独确认。显式 ask/deny、工具禁用、Hook、沙箱继续生效。
+- **查看与撤销**：`/permissions` 的 Allow 页显示 Session Bash，选择可撤销；也可用 `/permissions bash-session show`、`/permissions bash-session revoke`。撤销影响后续调用，不中断已经开始的命令。
+- 会话授权只在工具参数和权限检查通过后提交。拒绝、取消、过期、重复审批或把参数改成危险命令不会留下授权。
 - Bash 先显示说明，再在虚线之间显示完整命令；其他工具显示工具名和格式化后的输入（最多 12 行）。
 - 没有实时界面时（例如输入来自管道），同样的内容以文本显示，输入 `1`/`y` 放行、`2` 放行并记住（有该项时）、切换到自动模式那一项的编号（有该项时），其他输入拒绝。
 - 连接了[远程控制](./remote-control.md)时，远程客户端同样会收到这个请求，哪一方先回答就以哪一方为准。
