@@ -101,6 +101,7 @@ export default defineConfig({
           { text: 'vim 模式', link: '/cli/vim-mode' },
           { text: '回退', link: '/cli/rewind' },
           { text: '权限模式与工具审批', link: '/cli/permissions' },
+          { text: 'Shell 危险命令规则', link: '/cli/dangerous-commands' },
           { text: '计划模式', link: '/cli/plan-mode' },
           { text: '自动权限模式', link: '/cli/auto-mode' },
           { text: '沙箱', link: '/cli/sandbox' },
