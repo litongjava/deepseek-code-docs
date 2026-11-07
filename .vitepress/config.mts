@@ -55,6 +55,7 @@ export default defineConfig({
         { text: '浏览器调试', link: '/desktop/development/browser' },
         { text: '源码与接口导航', link: '/desktop/development/source' },
         { text: 'Code 提示词与隐私适配', link: '/desktop/development/code-prompt' },
+        { text: 'Super Agent 架构规范', link: '/cli/super-agent' },
         { text: '测试与故障排查', link: '/desktop/development/troubleshooting' }
       ] },
       { text: '维护与参考', collapsed: true, items: [
@@ -131,7 +132,8 @@ export default defineConfig({
           { text: '远程控制', link: '/cli/remote-control' },
           { text: 'Windows 远程开发 macOS', link: '/cli/windows-macos-development' },
           { text: '会话消息', link: '/cli/session-messages' },
-          { text: '代理团队', link: '/cli/agent-teams' }
+          { text: '代理团队', link: '/cli/agent-teams' },
+          { text: 'Super Agent 架构规范', link: '/cli/super-agent' }
         ] },
         { text: '实战与参考', items: [
           { text: '用 dcl 修复开源项目 Issue', link: '/cli/case-qwerty-learner' },
