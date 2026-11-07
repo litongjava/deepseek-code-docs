@@ -38,6 +38,19 @@
 
 截图见 `assets/desktop-customize-prompt-saved.png`、`assets/desktop-customize-tools-saved.png`。
 
+### 原生窗口验证
+
+上面的保存验证在浏览器里完成。为确认原生窗口本身也能保存，另起一个开启了远程调试端口的桌面开发实例，用 deepseek-browser-use 通过 CDP 接手应用窗口本身（`external-cdp`，1920×1032），重复同样的操作：
+
+1. 在提示词页填写内容并保存，数据目录的 `customization.json` 写入 `append` 与对应文本。
+2. 在工具页关闭 Write 并保存，文件新增 `disabled_tools`，提示词保持步骤 1 的值。
+3. 重新加载窗口后回到提示词页，内容仍是保存的值。
+4. 在提示词页改成新内容但不保存，切到工具页再关闭 Read 并保存：文件里的提示词没有变化，只新增了 Read。
+
+四项结果与浏览器验证一致，说明保存链路在原生窗口下同样只提交当前页面的部分。验证结束后已删除测试写入的 `customization.json`，界面语言和工具状态未留下改动。
+
+![原生窗口中的工具页](/desktop-customize-webview2-tools.png)
+
 ### 自动化检查
 
 前端 652 项测试通过（其中提示词与工具设置 9 项、自定义页 7 项、语言完整性 39 项），类型检查、生产构建、桌面端 `cargo check` 通过，`git diff --check` 通过。
