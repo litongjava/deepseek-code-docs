@@ -43,7 +43,9 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
 - 执行结果的 `shell` 和 `shell_path` 表示实际启动的 Shell；语法错误和非零退出码均报告失败。保存工作目录不会覆盖命令的退出码。
 - `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。
-- `run_in_background: true` 让命令在后台运行，模型用 `TaskOutput` 读取输出、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
+- `run_in_background: true` 让命令作为受管任务在后台运行，模型用 `TaskOutput` 读取输出、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
+- **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
+- **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，结果里 `pipeline_sigpipe` 为 `true`、`success` 仍为 `true`，同时保留 `exit_code: 141`。
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
 - 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
@@ -72,6 +74,6 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 
 ## 调整工具和系统提示词
 
-工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 的[提示词与工具](/desktop/usage/skills#提示词与工具)页面编辑，dcl 自动生效，下一次模型请求开始使用。
+工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 自定义页的[提示词](/desktop/usage/skills#提示词)和[工具](/desktop/usage/skills#工具)页面编辑，dcl 自动生效，下一次模型请求开始使用。
 
 这个文件有语法错误时，dcl 会报告错误并停止这一轮，不会悄悄恢复已关闭的工具。
