@@ -6,10 +6,17 @@
 
 - Rust 稳定版工具链（`cargo`、`rustc`）。
 - Linux 需要以下系统开发库（Debian/Ubuntu 包名）：
-  - `libasound2-dev`：`dcl voice` 的麦克风采集（`cpal`）。
-  - `libxdo-dev`：引擎的计算机操作能力（`enigo`）。
   - `pkg-config`。
+  - `libasound2-dev`：`dcl voice` 的麦克风采集（`cpal`）。
 - 只构建 CLI 不需要 Node.js；构建 Desktop 需要 Node.js 22+。
+
+在 Debian 或 Ubuntu 上，构建前执行：
+
+```bash
+sudo apt install pkg-config libasound2-dev
+```
+
+计算机操作能力（`enigo`）在 X11 下会在运行时加载 `libxdo`，需要时另外安装 `libxdo3`（或 `xdotool`），它不参与编译。
 
 ## 构建
 
@@ -27,20 +34,19 @@ Cargo 输出统一放在 workspace 根目录的 `target/`。
 
 ```bash
 mkdir -p ~/debs && cd ~/debs
-apt-get download libasound2-dev libxdo-dev
+apt-get download libasound2-dev
 for d in *.deb; do dpkg -x "$d" ~/.local/sysroot; done
 
 # -dev 包里的 .so 是相对符号链接，改为指向系统已安装的运行库
 L=~/.local/sysroot/usr/lib/x86_64-linux-gnu
 ln -sfn /usr/lib/x86_64-linux-gnu/libasound.so.2.0.0 $L/libasound.so
-ln -sfn /usr/lib/x86_64-linux-gnu/libxdo.so.3        $L/libxdo.so
 
 export PKG_CONFIG_PATH=$L/pkgconfig
 export PKG_CONFIG_SYSROOT_DIR=~/.local/sysroot
 export RUSTFLAGS="-L $L"
 ```
 
-前提是对应的运行库（`libasound2`、`libxdo3`）已经安装。
+前提是运行库 `libasound2` 已经安装。
 
 如果 `/usr/local/cargo` 等共享 `CARGO_HOME` 对当前用户只读（报错 `failed to create directory .../registry/cache ... Permission denied`），改用用户自己的目录，并复制镜像源配置：
 
