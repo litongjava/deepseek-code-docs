@@ -135,9 +135,9 @@ Windows 在审批文件被删除或短暂独占时可能返回 `Access is denied
 
 **处理**：运行 `/lsp` 查看各语言的状态，按提示执行 `/lsp install <语言>`，或用系统包管理器安装，见[语言服务器](./lsp.md)。安装 Java 时如果提示下载的不是压缩包，通常是下载站点临时不可用，稍后重试即可。
 
-## 构建报错 `alsa-sys` 或找不到 `alsa`
+## 构建报错 `alsa-sys` 或 `unable to find library -lxdo`
 
-缺少 `libasound2-dev` 或 `pkg-config`。在 Debian/Ubuntu 上执行 `sudo apt install pkg-config libasound2-dev`；没有 root 权限时见[安装与构建](./install.md#没有-root-权限时的-linux-构建)。
+缺少 `libasound2-dev`、`libxdo-dev` 或 `pkg-config`。在 Debian/Ubuntu 上执行 `sudo apt install pkg-config libasound2-dev libxdo-dev`；没有 root 权限时见[安装与构建](./install.md#没有-root-权限时的-linux-构建)。
 
 ## 构建报错 `failed to create directory .../registry/cache`
 
