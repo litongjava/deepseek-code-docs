@@ -52,6 +52,8 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 - `result`：每轮一条，含 `subtype`（`success`、`error_max_turns`、`error_during_execution`）、`is_error`、`result`、`num_turns`、`duration_ms`、`total_cost_usd`（会话累计）、`usage`、`structured_output`，以及 `permission_denials`（本轮被规则、模式、Hook 或宿主拒绝的工具调用）。
 - `prompt_suggestion`：`initialize` 打开 `promptSuggestions` 后，每轮成功结束时给出下一句建议。
 
+超限恢复、摘要失败或恢复取消时，最终 `result` 仍使用相同字段结构。已获得的各次尝试用量、模型轮数和工具拒绝会保留并汇总；同一次尝试内按请求 ID 汇总不同模型请求，同一请求的多次累积报告只保留最新已知值，后续缺失或 null 字段不擦除已报告计数。上下文重置后的新消息段也继续计入本轮；未知用量保留为空对象或未报告字段，不当作精确零。`total_cost_usd` 是收尾时读取的会话累计费用，不按尝试相加。最终错误反映实际结束原因；附属诊断日志保存失败会提示，但不会阻断压缩恢复。
+
 所有消息都带 `session_id` 和 `uuid`。为兼容旧的脚本，`text`、`tool_start`、`tool_result`、`usage` 等事件行仍然保留，SDK 可以忽略不认识的类型。
 
 ## 宿主可以发送的控制请求
@@ -62,7 +64,7 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 
 回合控制：
 
-- `interrupt`：中断当前回合，该回合的 `result` 为 `error_during_execution`。
+- `interrupt`：通知当前回合取消，并等待该回合完成收尾后返回一次 `error_during_execution` 结果。结果保留中断前按请求 ID 收集的最后已知用量、模型轮数、工具拒绝和实际耗时，轮次状态为 `cancelled`，终态计时事件也只发送一次；未知用量不填成零。压缩恢复期间同样适用，已提交的摘要仍报告保存位置，取消后不继续发送重试请求。
 - `cancel_async_message`（`message_uuid`）：取消尚未开始的排队消息，返回 `cancelled`。
 
 会话设置：
