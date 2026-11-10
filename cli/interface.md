@@ -149,6 +149,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/help` | 命令说明 |
 | `/status` | 当前会话和服务状态，见[状态查看](./status.md) |
 | `/provider`、`/model`、`/test` | 提供商和模型，见[模型与提供商](./providers.md) |
+| `/switch` | 选择 Responses 请求档案，见[模型与提供商](./providers.md) |
 | `/plan 任务` | 进入[计划模式](./plan-mode.md) |
 | `/lsp` | [语言服务器](./lsp.md) |
 | `/loop` | 定时重复一条提示词，或让模型自定节奏，见[定时任务与循环](./scheduling.md) |

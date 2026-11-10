@@ -233,8 +233,7 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 模型请求会携带真实客户端信息和追踪 ID，便于在代理日志中按会话定位请求：
 
 - `user-agent`、`x-app`、`originator` 标识 dcl 或 Desktop；`x-dcl-runtime`、`x-dcl-os`、`x-dcl-arch` 描述运行环境。
-- `session-id`、`x-session-id`、`x-dcl-session-id` 对应当前会话 ID，恢复会话后保持不变。
-- `thread-id` 与当前会话 ID 相同，表示持续的对话线程，不是操作系统线程。子代理使用自己的会话 ID；可取得父会话关系时，附带 `x-parent-session-id`。
+- `x-dcl-session-id` 对应当前会话 ID，恢复会话后保持不变。OpenCode 的接口额外要求 `x-opencode-session`，其余供应商不会收到会话 ID。子代理使用自己的会话 ID；可取得父会话关系时，附带 `x-parent-session-id`。
 - `x-dcl-turn-id` 标识一次引擎执行。同一轮工具循环中的多个模型请求共享它；新一轮或恢复执行会生成新值。
 - `x-request-id` 与 `x-client-request-id` 标识一次模型请求，主循环中的值与请求详情中的 ID 一致。同一请求的网络重试保留此 ID；`x-dcl-retry-count` 从 `0` 开始递增。
 
@@ -252,3 +251,26 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 支持自适应思考的 Claude 型号使用相同的 effort 字段；旧式 Claude 型号继续使用其支持的 `thinking.budget_tokens`。结构化输出的 `output_config.format` 与 effort 可同时保留。OpenAI Chat Completions 使用 `reasoning_effort`，Responses 使用 `reasoning.effort`。最终可用级别由所选模型和服务端决定。
 
 排查代理链路时，用会话 ID 找到请求，再分别查看入口请求体与上游请求体；协议转换后字段名称可能不同。
+
+## Responses 请求档案与客户端身份
+
+有些 Responses 兼容接口按 Codex 客户端发出的请求形状做兼容，要求补齐标准的 Responses 字段，甚至按客户端标识分流。`/switch` 为当前会话选择请求档案，只作用于声明了 Responses 协议的模型，即模型配置里的 `api` 为 `openai-responses` 或 `openai-codex-responses`；其他协议的请求保持原样。
+
+- `/switch` 显示当前档案，不改变设置。
+- `/switch compat` 补齐标准的 Responses 字段，客户端身份仍标识为 dcl。
+- `/switch codex` 在 `compat` 的基础上，把请求写成 Codex 客户端的样子。
+- `/switch default`（也接受 `off`）恢复默认，请求与升级前完全一致。
+
+两个档案分别增加的内容：
+
+- `compat` 补齐标准的 Responses 字段：请求带工具时加入 `tool_choice` 和 `parallel_tool_calls`，没有工具时不发这两个字段；同时加入 `prompt_cache_key` 和 `text.verbosity`。`prompt_cache_key` 使用会话 ID，便于服务端做缓存亲和；`reasoning.context` 只在请求已带推理配置时加入，需要完整的推理字段时配合 `/effort` 使用。
+- `codex` 在 `compat` 的基础上替换客户端身份：`user-agent`、`originator`、`session-id`、`thread-id`、`x-codex-window-id`、`x-codex-turn-metadata`，请求体附带 `client_metadata`，其中的 `turn_id` 与请求头一致。此时不再发送 `x-app` 和 `x-dcl-*` 这些 dcl 自有标识，避免一个请求里同时出现两种身份。
+
+档案按会话保存，`/clear` 时沿用，`--resume` 恢复会话时按该会话保存的值生效。它存放在会话设置中，不写进 `config.json`，也不改变 `providers.json`。
+
+使用前请确认这几点：
+
+- 该功能面向自己持有 Key、按量计费的 Responses 兼容接口。它改变的是请求形状，不改变凭据归属。
+- 服务端下发的 `x-codex-turn-state` 不会被保存或回放，`x-openai-internal-*`、`x-codex-beta-features` 等私有标记也不会发送。
+- 请求只包含标识符，不上报本地路径、git 远程地址或沙箱设置。
+- 网关原生压缩（`/responses/compact`）由单独的请求发出，不携带该档案；对话本身和工具循环使用所选档案。
