@@ -34,4 +34,5 @@ features:
 - **我使用桌面客户端**：从 [Desktop 项目介绍](./desktop/guide/overview.md) 开始，再看[安装客户端](./desktop/guide/installation.md)和[首次使用](./desktop/guide/usage.md)。
 - **我在终端或自动化脚本里使用**：阅读 [dcl 概览](./cli/index.md)、[安装与构建](./cli/install.md)和[非交互模式](./cli/non-interactive.md)。
 - **我要接入 DeepSeek 模型**：查看 [接入 DeepSeek 模型](./cli/deepseek.md)；Desktop 的供应商配置见[运行模式与模型供应商](./desktop/configuration/models.md)。
+- **我在 Android 手机上使用**：从 [Android 使用指南](./android/index.md)开始，了解[桌面版运行原理与命令](./android/desktop-on-android.md)。
 - **我在维护文档站**：查看[文档站构建与部署](./deployment.md)。

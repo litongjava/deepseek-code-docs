@@ -19,6 +19,7 @@ export default defineConfig({
       { text: 'Desktop', link: '/desktop/guide/overview', activeMatch: '^/desktop/' },
       { text: 'CLI', link: '/cli/', activeMatch: '^/cli/' },
       { text: 'Java SDK', link: '/sdk/java/', activeMatch: '^/sdk/' },
+      { text: 'Android', link: '/android/', activeMatch: '^/android/' },
       { text: '文档站部署', link: '/deployment' }
     ],
     sidebar: {
@@ -64,6 +65,15 @@ export default defineConfig({
         { text: '文档站构建与部署', link: '/deployment' },
         { text: '应用界面', link: '/desktop/verification' }
       ] }
+      ],
+      '/android/': [
+        { text: 'Android', items: [
+          { text: '概览与开始', link: '/android/' },
+          { text: '构建与安装', link: '/android/build' },
+          { text: '首次使用与开发环境', link: '/android/usage' },
+          { text: '桌面版运行原理与命令', link: '/android/desktop-on-android' },
+          { text: 'Android CLI（Termux）', link: '/cli/android' }
+        ] }
       ],
       '/sdk/': [
         { text: 'Java SDK', items: [
