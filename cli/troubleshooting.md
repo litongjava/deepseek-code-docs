@@ -8,6 +8,14 @@
 
 **处理**：当前版本最多等待 3 秒首个字节，详见[非交互模式](./non-interactive.md#标准输入)。没有输入时用 `< /dev/null` 运行。
 
+## 启动时报 Session worker startup failed
+
+**现象**：macOS 上启动 dcl 后只显示 `Error: Session worker startup failed:`，冒号后没有内容；会话 Worker 目录里的 `stderr.log` 记录 `Session host failed: path must be shorter than SUN_LEN`。
+
+**原因**：dcl 用本地 IPC 连接前台和会话宿主，IPC 名称放在系统临时目录。macOS 的 `TMPDIR` 是按用户生成的长目录，旧版本再拼上完整的会话标识后，超过了系统对 Unix socket 路径的长度限制，宿主无法创建 IPC，随后退出。
+
+**处理**：当前版本会自动压缩 IPC 名称，并在系统临时目录过长时改用更短的目录，不需要额外配置。如果手动把 `TMPDIR` 指向很长的目录，改回系统默认值或换一个短目录即可。
+
 ## `-p` 报错 Tool permission interrupted the turn
 
 **现象**：旧版本在 `-p` 模式下，模型一旦调用需要审批的工具，整轮就失败，退出码 1：
