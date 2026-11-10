@@ -38,6 +38,14 @@ Model API error 400: messages.2:`tool_use` ids were found without `tool_result` 
 
 **处理**：升级到包含该修复的版本。当前版本把同一轮的工具结果放进一条 user 消息，并在每次请求前合并相邻同角色消息。
 
+## 工具调用显示 Unknown tool:
+
+**现象**：模型调用工具后，工具结果显示 `{"error": "Unknown tool: "}`，冒号后面没有工具名，模型随后反复重试或无法继续执行。
+
+**原因**：一些 OpenAI 兼容网关会在工具调用参数分片的每个数据块里重复 `function.name`，第一块给出真实名称，后面的分块给空字符串。旧版本把后面的空字符串当成新名称，覆盖了已经解析到的工具名。
+
+**处理**：当前版本忽略空的名称分片，保留首次解析到的工具名。升级后重新发送请求即可。如果仍然看到 `Tool call has no name`，说明模型返回本身缺少工具名，可以让模型重试，或换用其他模型。
+
 ## `--json-schema` 报 Structured output is not valid JSON
 
 **现象**：使用 DeepSeek 时，旧版本的 `--json-schema` 总是失败。Anthropic 协议返回普通文本，报 `Structured output is not valid JSON`；OpenAI 协议直接报 `Model API error 400 ... This response_format type is unavailable now`。
