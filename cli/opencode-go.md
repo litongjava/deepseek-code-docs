@@ -122,6 +122,12 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 说明 Base URL 填成了网站地址而不是接口地址。OpenCode 请使用 `https://opencode.ai/inference/go/openai/v1`，或者直接用 `/provider add opencode-go` 预设。dcl 不会把网页源码打印到终端。
 
+### 连接测试提示 `expected struct OpenAIUsage`
+
+如果看到 `invalid type: null, expected struct OpenAIUsage`，表示连接测试在汇总流式响应时遇到了空的用量字段（`usage: null`）。这与缺少会话头不同：缺少 `x-opencode-session` 时返回的是 `400 MissingSessionID`。
+
+dcl 支持流式响应省略用量或返回 `usage: null`，继续保留模型回复；收到有效用量后，后续空用量也不会清除已有统计。遇到上述提示时，使用包含此兼容处理的 dcl 再试，无需因此更换 Key 或手工添加 session-id。连接测试与日常对话采用不同的响应处理路径，因此可能出现测试报错但仍能聊天的情况。
+
 ### 连接测试失败但提供商已保存
 
 `/provider add` 保存后立即测试连接。失败时不会丢弃刚保存的提供商：
