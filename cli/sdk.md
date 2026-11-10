@@ -145,8 +145,8 @@ public class DclExample {
 }
 ```
 
-`dcl` 特有的参数用 `extraArg` 传入，例如 `.extraArg("api-format", "anthropic")`、`.extraArg("data-dir", "/path/to/data")`。SDK 仓库的 `examples/tio-boot-agent-demo` 是一个完整的 HTTP 服务示例：一次性查询、SSE 流式输出、多轮会话、JVM 内 MCP 工具和服务端工具策略。
+`dcl` 特有的参数用 `extraArg` 传入，例如 `.extraArg("api-format", "anthropic")`、`.extraArg("data-dir", "/path/to/data")`。选择已保存的提供商时用 `.provider("opencode-go")` 配合 `.model("deepseek-v4.1-flash")`，只写模型 ID 而它在多个提供商下都存在时会报 `Model exists in several providers`。SDK 仓库的 `examples/tio-boot-agent-demo` 是一个完整的 HTTP 服务示例：一次性查询、SSE 流式输出、多轮会话、JVM 内 MCP 工具和服务端工具策略。
 
-## Java SDK
+## 相关文档
 
-Java 程序可以直接使用 [Java SDK](/sdk/java/)，不需要自己实现这个协议。
+Java 程序可以直接使用 [Java SDK](/sdk/java/)，不需要自己实现这个协议。使用 OpenCode Go 时，提供商和 Key 的准备见[接入 OpenCode Go](./opencode-go.md)。

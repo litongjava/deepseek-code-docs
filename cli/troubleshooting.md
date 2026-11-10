@@ -108,6 +108,54 @@ Windows 在审批文件被删除或短暂独占时可能返回 `Access is denied
 
 **处理**：重新运行 `/provider edit <ID>`，在 Key 一栏加上 `key:` 前缀强制按 Key 保存，例如 `key:ABC123`；也可以改为设置同名环境变量，见[交互模式 · 配置模型](./providers.md)。
 
+## OpenCode 报 model unavailable in this region
+
+**现象**：
+
+```text
+The connection test failed: Model API error 403: service reported an error: model unavailable in this region (regionerror)
+```
+
+**原因**：OpenCode Go 的模型列表对所有地区可见，但部分模型只在特定地区开放，例如免费模型 `beam-free`。地址和 Key 都是正确的。
+
+**处理**：换一个可用模型，例如 `deepseek-v4.1-flash`：
+
+```text
+❯ /provider edit opencode-go
+```
+
+OpenAI 系模型也可能返回 `unsupported_country_region_territory`，同样属于上游地区限制，不是本地协议错误。详见[接入 OpenCode Go](./opencode-go.md)。
+
+## `/provider add` 报 The endpoint answered ... with a web page
+
+**现象**：
+
+```text
+Could not list models: The endpoint answered 404 Not Found with a web page, not an API response; check that the Base URL is the API base (it usually ends in /v1).
+```
+
+**原因**：Base URL 填成了网站地址而不是接口地址，服务返回的是 HTML 页面。
+
+**处理**：改为服务商文档给出的 API 根地址。OpenCode 使用 `https://opencode.ai/inference/go/openai/v1`，或直接运行 `/provider add opencode-go`。dcl 不会把网页源码打印到终端。
+
+## OpenCode 返回 400 MissingSessionID
+
+**现象**：
+
+```text
+{"type":"error","error":{"type":"MissingSessionID","message":"Request is missing x-opencode-session ..."}}
+```
+
+**原因**：OpenCode 要求每个请求带 `x-opencode-session`。dcl 会自动发送：会话内使用会话 ID，连接测试等会话外请求回退为请求 ID。
+
+**处理**：正常使用不会出现。如果出现，先升级 dcl；仍复现时保留请求详情中的请求 ID 和发生时间，按缺陷反馈。
+
+## `/provider add` 保存后提示 The connection test failed
+
+**原因**：保存后 dcl 会立即用第一个模型发一个很小的请求。失败可能是地址、Key 或模型不可用。
+
+**处理**：提供商已经保存，不会因为测试失败而丢弃。按提示运行 `/provider edit <ID>` 修正；也可以重新运行 `/provider add`，用相同的 Provider ID 覆盖。
+
 ## 浏览历史与复制输出
 
 滚轮和翻页键用于浏览对话历史，`Ctrl+Home` 回到最早的记录。长指令点击展开后可继续滚动查看全文，窗口调整大小后仍保留历史。按 `Esc` 返回输入框。

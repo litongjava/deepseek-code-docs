@@ -69,6 +69,30 @@ public class QuickStart {
 
 `cliPath` 也可以省略，改用环境变量 `AGENT_CLI_PATH` 指定 CLI 路径。
 
+## 选择提供商与模型
+
+CLI 可以同时保存多个提供商。用 `provider(...)` 指定提供商，用 `model(...)` 指定模型；只写模型 ID 而它在多个提供商下都存在时，CLI 会报 `Model exists in several providers`。也可以写成 `model("provider::model")`。
+
+```java
+AgentOptions options = new AgentOptions()
+    .cliPath("dcl")
+    .provider("opencode-go")
+    .model("deepseek-v4.1-flash");
+```
+
+以 OpenCode Go 为例，它的模型分属四种协议，同一个提供商就能覆盖，切换模型即可：
+
+```java
+.model("deepseek-v4.1-flash")  // Chat Completions
+.model("grok-4.7")             // Responses
+.model("minimax-m3")           // Messages
+.model("gemini-4-argon")       // Gemini
+```
+
+提供商需要先在 CLI 里保存，例如运行 `/provider add opencode-go`，或首次启动时选择 OpenCode Go，详见[接入 OpenCode Go](/cli/opencode-go)。
+
+SDK 启动的子进程继承当前 JVM 的环境变量，因此在启动 JVM 前设置 `OPENCODE_API_KEY` 即可。需要从别处注入时用 `env("OPENCODE_API_KEY", key)`；SDK 不保存提供商配置，也不读取或缓存 Key。
+
 ## 接下来
 
 - [查询与多轮会话](./sessions)

@@ -66,8 +66,8 @@ Switch this session to llm-proxy now? [Y/n]:
 |---|---|
 | Provider ID | 字母、数字、`-`、`_`，例如 `deepseek` |
 | Protocol | 输入 `1`、`2`、`3`、`4` 选择 `openai`、`anthropic`、`gemini` 或 `responses`；直接回车选 `1`。也可以直接输入协议名 |
-| Base URL | `http://` 或 `https://` 开头，不能包含账号密码、查询参数或片段。DeepSeek 选择 Anthropic 协议时自动补成 `/anthropic` |
-| API Key / 环境变量名 | 可以直接粘贴 Key，也可以填保存 Key 的**环境变量名**。全大写的名字（如 `DEEPSEEK_API_KEY`）按变量名处理，其余输入（如 `123456`、`sk-...`）按 Key 直接保存；有歧义时用 `key:` 或 `env:` 前缀强制指定。DeepSeek 地址默认建议 `DEEPSEEK_API_KEY`，直接回车即可采用 |
+| Base URL | `http://` 或 `https://` 开头，不能包含账号密码、查询参数或片段。DeepSeek 选择 Anthropic 协议时自动补成 `/anthropic`；OpenCode 的网站地址会自动改成对应协议的接口地址 |
+| API Key / 环境变量名 | 可以直接粘贴 Key，也可以填保存 Key 的**环境变量名**。全大写的名字（如 `DEEPSEEK_API_KEY`）按变量名处理，其余输入（如 `123456`、`sk-...`）按 Key 直接保存；有歧义时用 `key:` 或 `env:` 前缀强制指定。DeepSeek 地址默认建议 `DEEPSEEK_API_KEY`，OpenCode 地址默认建议 `OPENCODE_API_KEY`，直接回车即可采用 |
 | Model IDs | 先列出接口返回的模型，按编号选择；可以输入多个编号（如 `1,3`）、`all`，也可以直接输入模型 ID。第一个是默认模型 |
 
 - **选择模型**：填好地址和凭据后，dcl 会先向该接口查询可用模型，按 `1`、`2`、`3` 编号列出，输入编号即可，例如 `1,3` 保存第 1 和第 3 个，输入 `all` 保存全部，直接回车保存第 1 个。编号顺序就是列表顺序，排在前面的编号是默认模型。
@@ -78,6 +78,15 @@ Switch this session to llm-proxy now? [Y/n]:
   - bash / zsh：`export DEEPSEEK_API_KEY=sk-...`
   - Windows：`setx DEEPSEEK_API_KEY sk-...`，设置后需要打开新的终端。
 - **保存后切换**：可以直接把当前会话切换到新的提供商，对话历史保留；再用 `/test` 验证连通性。
+- **保存后立即检查**：向导保存后会用第一个模型发一个很小的请求，成功显示 `Connected with <模型>.`；失败时显示原因，但提供商仍然保留，可用 `/provider edit <ID>` 修正。Key 来自环境变量且当前终端没有设置时跳过检查。
+
+OpenCode Go 的模型分属四种协议，一个提供商就能覆盖全部模型，建议直接使用预设：
+
+```text
+❯ /provider add opencode-go
+```
+
+它不经过通用向导，先读取 `OPENCODE_API_KEY`，再列出全部模型供选择，只用所选模型做连接测试。手填 `https://opencode.ai/v1` 时 dcl 会提示并自动纠正地址，详见[接入 OpenCode Go](./opencode-go.md)。
 
 ## 凭据从哪里读取
 
@@ -209,6 +218,7 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 ## 相关文档
 
 - [接入 DeepSeek](./deepseek.md)
+- [接入 OpenCode Go](./opencode-go.md)
 - [数据目录](./data-directory.md)：`config.json` 和会话数据的位置
 - [状态查看](./status.md)：查看当前使用的提供商、模型和接口地址
 

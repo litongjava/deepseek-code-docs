@@ -84,6 +84,7 @@ export default defineConfig({
         { text: '配置', items: [
           { text: '首次启动与内置提供商', link: '/cli/first-run' },
           { text: '接入 DeepSeek', link: '/cli/deepseek' },
+          { text: '接入 OpenCode Go', link: '/cli/opencode-go' },
           { text: '模型与提供商', link: '/cli/providers' },
           { text: '数据目录', link: '/cli/data-directory' },
           { text: '设置项参考', link: '/cli/settings' }
