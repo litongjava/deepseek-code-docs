@@ -38,7 +38,7 @@ Using the API key from OPENCODE_API_KEY.
 流程是：
 
 1. **读取 Key**：环境变量已设置时显示 `Using the API key from OPENCODE_API_KEY.`，不会再次询问；否则提示 `Get an API key at https://opencode.ai/auth`，粘贴时只显示圆点。
-2. **选择模型**：列出内置目录里的全部模型（当前 31 个），显示模型 ID 和名称。用方向键选择，也可以直接输入关键字筛选，例如输入 `grok` 只保留 `grok-4.7`。`Enter` 确认，`Esc` 取第一个。
+2. **选择模型**：列出内置目录里的全部模型（当前 30 个，随上游目录变化），显示模型 ID 和名称。用方向键选择，也可以直接输入关键字筛选，例如输入 `grok` 只保留 `grok-4.7`。`Enter` 确认，`Esc` 取第一个。
 3. **检查连接**：保存后立刻用**所选模型**发一个很小的请求，显示 `Checking the connection with <模型>…`。
 4. **完成**：成功时显示 `Connected. OpenCode Go is saved as the default provider.`，该模型成为新会话的默认模型，之后可用 `/model` 修改。
 

@@ -11,7 +11,7 @@
 
 自定义地址使用服务根地址或 `/v1` 基础地址，例如 `http://127.0.0.1:8317/v1`。先保存供应商，再点击“获取模型列表”；也可以直接手动添加模型。获取列表后点击“保存”应用变更。
 
-OpenCode Go 是目录中的一个特殊供应商：它的 31 个模型分属四种协议（Chat Completions、Responses、Messages、Gemini），每个模型在目录里自带协议和接口地址，供应商的 Base URL 留空。选择 `OpenCode Go` 后按模型选择即可，不要手工填一个统一的地址，否则其他协议的模型会发到错误的端点。Key 使用 `OPENCODE_API_KEY`，或在该供应商设置里直接填写。命令行侧的说明见[接入 OpenCode Go](../../cli/opencode-go.md)。
+OpenCode Go 是目录中的一个特殊供应商：它的全部模型分属四种协议（Chat Completions、Responses、Messages、Gemini），每个模型在目录里自带协议和接口地址，供应商的 Base URL 留空。选择 `OpenCode Go` 后按模型选择即可，不要手工填一个统一的地址，否则其他协议的模型会发到错误的端点。Key 使用 `OPENCODE_API_KEY`，或在该供应商设置里直接填写。命令行侧的说明见[接入 OpenCode Go](../../cli/opencode-go.md)。
 
 ![第三方供应商目录](../../assets/providers-builtins.png)
 

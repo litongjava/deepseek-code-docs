@@ -35,7 +35,7 @@ Connected. DeepSeek is saved as the default provider (key stored in config.json,
    - 否则可以把 Key 粘贴进来。输入时只显示圆点，Key 不会出现在终端记录里。它保存在[数据目录](./data-directory.md)的 `config.json` 中，该文件只有你自己可读写；
    - 也可以直接回车，按提示自行设置环境变量后重新启动。
 3. **检查连接**：保存后，dcl 用所选模型发一个很小的请求验证 Key。失败时会显示原因，可以重新粘贴。
-4. **选择默认模型**：提供商有多个模型时显示 `Choose the model to use` 列表，`Enter` 确认，`Esc` 选第一个；模型较多时（例如 OpenCode Go 的 31 个）可以直接输入关键字筛选。之后新会话默认用这个模型，可以随时用 `/model` 修改。
+4. **选择默认模型**：提供商有多个模型时显示 `Choose the model to use` 列表，`Enter` 确认，`Esc` 选第一个；模型较多时（例如 OpenCode Go 的数十个）可以直接输入关键字筛选。之后新会话默认用这个模型，可以随时用 `/model` 修改。
 5. **开始会话**：这个提供商成为默认提供商，直接进入会话。
 
 ## 内置提供商
@@ -49,7 +49,7 @@ Connected. DeepSeek is saved as the default provider (key stored in config.json,
 | 智谱 GLM Coding Plan（国内） | glm-5.1、glm-4.7 | `ZAI_API_KEY` |
 | MiniMax（国内） | MiniMax-M3、MiniMax-M2.7 | `MINIMAX_CN_API_KEY` |
 | 阿里 Qwen Token Plan（国内） | qwen3.6-flash、deepseek-v4-flash、glm-5.1 | `QWEN_TOKEN_PLAN_API_KEY` |
-| OpenCode Go | 全部 31 个模型，四种协议；常用 deepseek-v4.1-flash、grok-4.7、minimax-m3、gemini-4-argon | `OPENCODE_API_KEY` |
+| OpenCode Go | 全部模型，四种协议；常用 deepseek-v4.1-flash、grok-4.7、minimax-m3、gemini-4-argon | `OPENCODE_API_KEY` |
 | OpenRouter | anthropic/claude-sonnet-4.5、anthropic/claude-opus-4.6 | `OPENROUTER_API_KEY` |
 
 - **配置来源**：除 DeepSeek 外，这些提供商的接口地址、协议、上下文窗口和输出上限，都来自与 Desktop 共用的内置提供商目录，两端行为一致。
