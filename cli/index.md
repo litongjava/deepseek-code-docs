@@ -45,6 +45,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | 跳转定义、查引用、诊断 | [语言服务器（LSP）](./lsp.md) |
 | 把子任务交给本机的 Claude Code、Codex 或另一个 dcl | [调用 Claude Code、Codex 与 dcl](./external-agents.md) |
 | 审查改动、查找安全漏洞 | [代码审查与安全审查](./code-review.md) |
+| 创建、校验和维护技能 | [用 skill-creator 创建技能](./skill-creator.md) |
 | 接入数据库、浏览器等外部工具 | [MCP 服务](./mcp.md) |
 | 联网搜索、多角度深度研究 | [联网搜索与深度研究](./web-search.md) |
 | 在脚本和 CI 中使用 | [非交互模式](./non-interactive.md) |

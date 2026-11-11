@@ -20,6 +20,12 @@ Skill 复用任务说明、方法和上下文。MCP 提供工具服务，Skill �
 
 保存后检查详情，用小段示例材料验证格式。
 
+### 使用内置的 skill-creator
+
+Skills 入口的示例区包含内置的 `skill-creator`。它不写入数据目录，展开后显示真实的文件树（`SKILL.md`、`scripts/`、`references/`、`license.txt`、`NOTICE.md`），点击文件可以查看内容。它用于创建和校验新技能，模型会在合适时自动调用；也可以在 dcl 中运行 `/skill-creator`。命令行用法、脚本参数和 frontmatter 字段见 [用 skill-creator 创建技能](/cli/skill-creator)。
+
+旧版本写过一份占位技能。升级后，只有与旧占位完全一致的副本会被移除；改动过或加了文件的副本保持原样。
+
 ## 查找与使用
 
 在列表筛选条目，查看详情和使用入口。项目页也有选择 Skill 的交互。选择后补充本次任务的材料；Skill 不会自动知道未提供的文件内容。
