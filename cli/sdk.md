@@ -13,7 +13,7 @@ dcl --input-format stream-json --output-format stream-json \
 
 - `--input-format stream-json` 要求 `--output-format stream-json`。
 - `--include-partial-messages`：额外输出 `stream_event` 增量事件。
-- `--replay-user-messages`：回显收到的每条用户消息（带 `uuid`）。
+- `--replay-user-messages`：回显收到的每条用户消息（带 `uuid`）；回合进行中发送的消息在交付给模型时才回显，见下文“回合进行中发送的消息”。
 - `--permission-prompt-tool stdio`：工具审批交给宿主（SDK 模式下默认如此，参数用于兼容）。
 - 其它参数（`--model`、`--system-prompt`、`--allowedTools`、`--max-turns`、`--json-schema`、`--resume` 等）与非交互模式相同。
 
@@ -28,6 +28,19 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 ```
 
 `content` 可以是字符串，也可以是内容块数组（`text`、`image`）。`uuid` 可选；没有时 `dcl` 自动生成。`session_id` 省略、为空或为 `"default"` 时都视为当前会话。
+
+## 回合进行中发送的消息（中途引导）
+
+上一轮还没结束时（工具正在运行、模型正在回答，或正在等待审批）再发送一条普通用户消息，`dcl` 不会打断当前工具。它把消息放进与交互式模式相同的持久队列，在下一个安全边界——当前工具批次全部结束、工具结果记录完成之后，发出下一次模型请求之前——交给模型。模型的下一轮请求同时包含工具结果和这条消息，并把它当作本轮的用户指示继续处理。
+
+- 判断规则与交互式输入一致：纯文本会被引导；以 `/`、`!` 或 `# ` 开头的命令、控制帧和后台任务通知仍按原来的下一轮处理。
+- 多条消息按到达顺序交付，每条只交付一次。若本轮在没有下一个工具边界时结束（例如模型直接给出最终回答），尚未交付的消息作为下一轮的用户消息运行，既不丢失也不重复。
+- 取消或中断本轮（`interrupt`）不会丢弃未交付的消息，它们在下一轮运行；`cancel_async_message` 只能取消尚未交付的引导消息，已经交给模型的返回 `cancelled: false`。
+- 只有带文本的消息会被引导；`content` 仅为图片的消息仍按下一轮处理。等待工具审批或 Hook 回调时发送的消息同样排队，等审批结束后的工具边界再交付。
+- 交付的消息写入会话记录，`--resume` 后的历史包含它，并且不会作为工具结果的附注重复保存。
+- 交付时输出事件：`{"type":"queued_input","text":"…","content":"…","origin":"queue-input-<id>"}`。`origin` 是该持久队列项在交接时生成的标识。
+- 使用 `--replay-user-messages` 时，引导消息在**交付时**（而不是收到时）以原始信封回显，`uuid` 为宿主发送时提供的值；交付前不会出现在 stdout。
+- 宿主关闭 stdin 且本轮仍需要 Hook 或 MCP 回调时，排队中的引导消息与其它待处理消息一起丢弃，只返回一个错误 `result`。
 
 控制请求：
 
