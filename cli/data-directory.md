@@ -66,3 +66,30 @@ Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但�
 - `~/.claude/ide`：IDE 扩展写入的锁文件；
 - `~/.claude/plugins`：在 Claude Code 中安装的插件，其中的 LSP 插件会被 dcl 使用，见[语言服务器](./lsp.md#使用-claude-code-里安装的-lsp-插件)；
 - 项目里的 `.claude/` 目录。
+
+## 技能从哪里读取
+
+技能按以下顺序读取，后面的同名技能覆盖前面的：
+
+1. 内置工作流（随 dcl 发布，例如 `code-review`、`doctor`）；
+2. `CLAUDE_CONFIG_DIR` 指向的目录（未设置时为 `~/.claude`）下的 `skills/` 和 `commands/`；
+3. 数据目录的 `skills/`（默认 `~/.deepseek-code/skills`，可用 `--data-dir` 或 `DEEPSEEK_CODE_DATA_DIR` 改变）；
+4. 当前工作区的 `.claude/skills` 和 `.claude/commands`。
+
+同一名称只出现一次：项目覆盖用户，数据目录覆盖 `~/.claude`。数据目录的 `skills/bundled` 和 `skills/mcp` 仍会出现在列表中（斜杠列表原本就显示它们），但不会覆盖已经发现的内置或 `~/.claude` 同名技能；直接放在 `skills/<名称>` 的用户技能按“用户覆盖内置”处理。
+
+数据目录技能的命令名沿用旧版规则：取技能名称转小写、空格换成 `-`，其他标点保留。例如 `My Skill` 是 `/my-skill`，`R&D (team)'s check` 是 `/r&d-(team)'s-check`；多层集合也只使用技能自身名称，不加集合前缀。两个数据目录技能得到同一个名字时，两者都改用按文件路径计算的 `skill_<哈希>`，不会因为文件系统顺序只保留其中一个。`~/.claude`、项目和插件技能的名称规则不变。
+
+模型看到的技能列表、`Skill` 工具和斜杠命令使用同一套结果。`enabled: false` 的技能不出现；`disable-model-invocation: true` 的技能仍可用斜杠命令，但模型看不到也不能调用；`user-invocable: false` 的技能只供模型调用。格式错误或无法读取的 `SKILL.md` 会被跳过，只在运行日志中显示路径。发现过程不会创建目录或文件，也不会跟随符号链接。技能说明中的 `references/setup.md` 等相对路径以 `SKILL.md` 所在目录为基准解析。
+
+用 `dcl skills list`（或会话内 `/skills`）查看数据目录中托管的技能：输出为 JSON，包含 `id`、`name`、`enabled`、`source` 和 `sourceDir`。这里的 `name` 是技能保存的名称，斜杠命令使用上面说明的小写规则。它只列数据目录里由 dcl 管理的技能，不包含项目 `.claude` 或 `~/.claude` 里的条目；这些条目会直接出现在模型可用的技能列表和斜杠命令中。
+
+```bash
+# 查看默认数据目录中的托管技能
+dcl skills list
+
+# 查看 --data-dir 指定的其他数据目录
+dcl --data-dir /path/to/data skills list
+```
+
+验证某个技能确实被模型看到时，在空的工作区里让模型“列出可用的技能”，或让模型直接调用 `Skill`；返回的说明会包含真实的技能目录，可据此检查相对路径能否读取。`dcl skills list` 只反映数据目录，不能单独证明项目或 `~/.claude` 中的同名技能被选中。
