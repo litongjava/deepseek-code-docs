@@ -121,6 +121,7 @@ export default defineConfig({
           { text: '建议补全', link: '/cli/suggestions' },
           { text: '运行提示', link: '/cli/tips' },
           { text: '状态查看', link: '/cli/status' },
+          { text: '配置诊断', link: '/cli/doctor' },
           { text: '输出上限与自动续写', link: '/cli/output-limit' },
           { text: '上下文用量与费用', link: '/cli/context-and-cost' }
         ] },
