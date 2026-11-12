@@ -7,7 +7,7 @@
 | 用途 | 工具 |
 |---|---|
 | 文件 | `Read`、`Write`、`Edit`、`NotebookEdit`、`Glob`、`Grep` |
-| 命令 | `Bash`、`Monitor`、`TaskOutput`、`TaskStop` |
+| 命令 | `Bash`、`Monitor`、`TaskGet`、`TaskStop` |
 | 代码智能 | `LSP`，见[语言服务器](./lsp.md) |
 | 网络 | `WebFetch`、`WebSearch`，见[联网搜索与深度研究](./web-search.md) |
 | 提问与计划 | `AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`，见[计划模式](./plan-mode.md) |
@@ -43,7 +43,7 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
 - 执行结果的 `shell` 和 `shell_path` 表示实际启动的 Shell；语法错误和非零退出码均报告失败。保存工作目录不会覆盖命令的退出码。
 - `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。
-- `run_in_background: true` 让命令作为受管任务在后台运行，模型用 `TaskOutput` 读取输出、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
+- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
 - **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，结果里 `pipeline_sigpipe` 为 `true`、`success` 仍为 `true`，同时保留 `exit_code: 141`。
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
@@ -96,7 +96,7 @@ Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Ba
 - 只开按需：默认不加载；模型用 `ToolSearch` 找到后，从下一次请求开始可以调用。
 - 两个都关：完全不可用，既搜索不到，也不能直接调用。
 
-默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolSearch`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`plan_mode`、`TaskOutput`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
+默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolSearch`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `TaskGet`、`ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
 
 “启用”不是总开关：关掉它只表示不再默认加载，模型仍然可以按需发现这个工具。核心名单只决定默认值，任何一个工具的开关都可以修改。
 
