@@ -43,7 +43,7 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
 - 执行结果的 `shell` 和 `shell_path` 表示实际启动的 Shell；语法错误和非零退出码均报告失败。保存工作目录不会覆盖命令的退出码。
 - `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。
-- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
+- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出（默认立即返回当前快照；`block: true` 最多等待 `timeout` 毫秒，默认 30000、最多 600000，等待超时不会结束进程）、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
 - **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，结果里 `pipeline_sigpipe` 为 `true`、`success` 仍为 `true`，同时保留 `exit_code: 141`。
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
@@ -64,7 +64,29 @@ Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Ba
 
 `isolation` 省略或设为 `null` 时使用当前工作目录；`worktree` 创建并绑定独立工作树后再启动后台子进程。后台返回的 `to`、`session_id` 都可以用于 `SendMessage`，父会话也可以直接使用返回的 `agent_id`。
 
+**TaskCreate / TaskGet / TaskUpdate / TaskList**：任务记录按会话保存。`TaskUpdate` 用 `addBlockedBy`、`addBlocks` 追加依赖，并同步对方的反向列表；`setBlockedBy` 整体替换本任务的直接依赖，传 `[]` 清空。引用的任务必须属于同一会话，不能形成环；`setBlockedBy` 不能和 `addBlockedBy`、`addBlocks` 或删除任务同时使用，冲突时整次调用被拒绝，不写入任何记录。
+
 **AskUserQuestion**：一次 1–4 个问题，每个问题 2–4 个选项，可以带预览和多选，见[模型向你提问](./tool-calls.md#模型向你提问)。
+
+## 导入工作区的旧计划
+
+旧版 `plan_mode` 把计划保存在工作区的 `.claude/coordination.sqlite3`，任务工具则按会话保存任务。要把某个旧计划放进一个会话，显式执行：
+
+```bash
+dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan <计划 ID>
+dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --current
+dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan <计划 ID> --dry-run
+```
+
+旧库以只读方式打开，只导入选中的计划。导入后的任务属于目标会话；同一工作区的不同会话需要各自导入，任务记录不会共享或自动同步。退出码 0 表示已创建或无变化（包括 `--dry-run`），1 表示冲突或错误，2 表示参数无效。
+
+模型不再看到 `plan_mode` 工具，直接调用会被当作未知工具拒绝，不会创建或改动旧计划库。`EnterPlanMode` 和 `ExitPlanMode` 照常可用。导入后，旧操作可以这样对应：
+
+- `create`、`add_step`：`TaskCreate`。
+- `get`、`list`：`TaskGet`、`TaskList`。
+- `update_step`：`TaskUpdate` 更新字段、状态和输出，依赖用 `setBlockedBy` 整体替换。
+- `decompose`：把旧步骤 `TaskUpdate status=cancelled`（保留结果），再 `TaskCreate` 新步骤并设置依赖。
+- `abandon`：`TaskUpdate status=cancelled`，任务和结果都保留。
 
 ## 已移除的工具
 
