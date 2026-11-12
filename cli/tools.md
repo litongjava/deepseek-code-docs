@@ -7,7 +7,7 @@
 | 用途 | 工具 |
 |---|---|
 | 文件 | `Read`、`Write`、`Edit`、`NotebookEdit`、`Glob`、`Grep` |
-| 命令 | `Bash`、`TaskOutput`、`TaskStop` |
+| 命令 | `Bash`、`Monitor`、`TaskOutput`、`TaskStop` |
 | 代码智能 | `LSP`，见[语言服务器](./lsp.md) |
 | 网络 | `WebFetch`、`WebSearch`，见[联网搜索与深度研究](./web-search.md) |
 | 提问与计划 | `AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`，见[计划模式](./plan-mode.md) |
@@ -49,6 +49,12 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
 - 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
+
+**Monitor**：在后台运行一段 shell 脚本，把输出的每一行变成通知来唤醒模型，适合盯日志、构建或 CI。脚本应只在需要处理的事情发生时才输出一行，例如 `tail -f app.log | grep --line-buffered ERROR`，每一级管道都要逐行刷新。200 毫秒内到达的多行合并成一条通知；stderr 只写入日志，不通知。它和 Bash 的 `run_in_background` 不同：后者只在命令结束时通知一次，Monitor 每有输出就通知。
+
+参数是 `command`、`description`（通知里的简短说明）、`timeout_ms` 和 `shell`。不指定时运行 1800000 毫秒（30 分钟），最多 3600000（60 分钟）；脚本退出、到期、被停止或因事件过多停止时，最后一条通知会说明原因和事件数（事件过多时只说明原因），到期后可以重新启动。一分钟内超过 30 个事件会自动停止，并提示收窄过滤条件。
+
+Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Bash 命令走同一套[权限规则与审批](./permissions.md)，用 `TaskStop` 传入返回的 `task_id` 停止。它默认按需加载：模型用 `ToolSearch` 找到后，从下一次请求开始可以用它。
 
 **Agent**：默认在后台运行（`run_in_background` 默认为 `true`），子代理结束时通知模型；设为 `false` 时本轮等待结果。可以用 `subagent_type` 选择代理类型，`isolation: "worktree"` 让子代理在独立的 Git worktree 中工作。
 
