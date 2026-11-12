@@ -107,7 +107,7 @@
 ### Shell
 
 - `Bash` 的 `timeout` 单位是**毫秒**，前台默认 120000，最大 600000。
-- 支持 `run_in_background`：返回 `task_id` 和 `stdout_file`/`stderr_file`，用 `TaskOutput` 读取有限长度的日志和状态，用 `TaskStop` 结束整个进程树。后台命令跨轮次存活，worker 退出时结束。
+- 支持 `run_in_background`：返回 `task_id` 和 `stdout_file`/`stderr_file`，用 `TaskGet` 读取有限长度的日志和状态，用 `TaskStop` 结束整个进程树。后台命令跨轮次存活，worker 退出时结束。
 - 每次调用仍是新进程，但**工作目录跨调用保留**：bash、sh、zsh、PowerShell、Git Bash 和 Windows `cmd` 都会记住上次 `cd` 的位置；目录离开项目时重置回项目根目录。shell 变量不保留。
 - Windows 仍需显式指定 `shell: "powershell"` 或 `"pwsh"` 并使用对应语法。
 
