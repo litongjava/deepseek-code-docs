@@ -129,6 +129,7 @@ export default defineConfig({
           { text: '调用 Claude Code、Codex 与 dcl', link: '/cli/external-agents' },
           { text: '代码审查与安全审查', link: '/cli/code-review' },
           { text: '用 skill-creator 创建技能', link: '/cli/skill-creator' },
+          { text: '技能与插件面板', link: '/cli/skills' },
           { text: 'MCP 服务', link: '/cli/mcp' },
           { text: '联网搜索与深度研究', link: '/cli/web-search' }
         ] },
