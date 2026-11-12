@@ -90,7 +90,7 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 - 只开按需：默认不加载；模型用 `ToolSearch` 找到后，从下一次请求开始可以调用。
 - 两个都关：完全不可用，既搜索不到，也不能直接调用。
 
-默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolSearch`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`plan_mode`、`TaskOutput`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
+默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolSearch`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `TaskGet`、`TaskOutput`、`ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
 
 “启用”不是总开关：关掉它只表示不再默认加载，模型仍然可以按需发现这个工具。核心名单只决定默认值，任何一个工具的开关都可以修改。
 
