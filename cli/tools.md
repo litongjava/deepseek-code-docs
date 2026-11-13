@@ -1,34 +1,31 @@
 # 内置工具
 
-模型通过工具读写文件、运行命令、访问网络。dcl 的主要工具名称、参数和行为和 Claude Code 2.1.302 一致，另外保留了一些 dcl 自己的工具。工具调用在终端里怎样显示见[工具调用与改动详情](./tool-calls.md)，是否需要你确认见[权限模式与工具审批](./permissions.md)。
+模型通过工具读写文件、运行命令、访问网络。dcl 的主要工具名称、参数和行为和 Claude Code 一致，另外保留了一些 dcl 自己的工具。工具调用在终端里怎样显示见[工具调用与改动详情](./tool-calls.md)，是否需要你确认见[权限模式与工具审批](./permissions.md)。
 
 ## 和 Claude Code 一致的工具
 
-| 用途 | 工具 |
-|---|---|
-| 文件 | `Read`、`Write`、`Edit`、`NotebookEdit`、`Glob`、`Grep` |
-| 命令 | `Bash`、`Monitor`、`TaskGet`、`TaskStop` |
-| 代码智能 | `LSP`，见[语言服务器](./lsp.md) |
-| 网络 | `WebFetch`、`WebSearch`，见[联网搜索与深度研究](./web-search.md) |
-| 提问与计划 | `AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`，见[计划模式](./plan-mode.md) |
-| 子代理 | `Agent`、`ListAgents`、`SendMessage`、`ReportFindings` |
-| 工作区隔离 | `EnterWorktree`、`ExitWorktree` |
-| 定时与循环 | `CronCreate`、`CronDelete`、`CronList`、`ScheduleWakeup`，见[定时任务与循环](./scheduling.md) |
-| 编排 | `Workflow`，见[工作流](./workflows.md) |
-| 技能与工具检索 | `Skill`、`ToolSearch` |
-| 待办与任务 | `TodoWrite`、`TaskCreate`、`TaskGet`、`TaskList`、`TaskUpdate` |
+- 文件：`Read`、`Write`、`Edit`、`NotebookEdit`、`Glob`、`Grep`。
+- 命令：`Bash`、`Monitor`、`TaskGet`、`TaskStop`。
+- 代码智能：`LSP`，见[语言服务器](./lsp.md)。
+- 网络：`WebFetch`、`WebSearch`，见[联网搜索与深度研究](./web-search.md)。
+- 提问与计划：`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`，见[计划模式](./plan-mode.md)。
+- 子代理：`Agent`、`ListAgents`、`SendMessage`、`ReportFindings`。
+- 工作区隔离：`EnterWorktree`、`ExitWorktree`。
+- 定时与循环：`CronCreate`、`CronDelete`、`CronList`、`ScheduleWakeup`，见[定时任务与循环](./scheduling.md)。
+- 编排：`Workflow`，见[工作流](./workflows.md)。
+- 技能与工具检索：`Skill`、`ToolSearch`。
+- 待办与任务：`TodoWrite`、`TaskCreate`、`TaskGet`、`TaskList`、`TaskUpdate`。
 
 MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服务](./mcp.md)。
 
 ## dcl 自己的工具
 
-| 工具 | 作用 |
-|---|---|
-| `memory_search`、`memory_ingest` | 检索和写入长期记忆，和 Desktop 共用 |
-| `git_status`、`git_diff`、`git_log`、`git_add`、`git_commit` | Git 操作。`git_commit` 会暂存全部改动，有无关修改时模型应改用 shell 提交 |
-| `ListDir`、`MultiEdit`、`smart_project_scan` | 列目录、一次多处编辑、项目概览 |
-| `DeepSeekCode`、`ClaudeCode`、`Codex` | 把子任务交给本机的另一个 dcl、Claude Code 或 Codex，见[外部代理](./external-agents.md) |
-| `computer_use` | 鼠标、键盘、滚动、等待与截图，见[桌面操作](./computer-use.md) |
+- `memory_search`、`memory_ingest`：检索和写入长期记忆，和 Desktop 共用。
+- `ListDir`、`MultiEdit`：列目录、一次多处编辑。
+- `DeepSeekCode`、`ClaudeCode`、`Codex`：把子任务交给本机的另一个 dcl、Claude Code 或 Codex，见[外部代理](./external-agents.md)。
+- `computer_use`：鼠标、键盘、滚动、等待与截图，见[桌面操作](./computer-use.md)。
+
+Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit`）通过 `Bash` 执行，没有单独的 Git 工具。`smart_project_scan` 也已移除；查看项目时可用 `ListDir`、`Glob`、`Grep` 和 `Read`。
 
 ## 几个需要知道的行为
 
@@ -110,15 +107,13 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 ## 已移除的工具
 
-对齐 Claude Code 时，以下和其他工具重复的旧工具已删除：
+对齐 Claude Code 时，以下和其他工具重复的旧工具已从模型工具列表移除，可改用对应工具：
 
-| 旧工具 | 改用 |
-|---|---|
-| `Delegate`、`Worker` | `Agent` |
-| `smart_grep`、`smart_edit` | `Grep`、`Edit` |
-| `todo_write` | `TodoWrite` |
-| `cron` | `CronCreate`、`CronDelete`、`CronList` |
-| `worktree` | `EnterWorktree`、`ExitWorktree` |
+- `Delegate`、`Worker`：`Agent`。
+- `smart_grep`、`smart_edit`：`Grep`、`Edit`。
+- `todo_write`：`TodoWrite`。
+- `cron`：`CronCreate`、`CronDelete`、`CronList`。
+- `worktree`：`EnterWorktree`、`ExitWorktree`。
 
 `cron` 和 `worktree` 仍能执行旧会话记录里的调用，但不再提供给模型。
 
@@ -156,7 +151,18 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 `disabled_tools` 里非内置名称的原语义保持不变：写在那里的 MCP 工具不会出现在请求中，直接调用也会被拒绝。
 
-`ToolSearch` 支持用逗号或空白分隔多个完整工具名，例如 `WebSearch WebFetch`、`WebSearch,WebFetch`、`WebSearch, WebFetch`，忽略大小写、去重并保持输入顺序。当所有分项都是完整内置工具名时按名称选择；否则沿用关键词搜索，例如 `git diff` 匹配 `git_diff`。`select:WebSearch,WebFetch` 显式按名称选择，也支持空白分隔。每次最多加载五个符合当前开关和代理允许列表的工具，已在请求中的工具不会重复加载。关键词搜索时，如果没有工具同时包含所有关键词，会改为加载至少包含一半关键词、且其中一个关键词出现在工具名里的工具，最多三个，按匹配的词数排序；因此模型用自然语言描述需求时，多出一个无关的词也不会漏掉要找的工具。
+### 工具目录与搜索
+
+每次模型请求的系统提示词都会附上 `Tool directory`，逐项列出当前可加载的内置工具名称和一句话用途。目录与本次请求的工具定义使用同一份设置快照；常驻、已加载、两个开关都关或代理不允许的工具不会列入，MCP 和自定义工具也不在这份内置目录里。`ToolSearch` 在本次请求不可用或没有可加载的内置工具时，目录会明确说明。
+
+`ToolSearch` 支持两种方式：
+
+- **按名称选择**：完整名称用逗号或空白分隔，例如 `WebSearch WebFetch`、`WebSearch,WebFetch` 或 `select:WebSearch, WebFetch`。匹配忽略大小写，去重后保持输入顺序，加载全部合格工具，不限数量。未知、已在请求中或当前不可加载的名称会逐项报告。所有分项都是已知名称、带 `select:` 前缀，或含逗号且至少有一个已知名称时，按名称处理。
+- **按关键词搜索**：匹配工具名和说明，不区分大小写，下划线和连字符按空格处理，例如 `web fetch` 可找到 `WebFetch`。通常最多加载五个匹配；结果更多时会提示直接点名其余工具。没有工具匹配全部关键词时，按完整词尝试部分匹配：至少命中两个不同的关键词，且不少于不同关键词的一半，其中至少一个命中工具名。按命中词数排序，最多加载三个。
+
+空白分隔的列表混有未知名称时，先尝试关键词搜索；没有结果且至少一个分项与已知工具名大小写完全一致，才改为逐个按名称处理。例如 `ListDir NoSuchTool` 会尝试加载 `ListDir` 并报告未知名称；全小写写法不触发这一兜底。需要明确选择时，使用 `select:`。
+
+设为按需加载的 MCP 服务工具也可通过 `ToolSearch` 加载，使用完整的 `mcp__服务名__工具名`；关闭或仅供用户调用的服务不参与搜索。加载成功后，工具定义从下一次模型请求开始提供；调用仍受开关、禁用规则和代理允许列表限制。同一批并行调用不能立即使用刚加载的工具。
 
 按需加载只在当前会话内有效，不会改变保存的开关。恢复会话时，dcl 只把“模型自己发起的成功 `ToolSearch` 调用，以及与该调用 ID 对应的那次结果”当作加载依据：调用必须来自助手消息，结果必须属于同一次调用，同一批并行调用之间出现别的工具结果是正常的。用户输入、摘要、其他工具的输出、孤立结果、出错的结果、重复使用的调用 ID 都不算，也不能用旧 ID 重新登记一次成功结果。恢复后会再按当前设置、目录和代理允许列表过滤，已被关闭的工具不会因为历史记录重新开放。压缩或截断丢失记录时，模型再次搜索即可。
 
