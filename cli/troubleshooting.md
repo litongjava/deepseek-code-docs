@@ -223,7 +223,9 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 使用 Anthropic 协议连接转换网关时，上游也可能返回 `input[n].call_id` 的长度限制。客户端对 Anthropic 的 `tool_use.id` 与 `tool_result.tool_use_id` 成对处理，兼容最多 64 字节的调用标识；工具参数、结果正文与思考签名保持原样。错误字段名称本身不能用来判断客户端选择的协议。
 
-诊断输出会先经过脱敏：密钥、`Authorization`、`Proxy-Authorization`、`Cookie` 与 `Set-Cookie`、代理认证信息和 URL 查询参数都不会写入摘要、日志、请求快照或会话记录。
+普通失败诊断输出会先经过脱敏：密钥、`Authorization`、`Proxy-Authorization`、`Cookie` 与 `Set-Cookie`、代理认证信息和 URL 查询参数都不会写入诊断摘要、日志、诊断请求快照或会话中的失败诊断记录。
+
+开启[请求记录](./request-recording.md)后，`request-records` 中另行保存实际请求体和原始响应正文，**这些正文不脱敏**。排查请求、压缩或工具调用问题时，可用 `dcl requests <会话ID>` 找到文件；以下诊断脱敏规则不适用于这些原始正文，分享前需要逐份检查。
 
 几个容易漏掉的情况也一并处理：
 

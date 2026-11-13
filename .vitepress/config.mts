@@ -37,6 +37,7 @@ export default defineConfig({
       { text: '配置', collapsed: false, items: [
         { text: '运行模式与模型供应商', link: '/desktop/configuration/models' },
         { text: '通用设置与工作目录', link: '/desktop/configuration/preferences' },
+        { text: '请求记录', link: '/desktop/configuration/request-recording' },
         { text: '工具权限', link: '/desktop/configuration/permissions' },
         { text: 'MCP 服务', link: '/desktop/configuration/mcp' }
       ] },
@@ -151,6 +152,7 @@ export default defineConfig({
         ] },
         { text: '实战与参考', items: [
           { text: '用 dcl 修复开源项目 Issue', link: '/cli/case-qwerty-learner' },
+          { text: '请求记录', link: '/cli/request-recording' },
           { text: '故障排查', link: '/cli/troubleshooting' }
         ] }
       ]

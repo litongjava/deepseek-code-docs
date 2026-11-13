@@ -10,6 +10,8 @@ Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录�
 
 设置环境变量 `DEEPSEEK_CODE_DATA_DIR` 可以改用其他目录，CLI 还可以用 `--data-dir`。
 
+开启[请求记录](../configuration/request-recording.md)后，`request-records/<会话ID>/` 保存实际模型请求、原始响应及压缩记录。正文不脱敏，可能包含完整对话与文件内容；备份和分享前请检查。超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理，需要长期保留时提前另存。
+
 `~/.deepseek-code` 中的 `settings.json` 可以配置 hooks，因此模型编辑该目录下的文件需要审批；`workspaces/` 子目录是普通会话工作区，不受此限制。
 
 偏好和部分兼容配置在 localStorage，WebView 与浏览器彼此独立。安全存储凭据不能假定通过复制数据库迁移。

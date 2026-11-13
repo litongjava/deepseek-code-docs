@@ -24,6 +24,8 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 `dcl --yolo`（等同于 `--full-access`）是更彻底的 bypass：除了不询问，还**忽略 deny 规则**，并且命令在[沙箱](./sandbox.md)之外运行。首次使用时显示一次单独的警告。只在可以随时丢弃的机器上使用。
 
+完全访问启动还会自动开启[请求记录](./request-recording.md)，保存未脱敏的模型请求体和原始响应。可用 `DEEPSEEK_CODE_RECORD_REQUESTS=0` 或数据目录 `settings.json` 中的 `"requestRecording": { "enabled": false }` 显式关闭；环境变量优先于配置，`--record-requests` 则始终强制开启。
+
 `--dangerously-skip-permissions` 和 `--yolo` 在 bypass 模式下都跳过 Bash 工具内部的危险命令关键字过滤，例如 `shutdown`、`diskpart`。前者仍遵守显式 deny 规则和配置的沙箱；`--yolo` 同时关闭这些限制。切回 ask、plan 等模式后重新按当前权限模式检查。操作系统权限和命令本身的错误仍可能导致执行失败。
 
 bypass 也跳过 `PreToolUse` Hook 提出的 ask 审批，Hook 的明确拒绝仍会阻止执行。父会话切换权限模式时，运行中的子代理跟随新模式；切到 bypass 后，等待中的普通工具审批会自动继续，本机和内网 Fetch 仍等待本次授权。详见[子代理协作](./plan-mode.md#子代理协作)。
