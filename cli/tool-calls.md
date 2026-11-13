@@ -39,27 +39,16 @@
   ● Updated src/calc.py (+7 -0) (click to expand)
   ```
 
-- `WebFetch` 和 `WebSearch` 的标题和 Claude Code 一样写成 `Fetch(https://example.com/)` 和 `Web Search("rust 1.85")`。
+- `WebFetch` 和 `WebSearch` 的标题和 Claude Code 一样写成 `Fetch(https://example.com/)` 和 `Web Search("rust async")`。
 - 多个工具并行运行时，按开始顺序依次显示，各自在结束时原位换成结果，标题里带着参数，不会混淆。
 
 MCP 调用只显示一个包含工具名和参数的标题，完成后在原位置补上结果，不附加 `Exploration: ...` 摘要。响应直接显示文本正文和嵌入资源的文本，去掉 `content`、`type`、`text` 等协议包装；图片、音频显示附件说明，资源链接保留名称和地址。展开结果、详细记录和恢复会话沿用同一正文展示方式。正文自身是 JSON 时保留原文。
 
 同时返回正文与结构化数据时，终端优先展示正文；模型及 SDK 的结构化工具结果仍保留原始内容块和图片。输出替换钩子会同步更新两种表示。
 
-## Git 暂存结果
+## Git 操作结果
 
-`git_add` 使用文本摘要和请求路径列表，展开和复制也使用完整文本。路径数量表示本次请求的路径数，例如 `.` 算一个路径，不表示实际新增了多少个暂存文件。
-
-```text
-● #603 git_add(.)
-  ⎿  Git add completed — 12 requested paths
-     src-tauri/src/main.rs
-     src-tauri/tauri.conf.json
-     src/api.ts
-     +9 lines (click to expand)
-```
-
-`+N` 是实际被折叠的文本行数。失败显示 Git 错误和退出码；历史、Hook 与协议中的结构化结果保持不变。
+Git 命令通过 `Bash` 执行，输出按普通命令结果展示，没有单独的 Git 工具或专门的暂存摘要。
 
 ## 任务名称
 
@@ -142,18 +131,16 @@ CodeGraph 探索返回的带行号源码也可作为读取记录：系统会核�
   Showing detailed transcript · ctrl+o to toggle · ↑↓ scroll · v to open in vi · ? for shortcuts
 ```
 
-| 按键 | 作用 |
-|---|---|
-| `↑` `↓` / `j` `k` | 滚动一行 |
-| `Ctrl+U` / `Ctrl+D` | 半页 |
-| `空格` / `b` | 下一页 / 上一页 |
-| `g` / `G` | 开头 / 结尾 |
-| `{` / `}` | 上一条 / 下一条提示词 |
-| `/` | 搜索，`Enter` 跳到匹配处；`n` / `N` 下一个 / 上一个 |
-| `[` | 关闭并把整份记录打印到终端的滚动历史 |
-| `v` | 用 `$VISUAL`、`$EDITOR` 或 `vi` 打开 |
-| `?` | 显示或关闭按键说明 |
-| `q` / `Esc` / `Ctrl+O` | 关闭 |
+- `↑` `↓` / `j` `k`：滚动一行。
+- `Ctrl+U` / `Ctrl+D`：半页。
+- `空格` / `b`：下一页 / 上一页。
+- `g` / `G`：开头 / 结尾。
+- `{` / `}`：上一条 / 下一条提示词。
+- `/`：搜索，`Enter` 跳到匹配处；`n` / `N` 下一个 / 上一个。
+- `[`：关闭并把整份记录打印到终端的滚动历史。
+- `v`：用 `$VISUAL`、`$EDITOR` 或 `vi` 打开。
+- `?`：显示或关闭按键说明。
+- `q` / `Esc` / `Ctrl+O`：关闭。
 
 - 一轮结束后，如果用过工具，输入框下方的提示行末尾显示 `ctrl+o to expand tool calls`，看过一次之后这个提示消失。
 - 模型工作时也可以按 `Ctrl+O`，记录包括这一轮到目前为止的思考、调用和输出；这一轮继续在后台运行，关闭后回到实时界面。
@@ -198,7 +185,7 @@ dcl 在每一轮开始前记录会被修改的文件。`/rewind` 列出各轮的
 
 Windows 文件标签会隐藏扩展路径前缀，盘符路径与网络共享路径保持可读；读取、编辑和文件审阅仍使用原始路径。
 
-`ListDir`、`git_status`、`git_diff` 省略 `path` 时使用当前会话的工作目录。Git 状态逐文件列出，未跟踪文件显示 `Untracked`；Git diff 按原始差异逐行显示。Skill 标题包含技能名，结果展示说明正文。任务查询和停止结果的标题包含任务名称；SendMessage 展示收件人、投递状态与正文，ListAgents 展示代理名称、类型和状态。
+`ListDir` 省略 `path` 时使用当前会话的工作目录。Git 状态和差异按 `Bash` 命令输出显示。Skill 标题包含技能名，结果展示说明正文。任务查询和停止结果的标题包含任务名称；SendMessage 展示收件人、投递状态与正文，ListAgents 展示代理名称、类型和状态。
 
 Edit 和 MultiEdit 匹配时将 LF、CRLF 视为等价。替换内容沿用匹配位置的换行风格，未修改区域、已有 BOM、混合换行和文件末尾是否换行均保持原样。默认要求唯一匹配；需要替换全部匹配时，Edit 或 MultiEdit 的对应编辑项须设置 `replace_all: true`。
 

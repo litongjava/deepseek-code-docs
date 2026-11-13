@@ -1,6 +1,6 @@
 # Code 模式提示词：样本讲解、隐私清理与项目接入
 
-本文解释 `code_prompt_1.json` 的结构、可复用的设计，以及它在 DeepSeek Code Desktop 中的实际接入方式。接入日期：2026-10-14。2026-10-29 起，Code 模式改为参照 Claude Code 2.1.302 的请求快照对齐提示词和工具（CLI 与 Desktop Code 模式共用同一引擎），本文第 4–7 节按当前实现更新。
+本文解释 `code_prompt_1.json` 的结构、可复用的设计，以及它在 DeepSeek Code Desktop 中的实际接入方式。接入日期：2026-10-14。2026-10-29 起，Code 模式改为参照 Claude Code 的请求快照对齐提示词和工具（CLI 与 Desktop Code 模式共用同一引擎），本文第 4–7 节按当前实现更新。
 
 ## 1. 先认清样本是什么
 
@@ -10,7 +10,7 @@
 
 样本包括：
 
-- `model`：`claude-sonnet-4-5`，是该次请求选择的模型，不应覆盖项目用户当前选择。
+- `model`：该次请求选择的模型，不应覆盖项目用户当前选择。
 - `tools`：116 个工具，其中 31 个普通工具、85 个以 `mcp__` 开头的工具。
 - `messages`：一条要求只回复 OK、不调用工具的探测消息。它是样本输入，不是项目的默认行为规则。
 - `max_tokens`：256，只适用于该次短回复请求，不能作为编程任务的默认输出上限。
@@ -54,7 +54,7 @@
 
 提交前检查状态与暂存区，只暂存用户任务涉及的路径；未明确要求时不提交、不推送。不擅自 amend、强推、重置、清理工作区或跳过 hooks。
 
-本项目现有 `git_commit` 会先执行 `git add -A`，适配版提示词明确说明这个事实：有无关修改时，应通过 shell 提交经过选择的暂存内容，避免误收文件。本次没有改变这个既有工具的接口和默认行为。
+Git 操作通过 `Bash` 执行，例如 `git status`、`git diff`、`git add <路径>` 和 `git commit`，没有单独的 Git 工具。提示词要求只暂存任务涉及的路径，保留无关修改。
 
 ### 3.4 提问与验证都有明确目的
 
@@ -102,7 +102,7 @@
 
 ## 5. 当前工具协议
 
-对齐后，Code 模式向模型提供的工具名称、参数和说明以参考 CLI 为准；本项目特有的工具（`memory_search`、`memory_ingest`、`git_*`、`ListDir`、`MultiEdit`、`computer_use` 等）继续保留。`prompt/code.rs` 只在原生说明后面追加一句 `Code mode:` 提示，**不改变参数 schema**。旧的 `Delegate`、`Worker`、`smart_grep`、`smart_edit`、`todo_write` 已删除，`cron` 和 `worktree` 只为旧会话记录保留执行入口，模型看不到。
+对齐后，Code 模式向模型提供的工具名称、参数和说明以参考 CLI 为准；本项目特有的工具（`memory_search`、`memory_ingest`、`ListDir`、`MultiEdit`、`computer_use` 等）继续保留。`prompt/code.rs` 只在原生说明后面追加一句 `Code mode:` 提示，**不改变参数 schema**。旧的 `Delegate`、`Worker`、`smart_grep`、`smart_edit`、`todo_write` 已删除，`cron` 和 `worktree` 只为旧会话记录保留执行入口，模型看不到。
 
 ### Shell
 
@@ -117,7 +117,7 @@ PowerShell 文件读取示例：
 Get-Content -LiteralPath 'D:\项目\配置.json' -Raw -Encoding UTF8
 ```
 
-应用原有 shell 包装器已设置 UTF-8 输入输出与文件 cmdlet 编码，适配版仍要求显式编码。控制台输出使用逐行文本或 JSON，不使用表格。文件写入沿用 `utf8.rs`：普通文本 UTF-8，Windows `.ps1` 按既有逻辑写入 BOM，兼容 Windows PowerShell 5.1。
+应用原有 shell 包装器已设置 UTF-8 输入输出与文件 cmdlet 编码，适配版仍要求显式编码。控制台输出使用逐行文本或 JSON，不使用表格。文件写入沿用 `utf8.rs`：普通文本 UTF-8，Windows `.ps1` 按既有逻辑写入 BOM，兼容 Windows PowerShell。
 
 ### 文件与搜索
 
@@ -154,7 +154,9 @@ Code 的系统提示词按参考 CLI 的布局分三块：
 2. `code.md` + `memory.md`，单独带缓存断点。
 3. `# Environment`（工作目录、是否 Git 仓库、平台、shell、系统版本、模型、日期）和请求自定义提示词（放在 `<additional_instructions>` 中），不带缓存标记。
 
-其余上下文不再放进系统提示词，而是像参考 CLI 一样附在用户消息上：
+每次请求还会追加运行时 `Tool directory`，列出当前可按需加载的内置工具名称和用途，见[工具目录与搜索](/cli/tools#工具目录与搜索)。
+
+项目和会话上下文不再放进系统提示词，而是像参考 CLI 一样附在用户消息上：
 
 - **第一条用户消息**开头附上项目说明（`Codebase and user instructions are shown below…`，含 `AGENTS.md`、`CLAUDE.md` 和记忆索引）和会话开始时的 **Git 状态快照**（当前分支、主分支、`git status`、最近提交，状态最多 2000 字符）。快照每个会话只取一次，之后的请求复用，保证前缀稳定可缓存。
 - **每轮用户消息**后面附上该轮的钩子附加内容、`/技能` 展开的技能正文、召回的相关记忆。这些内容按会话保存，之后的每次请求都放回同一条消息后面，不会在下一轮丢失。
@@ -164,23 +166,21 @@ Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话�
 
 `chat`、`work`、`study` 沿用 Desktop 提示词与原有记忆行为。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
 
-主要源码（相对于应用仓库）：
+主要源码位于 CLI 与 Desktop 共用的核心引擎中：
 
-提示词和引擎已移到共享引擎 `crates/core`，CLI 与 Desktop 共用：
-
-- `crates/core/src/prompt/code.md`：Code 行为规则，编译时嵌入。
-- `crates/core/src/prompt/code.rs`：8 项原生工具的 `Code mode:` 说明补充；保留实际参数 schema，包括记忆工具。
-- `crates/core/src/prompt/mod.rs`：提示词 profile、组装入口和缓存分块。
-- `crates/core/src/native_engine/engine_core.rs`：选择 profile，组装项目说明、Git 快照和每轮附加内容。
-- `crates/core/src/services/turn_context.rs`、`services/git_snapshot.rs`、`project_instructions.rs`：随用户消息附带的上下文。
-- `crates/core/src/native_engine/tool_loop.rs`：两种协议使用同一工具适配逻辑。
-- `crates/core/src/tools/`：工具定义与实现（`read.rs`、`search.rs`、`web.rs`、`wakeup.rs` 等）。
+- `prompt/code.md`：Code 行为规则，编译时嵌入。
+- `prompt/code.rs`：8 项原生工具的 `Code mode:` 说明补充；保留实际参数 schema，包括记忆工具。
+- `prompt/mod.rs`：提示词 profile、组装入口和缓存分块。
+- `native_engine/engine_core.rs`：选择 profile，组装项目说明、Git 快照和每轮附加内容。
+- `services/turn_context.rs`、`git_snapshot.rs`、`project_instructions.rs`：随用户消息附带的上下文。
+- `native_engine/tool_loop.rs`：两种协议使用同一工具适配逻辑。
+- `tools/`：工具定义与实现（`read.rs`、`search.rs`、`web.rs`、`wakeup.rs` 等）。
 
 前端已经保存 `workspace_mode`，不需要新增提示词文本框或在浏览器里拼接大段规则。请求中的自定义提示词仍保留，不将其替换成样本的探测消息。
 
 ## 7. 如何维护与验证
 
-修改 `crates/core/src/prompt/code.md` 后重新编译 Rust 应用，下一轮 Code 请求才会使用新版本。仅重启 Vite 前端无法更新编译嵌入的文本。
+修改 `prompt/code.md` 后重新编译 Rust 应用，下一轮 Code 请求才会使用新版本。仅重启 Vite 前端无法更新编译嵌入的文本。
 
 新增能力时先实现工具，再写说明：可以沿用参考 CLI 的工具名、参数和单位，但说明里承诺的行为（后台完成通知、工作目录保留等）必须有对应实现。采集类约定应在人工审阅时排除，不能依赖模型自行忽略。
 
