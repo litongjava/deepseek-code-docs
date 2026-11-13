@@ -39,7 +39,7 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
 - 执行结果的 `shell` 和 `shell_path` 表示实际启动的 Shell；语法错误和非零退出码均报告失败。保存工作目录不会覆盖命令的退出码。
-- `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。
+- `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。前台命令到时间仍未结束时不会被终止，而是转为后台受管任务继续运行：模型拿到已有输出和任务编号，再决定用 `TaskGet` 等待或用 `TaskStop` 停止，对话里显示“Still running after 2m; moved to the background”。子代理里的命令到时间仍会被终止。
 - `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出（默认立即返回当前快照；`block: true` 最多等待 `timeout` 毫秒，默认 30000、最多 600000，等待超时不会结束进程）、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
 - **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，结果里 `pipeline_sigpipe` 为 `true`、`success` 仍为 `true`，同时保留 `exit_code: 141`。
