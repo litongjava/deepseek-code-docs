@@ -37,6 +37,12 @@ Warning: no stdin data received in 3s, proceeding without it; redirect stdin fro
 
 并只使用命令行提示词继续。一旦收到首个字节，就会一直读到 EOF，不设超时。确定没有输入时，使用 `< /dev/null` 可以跳过这 3 秒等待。
 
+## 中断与请求超时
+
+用 `Ctrl+C` 可以取消正在执行的单次任务，包括代理正在启动或正在输出工具结果时。dcl 会先收尾，再以非零状态退出。
+
+长回答只要持续收到数据，就可以超过 300 秒。流式响应在已有内容之后空闲超时、且未启用恢复时，dcl 保留已收到的部分回复，并以非零状态退出。`stream-json` 的 `result` 此时带有 `is_error: true` 和 `stop_reason: "stream_error"`。需要继续同一会话时，可用 `--resume <ID>` 发起新一轮。配置和重试条件见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
+
 ## 权限
 
 非交互模式没有人可以回答审批请求。默认的 `ask` 模式下，如果模型调用了需要审批的工具（例如修改文件的 `Edit`、运行非只读命令的 `Bash`、访问新网站的 `WebFetch`），这次调用会被**拒绝**，模型收到
@@ -75,6 +81,7 @@ dcl -m deepseek-flash --api-format anthropic \
 | `tool_start` | 工具调用开始，含 `name` 和 `input` |
 | `tool_result` | 工具结果，含 `is_error` 和 `output` |
 | `error` | 请求或引擎错误 |
+| `request_attempt` | 模型请求尝试和重连通知，`outcome` 为 `retry_wait` 或 `post_content_retry` 时，表示仍在处理本轮 |
 | `result` | 最终结果，含 `is_error`、`result`、`session_id` 和用量 |
 
 `stream-json` 同时输出参考协议的 `system`、`assistant`、`user`、`result` 消息，SDK 和多轮会话的用法见 [SDK 与 stream-json 协议](./sdk.md)。

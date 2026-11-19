@@ -132,6 +132,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `@` | 补全项目文件，见[`@` 引用文件](./file-mentions.md) |
 | `Ctrl+V` | 粘贴剪贴板中的图片，没有图片时粘贴文字；`Alt+V` 同样粘贴图片，见[图片](./images.md) |
 
+回合进行中按一次 `Ctrl+C` 即可请求取消，包括代理正在启动、终端正在处理工具输出或前台正在等待 Worker 的时候。dcl 会等待取消收尾，再恢复输入。在 Unix 上，收到 `SIGTERM` 或 `SIGHUP` 时，正在观察 Worker 的前台会先请求取消当前任务，等任务收尾后退出。
+
 输入框的特殊前缀：
 
 | 前缀 | 作用 |

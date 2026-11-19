@@ -147,6 +147,7 @@ export default defineConfig({
           { text: '远程控制', link: '/cli/remote-control' },
           { text: 'Windows 远程开发 macOS', link: '/cli/windows-macos-development' },
           { text: '会话消息', link: '/cli/session-messages' },
+          { text: '本地协调与运行中的会话', link: '/cli/local-coordination' },
           { text: '代理团队', link: '/cli/agent-teams' },
           { text: 'Super Agent 架构规范', link: '/cli/super-agent' }
         ] },

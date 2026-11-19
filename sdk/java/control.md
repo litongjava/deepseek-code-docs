@@ -17,6 +17,8 @@
 - `reloadPlugins()`：重新加载插件。
 - `control(request)`：发送任意控制请求。
 
+使用 `interrupt()` 取消 dcl 回合后，可继续读取该轮的 `ResultMessage`，再发送下一轮。直接发送 `SIGINT` 时，空闲的 dcl 进程也可能退出，见 [stream-json 控制请求](/cli/sdk#宿主可以发送的控制请求)。
+
 ## 选项
 
 `AgentOptions` 的方法可以链式调用：
@@ -25,10 +27,13 @@
 - `cwd(directory)`：工作目录。
 - `permissionMode(mode)`、`allowedTools(...)`：权限模式和预先允许的工具。
 - `includePartialMessages(true)`：接收增量事件 `StreamEvent`。
+- `includeRawFrames(true)`：接收 `RawMessage`，例如 dcl 的 `request_attempt` 重连通知。
 - `extraArg("flag", "value")`：传递任意 CLI 参数（不带前导 `--`），例如 `dcl` 的 `model`、`data-dir`。
 - `env(name, value)`：为 CLI 进程设置环境变量，适合传入密钥。
 - `stderr(consumer)`：接收 CLI 的标准错误输出，便于接入日志。
 - `resume(sessionId)`、`continueConversation(true)`、`forkSession(true)`：恢复或分叉会话。
 - `initializeField(name, value)`：向 `initialize` 请求添加字段，例如 `promptSuggestions`。
+
+`ResultMessage.getStopReason()` 读取 CLI 提供的停止原因，`stop_reason` 为 `null` 或省略时返回 `null`。以 dcl 的 Chat Completions 请求为例，等待响应头超时导致本轮失败时，停止原因为 `error`。如果在收到内容后因正文读取超时而失败，可返回 `stream_error`，并在 `getResult()` 中保留部分回复。多轮会话可以继续发送下一条消息。超时与恢复的配置见[流式请求超时与重试](/cli/providers#流式请求超时与重试)。
 
 协议细节见 [SDK 与 stream-json 协议](/cli/sdk)。

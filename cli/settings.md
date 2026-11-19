@@ -13,6 +13,8 @@
 }
 ```
 
+`spinnerTipsEnabled` 和 `promptSuggestionEnabled` 与 Claude Code 的同名设置含义一致。
+
 | 键 | 默认 | 作用 |
 |---|---|---|
 | `spinnerTipsEnabled` | `true` | 运行中是否在状态行下显示提示，见[运行提示](./tips.md) |
@@ -23,14 +25,20 @@
 | `shell` | 工具使用 Bash，手动终端保留原默认值 | 共用 Shell 配置，见下文 |
 | `permissions` | 无 | `allow`、`ask`、`deny` 规则列表，见[权限](./permissions.md#规则) |
 | `remoteControlAtStartup` | `false` | 交互会话启动时自动连接远程控制，见[远程控制](./remote-control.md#启动时自动连接) |
+| `localCoordination.enabled` | `false` | 开启 Linux CLI 的本地协调，见[本地协调](./local-coordination.md) |
+| `localCoordination.registry` | `true` | 开启本地协调后，自动登记 CLI 会话与常驻 Worker |
 
-这两个开关和 Claude Code 的同名设置含义一致。
+`localCoordination.enabled` 和 `localCoordination.registry` 是 `localCoordination` 对象中的字段。嵌套写法见[启用登记](./local-coordination.md#启用登记)。
 
 ## 请求记录
 
 在数据目录的 `settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
 
 优先级是 `--record-requests` 强制开启 → `DEEPSEEK_CODE_RECORD_REQUESTS` 的有效值 → `requestRecording.enabled` → 完全访问模式自动开启。环境变量支持 `1`、`true`、`0`、`false`。请求体不脱敏，完整示例、保存位置与隐私说明见[请求记录](./request-recording.md)。Desktop 使用同一份数据目录配置。
+
+## 流式模型请求
+
+流式请求的读取空闲超时和内容后超时恢复在 `config/orchestration.toml` 的 `[http]` 段配置。默认分别为 `300` 秒和 `false`。完整配置示例见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
 
 ## Shell 配置
 
@@ -81,6 +89,7 @@ dcl config set shell.terminalDefault wsl
 | `DEEPSEEK_API_KEY` | DeepSeek API Key | [接入 DeepSeek](./deepseek.md) |
 | `DEEPSEEK_BASE_URL` | 覆盖 DeepSeek 接口地址 | [接入 DeepSeek](./deepseek.md) |
 | `DEEPSEEK_CODE_DATA_DIR` | 数据目录 | [数据目录](./data-directory.md) |
+| `DEEPSEEK_CODE_COORDINATION_DIR` | 本地协调目录 | [本地协调](./local-coordination.md) |
 | `DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | 启用代理团队工具 | [代理团队](./agent-teams.md) |
 | `CLAUDE_BRIDGE_OAUTH_TOKEN` | 远程控制服务的 token | [远程控制](./remote-control.md) |
 | `TEAM_SYNC_TOKEN` | 团队同步客户端 token | [团队同步](./team-sync.md) |
@@ -99,6 +108,7 @@ dcl config set shell.terminalDefault wsl
 | `--allow-dangerously-skip-permissions` | 兼容参数；普通启动已允许切换 bypass | [权限模式与工具审批](./permissions.md#权限模式) |
 | `--yolo` / `--full-access` | 完全访问：bypass 并忽略命令黑名单、deny 规则和沙箱 | [权限模式与工具审批](./permissions.md#完全访问) |
 | `--data-dir` | 数据目录 | [数据目录](./data-directory.md) |
+| `--coordination-dir` | 本地协调目录 | [本地协调](./local-coordination.md) |
 | `-p, --print` | 非交互执行一次 | [非交互模式](./non-interactive.md) |
 | `--json-schema` | 结构化输出 | [结构化输出](./structured-output.md) |
 
