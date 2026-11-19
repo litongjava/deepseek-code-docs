@@ -69,6 +69,7 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 | `dcl --continue` | 继续当前目录最近的会话（跳过没有消息的空会话） |
 | `dcl --resume <ID>` | 恢复指定会话 |
 | `dcl sessions list` | 列出保存的会话 |
+| `dcl sessions live` | 查看本机已登记的 CLI 会话和 Worker，见[本地协调](./local-coordination.md) |
 | `dcl lsp` | 查看语言服务器状态 |
 | `dcl --help` | 查看全部参数 |
 

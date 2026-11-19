@@ -64,10 +64,13 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 - `stream_event`：仅在 `--include-partial-messages` 时输出，`event` 为 `message_start`、`content_block_start`、`content_block_delta`（`text_delta`、`thinking_delta`、`input_json_delta`）、`content_block_stop`、`message_delta`、`message_stop`。
 - `result`：每轮一条，含 `subtype`（`success`、`error_max_turns`、`error_during_execution`）、`is_error`、`result`、`num_turns`、`duration_ms`、`total_cost_usd`（会话累计）、`usage`、`structured_output`，以及 `permission_denials`（本轮被规则、模式、Hook 或宿主拒绝的工具调用）。
 - `prompt_suggestion`：`initialize` 打开 `promptSuggestions` 后，每轮成功结束时给出下一句建议。
+- `request_attempt`：请求尝试诊断，包含 `requestId` 和 `outcome`。`retry_wait` 表示正在等待常规重试，例如收到 HTTP 503 后等待重连，`requestId` 是同一请求各次常规尝试共用的 ID。`post_content_retry` 仅在[开启内容后超时恢复](./providers.md#流式请求超时与重试)时出现，表示即将重新请求当前尚未提交的模型步骤，`requestId` 是将被替换的原超时请求的 ID。两种通知都无需开启 `--include-partial-messages`，此时回合仍在进行。
+
+以 Chat Completions 为例，如果超时最终导致本轮失败，`result` 帧包含 `is_error: true` 和 `subtype: "error_during_execution"`。等待响应头超时时，dcl 返回 `stop_reason: "error"`。如果在收到内容后因正文读取超时而失败，dcl 可返回 `stop_reason: "stream_error"`，`result` 可包含保留的部分文本。SDK 输入保持可用，宿主仍可发送下一轮。`stop_reason` 由 CLI 提供，可以为 `null` 或省略，例如宿主发起的取消可能只在 `turn.status` 中标记为 `cancelled`。
 
 超限恢复、摘要失败或恢复取消时，最终 `result` 仍使用相同字段结构。已获得的各次尝试用量、模型轮数和工具拒绝会保留并汇总；同一次尝试内按请求 ID 汇总不同模型请求，同一请求的多次累积报告只保留最新已知值，后续缺失或 null 字段不擦除已报告计数。上下文重置后的新消息段也继续计入本轮；未知用量保留为空对象或未报告字段，不当作精确零。`total_cost_usd` 是收尾时读取的会话累计费用，不按尝试相加。最终错误反映实际结束原因；附属诊断日志保存失败会提示，但不会阻断压缩恢复。
 
-所有消息都带 `session_id` 和 `uuid`。为兼容旧的脚本，`text`、`tool_start`、`tool_result`、`usage` 等事件行仍然保留，SDK 可以忽略不认识的类型。
+会话消息带 `session_id` 和 `uuid`。为兼容旧的脚本，`text`、`tool_start`、`tool_result`、`usage` 等事件行仍然保留，SDK 可以忽略不认识的类型。
 
 ## 宿主可以发送的控制请求
 
@@ -79,6 +82,8 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 
 - `interrupt`：通知当前回合取消，并等待该回合完成收尾后返回一次 `error_during_execution` 结果。结果保留中断前按请求 ID 收集的最后已知用量、模型轮数、工具拒绝和实际耗时，轮次状态为 `cancelled`，终态计时事件也只发送一次；未知用量不填成零。压缩恢复期间同样适用，已提交的摘要仍报告保存位置，取消后不继续发送重试请求。
 - `cancel_async_message`（`message_uuid`）：取消尚未开始的排队消息，返回 `cancelled`。
+
+宿主要中断回合时，使用 `interrupt`，再读取该轮的 `result`。如果直接给 dcl 发送 `SIGINT`，被当前回合处理的信号只中断这一轮。回合结束后才收到的信号仍可中断 SDK 的输入等待，空闲时收到信号可能使进程退出并报告 `SDK input interrupted`。
 
 会话设置：
 
