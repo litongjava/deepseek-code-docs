@@ -8,6 +8,8 @@ Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录�
 
 旧版本把上传文件、App Studio 项目和部分记忆放在系统本地数据目录下的 `claude-desktop/` 中（Linux 为 `~/.local/share/claude-desktop`，Windows 为 `%LOCALAPPDATA%\claude-desktop`）。新版本不再读取那里，也不会自动迁移；需要旧文件时手动复制到数据目录对应的子目录。
 
+内置的 `task-template` 随程序提供，备份 `skills/` 时只需处理实际保存在磁盘上的技能副本。
+
 设置环境变量 `DEEPSEEK_CODE_DATA_DIR` 可以改用其他目录，CLI 还可以用 `--data-dir`。
 
 开启[请求记录](../configuration/request-recording.md)后，`request-records/<会话ID>/` 保存实际模型请求、原始响应及压缩记录。正文不脱敏，可能包含完整对话与文件内容；备份和分享前请检查。超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理，需要长期保留时提前另存。

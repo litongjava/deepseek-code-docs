@@ -154,7 +154,7 @@ Code 的系统提示词按参考 CLI 的布局分三块：
 2. `code.md` + `memory.md`，单独带缓存断点。
 3. `# Environment`（工作目录、是否 Git 仓库、平台、shell、系统版本、模型、日期）和请求自定义提示词（放在 `<additional_instructions>` 中），不带缓存标记。
 
-每次请求还会追加运行时 `Tool directory`，列出当前可按需加载的内置工具名称和用途，见[工具目录与搜索](/cli/tools#工具目录与搜索)。
+每次请求还会追加运行时 `Tool directory`，分别列出当前可加载的内置工具和 MCP 工具。模型按目录中的完整名称调用 `ToolLoad`，见[工具目录与加载](/cli/tools#工具目录与加载)。
 
 项目和会话上下文不再放进系统提示词，而是像参考 CLI 一样附在用户消息上：
 

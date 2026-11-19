@@ -48,6 +48,8 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 {"type":"control_request","request_id":"req_1","request":{"subtype":"initialize"}}
 ```
 
+宿主可在 `initialize` 请求的子代理定义中预加载技能，例如在 `request.agents` 下指定 `{"coordinator":{"description":"分派任务","prompt":"为队员准备任务说明","skills":["task-template"]}}`。dcl 将技能正文放入该子代理的上下文。见 [Java 子代理配置](/sdk/java/tools-agents#子-agent-与结构化输出)。
+
 `dcl` 用 `control_response` 回答：
 
 ```json
@@ -136,6 +138,8 @@ printf '%s\n' \
 {"type": "assistant", "message": {"content": [{"text": "Tool said: Permission denied: Plan mode: write operations are not allowed", "type": "text"}], "id": "msg_73f758984d53411796b0c999fbcc9adf", "role": "assistant"}, "session_id": "4472dafa-acf8-4c0a-a281-2f9f0f03398c"}
 {"type": "result", "subtype": "success", "is_error": false, "result": "Tool said: Permission denied: Plan mode: write operations are not allowed", "num_turns": 2, "duration_ms": 108, "total_cost_usd": 0.0, "permission_denials": [{"tool_input": {}, "tool_name": "mcp__app__server_time", "tool_use_id": "time-1"}], "session_id": "4472dafa-acf8-4c0a-a281-2f9f0f03398c"}
 ```
+
+`system/init.tools` 列出工具名，其中包括 `ToolLoad`。每次模型请求实际收到的定义取决于加载设置和当前代理。加载调用按普通 `tool_use` 块发送，例如 `"name":"ToolLoad","input":{"names":["ListDir","WebFetch"]}`；宿主可以用调用 ID 关联对应的 `tool_result`。
 
 ## Java SDK
 

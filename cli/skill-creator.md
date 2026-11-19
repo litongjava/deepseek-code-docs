@@ -22,7 +22,7 @@ DeepSeek Code 从以下位置读取技能：
 - 用户配置目录：`$CLAUDE_CONFIG_DIR/skills`，未设置时是 `~/.claude/skills`。
 - 项目目录：工作区下的 `.claude/skills`。
 
-`dcl skills list` 和自定义页会列出数据目录中的技能。内置的 `skill-creator` 不写入磁盘，但仍只显示一次；如果数据目录里存在同名技能，以你的副本为准。
+`dcl skills list` 和自定义页会列出数据目录中的技能，以及内置的 `skill-creator` 和 [task-template](./skills.md#task-template)。前者用于编写技能，后者用于为队员或代理准备任务说明。同名的数据目录技能优先，每个名称只列一次。
 
 旧版本在 `skills/bundled/skill-creator` 写过一份占位技能。新版本只在文件与旧占位**完全一致**（`SKILL.md`、`agents/analyzer.md`、`agents/grader.md`，没有额外文件）时删除它；改动过的副本和不相关的兄弟技能不会被动。
 

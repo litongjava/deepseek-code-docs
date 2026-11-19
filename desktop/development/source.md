@@ -23,10 +23,10 @@
 - `src-tauri/src/commands`：Tauri 命令。
 - `crates/core/src/native_engine`：模型和工具执行核心（与 CLI 共用）。
 - `crates/core/src/prompt`：系统提示词。
-- `crates/core/src/tools`：内置工具。
+- `crates/core/src/tools`：内置工具及 `ToolLoad` 的参数定义。按请求筛选目录和加载工具的逻辑在 `crates/core/src/native_engine/tool_loop.rs`。
 - `crates/core/src/db`：SQLite 及迁移相关逻辑。
 - `crates/core/src/permissions`：工具权限管理。
-- `crates/core/src/mcp`、`crates/core/src/skills`、`crates/core/src/memory`：MCP、技能和记忆。
+- `crates/core/src/mcp`、`crates/core/src/skills`、`crates/core/src/memory`：MCP、技能和记忆。内置任务说明模板位于 `crates/core/src/skills/bundled/task-template.md`。
 
 ## 常用 HTTP 入口
 

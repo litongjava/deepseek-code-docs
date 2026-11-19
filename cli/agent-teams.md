@@ -17,6 +17,8 @@ export DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 | `SendMessage` | 队员之间、队员与队长之间发消息，`to` 写队员名字，`*` 广播 |
 | `TeamDelete` | 解散团队；有队员仍在运行时会失败 |
 
+决定把较大的任务交给队员时，可以先用 [task-template](./skills.md#task-template) 写清每个队员负责的改动、验收步骤和报告要求，再把相应说明交给队员。
+
 ## 示例
 
 ```bash
