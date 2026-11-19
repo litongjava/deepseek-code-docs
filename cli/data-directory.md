@@ -75,7 +75,7 @@ Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但�
 
 技能按以下顺序读取，后面的同名技能覆盖前面的：
 
-1. 内置工作流（随 dcl 发布，例如 `code-review`、`doctor`）；
+1. 内置工作流（随 dcl 发布，例如 `code-review`、`doctor`、`task-template`）；
 2. `CLAUDE_CONFIG_DIR` 指向的目录（未设置时为 `~/.claude`）下的 `skills/` 和 `commands/`；
 3. 数据目录的 `skills/`（默认 `~/.deepseek-code/skills`，可用 `--data-dir` 或 `DEEPSEEK_CODE_DATA_DIR` 改变）；
 4. 当前工作区的 `.claude/skills` 和 `.claude/commands`。
@@ -86,14 +86,14 @@ Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但�
 
 模型看到的技能列表、`Skill` 工具和斜杠命令使用同一套结果。`enabled: false` 的技能不出现；`disable-model-invocation: true` 的技能仍可用斜杠命令，但模型看不到也不能调用；`user-invocable: false` 的技能只供模型调用。格式错误或无法读取的 `SKILL.md` 会被跳过，只在运行日志中显示路径。发现过程不会创建目录或文件，也不会跟随符号链接。技能说明中的 `references/setup.md` 等相对路径以 `SKILL.md` 所在目录为基准解析。
 
-用 `dcl skills list`（或会话内 `/skills`）查看数据目录中托管的技能：输出为 JSON，包含 `id`、`name`、`enabled`、`source` 和 `sourceDir`。这里的 `name` 是技能保存的名称，斜杠命令使用上面说明的小写规则。它只列数据目录里由 dcl 管理的技能，不包含项目 `.claude` 或 `~/.claude` 里的条目；这些条目会直接出现在模型可用的技能列表和斜杠命令中。
+用 `dcl skills list`（或会话内 `/skills`）查看托管技能和内置清单条目：输出为 JSON，包含 `id`、`name`、`enabled`、`source` 和 `sourceDir`。这里的 `name` 是技能保存的名称，斜杠命令使用上面说明的小写规则。列表也包含内置的 `skill-creator` 和 `task-template`。后者的 `source` 是 `bundled`，`sourceDir` 为 `null`，可用 `dcl skills help task-template` 阅读正文。清单不包含项目 `.claude` 或 `~/.claude` 里的条目；这些条目会直接出现在模型可用的技能列表和斜杠命令中。
 
 ```bash
-# 查看默认数据目录中的托管技能
+# 查看托管技能和内置条目
 dcl skills list
 
 # 查看 --data-dir 指定的其他数据目录
 dcl --data-dir /path/to/data skills list
 ```
 
-验证某个技能确实被模型看到时，在空的工作区里让模型“列出可用的技能”，或让模型直接调用 `Skill`；返回的说明会包含真实的技能目录，可据此检查相对路径能否读取。`dcl skills list` 只反映数据目录，不能单独证明项目或 `~/.claude` 中的同名技能被选中。
+验证某个技能确实被模型看到时，在空的工作区里让模型“列出可用的技能”，或让模型直接调用 `Skill`；有磁盘资源的技能可根据返回的目录检查相对路径。要确认项目或 `~/.claude` 中的同名技能是否被选中，应检查运行时返回的内容。

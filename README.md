@@ -28,7 +28,7 @@ npm.cmd run preview
 - `desktop/`：Desktop 板块。
   - `guide/`：概览、安装与首次使用。
   - `configuration/`：模型、偏好、权限与 MCP。
-  - `usage/`：聊天、项目、Skills、知识库与记忆。
+  - `usage/`：聊天、项目、[Skills 与按需工具](./desktop/usage/skills.md)、知识库与记忆。
   - `advanced/`：定时任务、IM 与辅助面板。
   - `development/`：通信、浏览器调试、源码与故障排查。
   - `maintenance/`：备份、升级、迁移与常见问题。

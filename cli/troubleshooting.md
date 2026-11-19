@@ -92,6 +92,10 @@ Windows 在审批文件被删除或短暂独占时可能返回 `Access is denied
 
 **处理**：当前版本会重试最多 500 毫秒。如果仍然报错，说明确实有另一个进程正在操作，等它结束后重试。
 
+## 按需工具没有加载
+
+查看 `ToolLoad` 的 `tool_result`。如果 `unknown` 中有名称，从当前目录复制完整名称并核对大小写。如果 `unavailable` 中有条目，根据对应的原因检查工具开关、MCP 服务状态或代理允许范围。修正后重新提交整组名称；失败的请求不会加载其中任何一项。见[工具目录与加载](./tools.md#工具目录与加载)。
+
 ## TeamSpawn 报 team_name is required
 
 **现象**：模型明明传了参数，`TeamSpawn` 仍然每次都返回 `team_name is required`。日志中该工具的 `input` 为 `{}`。

@@ -42,7 +42,7 @@ Status
 - 包含图片或不透明压缩内容的请求可能无法在本地完整估算。最新请求尚无完整统计时，显示同一会话、同一模型最近已报告的输入量，注明 `last reported input; latest request input not yet available`，此时不计算当前剩余百分比；没有历史统计时显示 `pending`。搜索等辅助请求的用量计入累计量，但不替代主对话的上下文占用。
 - 尚无请求时显示 `not available (no request yet)`；未知模型既无显式窗口也无默认值时，仅窗口容量显示 `unknown`。已有输入统计仍可单独查看。
 
-**工具**：`Worker` 是持久化后台进程的状态；`MCP servers` 列出运行中和已配置的服务数量，并在下方逐个展示。`Built-in tools` 是内置工具数量；`Language servers` 是已安装的语言服务器数量，详细情况用 `/lsp` 查看。
+**工具**：`Worker` 是持久化后台进程的状态；`MCP servers` 列出运行中和已配置的服务数量，并在下方逐个展示。`Built-in tools` 是内置工具数量。实际提供哪些定义取决于本次请求；符合条件的按需工具可用 [ToolLoad](./tools.md#工具目录与加载) 加载。`Language servers` 是已安装的语言服务器数量，详细情况用 `/lsp` 查看。
 
 MCP 的"运行中"来自管理器的记录，dcl 不会为此向服务发送协议级的健康检查。
 

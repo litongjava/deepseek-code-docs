@@ -64,7 +64,7 @@ dcl -c -p "/compact 保留接口设计的讨论" < /dev/null
 ```
 
 - 通常配合 `-c`（继续最近的会话）或 `--resume <ID>` 使用；后面的文字是可选的压缩要求。
-- 文本输出显示压缩了多少条消息；`json`、`stream-json` 输出一个成功的 `result`。之后继续这个会话时，已调用的技能内容仍然保留。
+- 文本输出显示压缩了多少条消息；`json`、`stream-json` 输出一个成功的 `result`。之后继续这个会话时，已调用的技能内容仍然保留，包括委派任务时用过的 [task-template](./skills.md#task-template)。
 
 ## 记录完整过程
 

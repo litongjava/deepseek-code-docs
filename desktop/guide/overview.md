@@ -12,7 +12,7 @@ DeepSeek Code Desktop 使用 React 19、TypeScript、Tauri 2 和 Rust 构建桌�
 
 ## 能力范围
 
-项目包含多模型聊天、Markdown 渲染、会话管理、项目工作区、MCP、Skills、终端、文件浏览、知识库、研究、记忆、成本分析和 IM 集成等模块。模型供应商、GitHub、IM 和部分网关功能依赖相应配置或外部服务，不能仅凭页面能打开就判断功能可用。
+项目包含多模型聊天、Markdown 渲染、会话管理、项目工作区、MCP、[Skills](../usage/skills.md)（包括委派任务用的 `task-template`）、终端、文件浏览、知识库、研究、记忆、成本分析和 IM 集成等模块。模型供应商、GitHub、IM 和部分网关功能依赖相应配置或外部服务，不能仅凭页面能打开就判断功能可用。
 
 ## 三个需要区分的工程
 
