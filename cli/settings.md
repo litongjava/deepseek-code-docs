@@ -61,6 +61,8 @@ dcl config set shell.terminalDefault bash
 dcl config show
 ```
 
+`shell.toolDefault` 决定 `Bash` 和 `Monitor` 提示的默认 Shell。它们的 `shell` 参数只列出本机可用的选项。选择 Git Bash 时会看到 Unix 路径与路径转换提示，选择 PowerShell 或 cmd 时会看到对应语法，原生 POSIX Shell 直接使用其常规语法。
+
 Shell 名称支持 `bash`、`sh`、`zsh`、`fish`、`cmd`、`powershell`、`pwsh`，所选程序需要已安装。`terminalDefault: "auto"` 保留入口原有默认行为；dcl 在 Windows 优先使用 PowerShell 7，找不到时使用 Windows PowerShell。
 
 Bash 路径优先级：`DEEPSEEK_CODE_BASH_PATH` 环境变量 → `shell.bashPath` → 自动发现。显式路径必须是存在的绝对文件路径；不能填 System32 或 WindowsApps 中的 WSL Bash 别名。路径失效时直接报错。将 `bashPath` 设为 `null` 或删除该字段可恢复自动发现。
