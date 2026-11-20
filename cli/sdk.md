@@ -63,6 +63,7 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 - `system`（`subtype: init`）：每个进程一次，含 `session_id`、`cwd`、`model`、`tools`（含 MCP 与宿主 MCP 工具）、`mcp_servers`、`permissionMode`、`slash_commands`、`agents`。
 - `assistant`：每个内容块一条，`message.content` 为 `text`、`thinking` 或 `tool_use`；同一轮模型请求的块共享 `message.id`。
 - `user`：工具结果，`content` 为 `tool_result` 块；MCP 工具的结果保留为内容块数组。
+  dcl 的前台 `Bash` 事件保留原始结果文本，成功时通常是包含 `stdout`、`stderr`、`exit_code` 的 JSON 字符串；工具失败时也可能是带 `Error: ` 前缀的文本。用 `tool_use_id` 关联调用，用 `is_error` 判断调用是否报错。普通后台 Shell 的 `TaskGet` 返回快照，其中的 `output` 和 `result` 是精简文本；控制台任务的终态仍是 JSON 字符串。见 [Java 读取示例](/sdk/java/sessions#读取-shell-任务结果)。
 - `stream_event`：仅在 `--include-partial-messages` 时输出，`event` 为 `message_start`、`content_block_start`、`content_block_delta`（`text_delta`、`thinking_delta`、`input_json_delta`）、`content_block_stop`、`message_delta`、`message_stop`。
 - `result`：每轮一条，含 `subtype`（`success`、`error_max_turns`、`error_during_execution`）、`is_error`、`result`、`num_turns`、`duration_ms`、`total_cost_usd`（会话累计）、`usage`、`structured_output`，以及 `permission_denials`（本轮被规则、模式、Hook 或宿主拒绝的工具调用）。
 - `prompt_suggestion`：`initialize` 打开 `promptSuggestions` 后，每轮成功结束时给出下一句建议。

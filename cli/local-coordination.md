@@ -44,7 +44,7 @@ dcl --coordination-dir "$HOME/dcl-coordination" sessions live --json
 
 | 类别 | 含义 |
 |---|---|
-| `busy` | 登记暂时繁忙，可稍后重试 |
+| `busy` | 登记暂时繁忙，可稍后重试。首次并发初始化时，等待建库锁最多 15 秒；普通 SQLite 锁等待最多 2 秒 |
 | `unsupported_schema` | 当前 dcl 无法读取这种登记格式 |
 | `corrupt` | 登记已损坏或状态不完整 |
 | `missing_database` | 找到登记目录的标记，但缺少登记数据库 |

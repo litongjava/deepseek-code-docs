@@ -22,12 +22,23 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 
 - `ToolLoad`：按目录中的完整名称加载工具定义，见[工具目录与加载](#工具目录与加载)。
 
+- [`ContextSearch`](#contextsearch)：在当前会话已保存的历史中检索原文。
 - `memory_search`、`memory_ingest`：检索和写入长期记忆，和 Desktop 共用。
 - `ListDir`、`MultiEdit`：列目录、一次多处编辑。
 - `DeepSeekCode`、`ClaudeCode`、`Codex`：把子任务交给本机的另一个 dcl、Claude Code 或 Codex，见[外部代理](./external-agents.md)。
 - `computer_use`：鼠标、键盘、滚动、等待与截图，见[桌面操作](./computer-use.md)。
 
 Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit`）通过 `Bash` 执行，没有单独的 Git 工具。`smart_project_scan` 也已移除；查看项目时可用 `ListDir`、`Glob`、`Grep` 和 `Read`。
+
+## ContextSearch
+
+`ContextSearch` 检索当前会话保存的用户消息、助手正文和工具结果，适合找回压缩摘要省略的路径、决定和报错。默认先调用 `ToolLoad` 并传入 `{"names":["ContextSearch"]}`，从下一次模型请求开始可调用。工具开关、权限和代理允许列表仍生效。已获准使用的子代理和队友各自检索自己的会话。分叉可以检索自己的记录，父会话的历史仅限已复制到该分叉的部分。
+
+- `query` 是非空、区分大小写的字面子串，最多 512 个 UTF-8 字节。`regex: true` 使用 Rust 正则，例如用 `(?i)` 忽略大小写。普通文本按有重叠的窗口匹配，正则锚点以每个窗口为界。需要跨过较长片段时，可以先检索较短的关键词。
+- 可用 `role`（`user`、`assistant`、`tool`）、`tool_name`（完整工具名，忽略大小写，可与 `role: "tool"` 配合使用）、`range`（默认 `all`，也可选 `before`、`after`）和本会话的 `boundary_id` 过滤。首次查询默认选择最近的压缩边界。
+- 结果按来源从新到旧返回。默认 5 条，最多 10 条和 12 KiB JSON。引用包括 `message_id`、时间戳、角色，以及可用的 `turn_id`、`tool_name` 和 `tool_call_id`。有 `next_cursor` 时可以保留原查询和过滤条件继续翻页，即使本页没有匹配。
+- 每页检查最多 25,000 个元数据行，SQLite 读取预算为 24 MiB，包含元数据页和文本，每个文本窗口最多 8 MiB。升级会在本地数据库中为已有历史建立检索元数据，并把需要按偏移读取的大值另存为可独立读取的分块。`scan_truncated` 表示扫描因预算停止或有结构化来源被跳过，`has_more` 表示有已发现但本页未返回的匹配。需要完整投影的 `Bash`、`Read`、`Write`、`Edit`、`MultiEdit` 和 `ApplyPatch` 结果超过 8 MiB 或无法安全解析时，计入 `skipped_structured_sources`。图片原始数据、思考内容和请求记录不参与检索。
+- 摘录正文最多 384 个 UTF-8 字节，省略处以 `…` 标记。`excerpt_truncated` 说明来源有省略，`match_truncated` 说明匹配本身也被截短。可以用较短的关键词或正则查找所需部分，也可以凭消息和工具调用 ID 回看原始记录。
 
 ## 几个需要知道的行为
 
@@ -40,18 +51,20 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 **Bash**：
 
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
-- 执行结果的 `shell` 和 `shell_path` 表示实际启动的 Shell；语法错误和非零退出码均报告失败。保存工作目录不会覆盖命令的退出码。
+- `shell` 参数列出本机可用的 Shell，并标明默认项。模型看到的命令语法和路径提示跟随 [shell.toolDefault](./settings.md)。例如 Git Bash 使用 Unix 语法，PowerShell 使用 `$env:NAME`，cmd 使用 `%NAME%`。原始结果记录实际程序路径，发给模型的文本只在发生回退时显示路径。
 - `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。前台命令到时间仍未结束时不会被终止，而是转为后台受管任务继续运行：模型拿到已有输出和任务编号，再决定用 `TaskGet` 等待或用 `TaskStop` 停止，对话里显示“Still running after 2m; moved to the background”。子代理里的命令到时间仍会被终止。
 - `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出（默认立即返回当前快照；`block: true` 最多等待 `timeout` 毫秒，默认 30000、最多 600000，等待超时不会结束进程）、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
 - **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
-- **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，结果里 `pipeline_sigpipe` 为 `true`、`success` 仍为 `true`，同时保留 `exit_code: 141`。
+- **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，原始结果里 `pipeline_sigpipe` 和 `success` 均为 `true`。模型会看到退出码和下游提前关闭管道的说明。其他输出规则见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
 - 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
 
 **Monitor**：在后台运行一段 shell 脚本，把输出的每一行变成通知来唤醒模型，适合盯日志、构建或 CI。脚本应只在需要处理的事情发生时才输出一行，例如 `tail -f app.log | grep --line-buffered ERROR`，每一级管道都要逐行刷新。200 毫秒内到达的多行合并成一条通知；stderr 只写入日志，不通知。它和 Bash 的 `run_in_background` 不同：后者只在命令结束时通知一次，Monitor 每有输出就通知。
 
-参数是 `command`、`description`（通知里的简短说明）、`timeout_ms` 和 `shell`。不指定时运行 1800000 毫秒（30 分钟），最多 3600000（60 分钟）；脚本退出、到期、被停止或因事件过多停止时，最后一条通知会说明原因和事件数（事件过多时只说明原因），到期后可以重新启动。一分钟内超过 30 个事件会自动停止，并提示收窄过滤条件。
+传入 `command` 和用于通知的 `description`，可用 `shell` 指定本机可用的 Shell。`timeout_ms` 默认 1800000（30 分钟），取值范围为 1000 至 3600000 毫秒。默认在该时限到期时结束。
+
+需要长时间监视时，再传入整数 `max_runtime_ms`，它必须大于 `timeout_ms` 且最多为 86400000（24 小时）。例如 `"timeout_ms":600000,"max_runtime_ms":7200000` 表示每 10 分钟续期，总共最多 2 小时。只要原脚本仍在运行，就延长本次监视，不重启脚本；总时限从启动时算起。续期通知最多每分钟一条。脚本退出、任务停止、达到总时限或一分钟内输出事件超过 30 个时，监视结束并报告原因。
 
 Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Bash 命令走同一套[权限规则与审批](./permissions.md)，用 `TaskStop` 传入返回的 `task_id` 停止。它默认按需加载：模型调用 `ToolLoad` 并传入 `{"names":["Monitor"]}` 后，从下一次请求开始可以用它。
 
@@ -59,7 +72,7 @@ Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Ba
 
 决定委派较大任务后，可以先用内置技能 [task-template](./skills.md#task-template) 写好任务说明，再把说明作为 `Agent` 的 `prompt`。
 
-等待前台子代理的结果时（`Agent` 的 `run_in_background: false`），即使子代理执行失败，dcl 也会尝试停止它留下的受管后台 Bash 命令。父会话的工具结果会简要列出已停止的任务、5 秒内未确认停止的任务、停止失败的任务，或未能完成的检查。父回合中断时也会请求停止这些任务，停止可能尚未确认。清理仅限该子代理的受管后台命令，已结束的任务保持原状态。
+等待前台子代理的结果时（`Agent` 的 `run_in_background: false`），即使子代理执行失败，dcl 也会尝试停止它留下的受管后台 Bash 命令。父会话的工具结果会简要列出已停止的任务、5 秒内未确认停止的任务、停止失败的任务，或未能完成的检查。父回合中断时也会请求停止这些任务，停止可能尚未确认。该子代理启动的 Monitor（含续期中的监视）也归它所有，返回或中止时会清理。停止运行中的 Monitor 请用 `TaskStop`；`TaskUpdate` 不能把它标为完成或删除。
 
 前台和后台子代理均支持 `model`、`effort` 和 `isolation`。`model` 留空时沿用代理的模型，指定时须使用当前供应商中配置的模型；思考等级按工具说明和用户要求指定。独立工作树绑定到子会话，父会话目录保持原样，同一父会话继续子代理时保留其模型、权限和工作树绑定。
 

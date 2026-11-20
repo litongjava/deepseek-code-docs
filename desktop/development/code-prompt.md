@@ -86,19 +86,11 @@ Git 操作通过 `Bash` 执行，例如 `git status`、`git diff`、`git add <�
 
 85 个样本 MCP 工具均未复制注册。
 
-### 4.3 所有模式保留并启用原有记忆能力
+### 4.3 显式使用长期记忆
 
-`chat`、`work`、`study`、`code` 均在共同执行入口安装 `MemExClient`，按原有配置在请求前检索记忆，并在成功回复后通过 `ContextManager::after_response` 自动入库。项目记忆不是样本遥测，不属于此次排除范围。
+在 Chat、Work、Study 和 Code 模式中，需要跨会话保存或检索事实时，模型可显式调用 `memory_ingest` 或 `memory_search`。也可通过 Desktop 的[记忆面板](../usage/knowledge.md)或 [dcl memory](/cli/memory) 管理条目。默认使用本地 SQLite，也可配置 MemEx HTTP 后端。
 
-所有模式使用同一套记忆能力：
-
-1. 拼接 `memory.md`，提供统一的跨会话记忆指导。
-2. 安装 MemEx 客户端和 ContextManager，支持自动召回与长期记忆入库。
-3. 向模型提供 `memory_search`、`memory_ingest`。两个协议均将调用路由到执行器持有的真实记忆客户端，避免落到通用工具 stub。
-
-`with_prompt_profile` 只选择模式提示词和工具说明，不清除记忆客户端、不改写记忆设置。`with_memex` 与 profile 的配置顺序不影响记忆能力。默认的 `enabled`、`auto_search`、`auto_ingest` 均为 `true`；用户已有的后端地址、检索数量、重要性阈值及开关仍由原有记忆配置管理，不在模式切换时覆盖。
-
-当前会话的消息、工具结果、请求快照仍由原有本地会话功能保存，相关记忆会作为上下文发送给用户选择的模型供应商。记忆默认使用本地 SQLite；用户若配置了 MemEx HTTP 后端，则继续使用其配置。本次仅排除样本中的遥测和无关信息采集约定，不移除项目原有记忆功能，也没有进行全应用隐私审计。
+发送消息时不会自动检索记忆，回合完成后也不会自动把对话写成记忆。旧配置中的 `auto_search`、`auto_ingest` 和 `auto_ingest_importance_threshold` 不再生效；续接旧会话时会跳过先前自动附加的召回片段。会话历史仍单独保存。
 
 ## 5. 当前工具协议
 
@@ -109,7 +101,7 @@ Git 操作通过 `Bash` 执行，例如 `git status`、`git diff`、`git add <�
 - `Bash` 的 `timeout` 单位是**毫秒**，前台默认 120000，最大 600000。
 - 支持 `run_in_background`：返回 `task_id` 和 `stdout_file`/`stderr_file`，用 `TaskGet` 读取有限长度的日志和状态，用 `TaskStop` 结束整个进程树。后台命令跨轮次存活，worker 退出时结束。
 - 每次调用仍是新进程，但**工作目录跨调用保留**：bash、sh、zsh、PowerShell、Git Bash 和 Windows `cmd` 都会记住上次 `cd` 的位置；目录离开项目时重置回项目根目录。shell 变量不保留。
-- Windows 仍需显式指定 `shell: "powershell"` 或 `"pwsh"` 并使用对应语法。
+- `Bash` 和 `Monitor` 的说明使用配置的默认 Shell，只列出本机可用的 Shell。需要切换语法时，用 `shell` 选择另一个可用项。
 
 PowerShell 文件读取示例：
 
@@ -117,7 +109,7 @@ PowerShell 文件读取示例：
 Get-Content -LiteralPath 'D:\项目\配置.json' -Raw -Encoding UTF8
 ```
 
-应用原有 shell 包装器已设置 UTF-8 输入输出与文件 cmdlet 编码，适配版仍要求显式编码。控制台输出使用逐行文本或 JSON，不使用表格。文件写入沿用 `utf8.rs`：普通文本 UTF-8，Windows `.ps1` 按既有逻辑写入 BOM，兼容 Windows PowerShell。
+PowerShell 包装器设置 UTF-8 输入输出与文件 cmdlet 编码。文件写入沿用 `utf8.rs`：普通文本 UTF-8，Windows `.ps1` 按既有逻辑写入 BOM，兼容 Windows PowerShell。
 
 ### 文件与搜索
 
@@ -151,20 +143,24 @@ HTTP / 原生聊天请求
 Code 的系统提示词按参考 CLI 的布局分三块：
 
 1. 一行身份 `You are deepseek-code, an agentic coding tool for DeepSeek models.`，单独带缓存断点。
-2. `code.md` + `memory.md`，单独带缓存断点。
-3. `# Environment`（工作目录、是否 Git 仓库、平台、shell、系统版本、模型、日期）和请求自定义提示词（放在 `<additional_instructions>` 中），不带缓存标记。
+2. `code.md` + `memory.md`，单独带缓存断点。默认的 `Execution and verification` 要求在探索性提问中先给建议和主要取舍，获得同意再实施；非交互运行给完建议就结束。改动界面时，应在条件允许时运行应用检查主要流程和边界情况，说明未能验证的部分。遇到阻碍先排查原因，改动陌生文件前先调查；范围较大的探索可委派，引用记忆中的路径前要在当前工作区核对。
+3. `# Environment`（项目名、主工作目录、是否 Git 仓库、平台、架构和日期；能检测时还会列出 Shell 路径、系统版本和 Node.js 版本）和请求自定义提示词（放在 `<additional_instructions>` 中），不带缓存标记。
+
+项目名在主工作目录之前；有多个源码目录时，会在 Git 状态之后逐行列出目录。可用技能也按每行一个名称和说明排列。
 
 每次请求还会追加运行时 `Tool directory`，分别列出当前可加载的内置工具和 MCP 工具。模型按目录中的完整名称调用 `ToolLoad`，见[工具目录与加载](/cli/tools#工具目录与加载)。
 
-项目和会话上下文不再放进系统提示词，而是像参考 CLI 一样附在用户消息上：
+指令文件和会话快照随用户消息发送：
 
-- **第一条用户消息**开头附上项目说明（`Codebase and user instructions are shown below…`，含 `AGENTS.md`、`CLAUDE.md` 和记忆索引）和会话开始时的 **Git 状态快照**（当前分支、主分支、`git status`、最近提交，状态最多 2000 字符）。快照每个会话只取一次，之后的请求复用，保证前缀稳定可缓存。
-- **每轮用户消息**后面附上该轮的钩子附加内容、`/技能` 展开的技能正文、召回的相关记忆。这些内容按会话保存，之后的每次请求都放回同一条消息后面，不会在下一轮丢失。
+- **第一条用户消息**依次附上用户级指令、项目指令和会话开始时的 **Git 状态快照**（当前分支、主分支、`git status`、最近提交，状态最多 2000 字符）。快照每个会话只取一次，之后的请求复用，保证前缀稳定可缓存。
+- **每轮用户消息**后面附上该轮的钩子附加内容和 `/技能` 展开的技能正文。这些内容按会话保存，之后的每次请求都放回同一条消息后面，不会在下一轮丢失。
 - 压缩之后，已调用技能的正文会作为提醒重新附上。
+
+用户级指令和项目指令分属两个提醒块，空组略去，导语只出现一次。Anthropic 保留各个文本块，Responses 使用独立的 `input_text`，Chat Completions 为兼容服务端而合并成字符串。文件查找顺序见[项目说明](/cli/memory-notes#会加载哪些说明文件)。
 
 Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话中最后一个用户块再放一个滚动断点。
 
-`chat`、`work`、`study` 沿用 Desktop 提示词与原有记忆行为。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
+`chat`、`work`、`study` 使用 Desktop 提示词，也通过显式调用读写长期记忆。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
 
 主要源码位于 CLI 与 Desktop 共用的核心引擎中：
 
@@ -190,7 +186,7 @@ Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话�
 - 数据库会话模式选择和内部任务默认值。
 - 工具名称和 schema 保持原生实现，Code 与其他模式均提供记忆工具。
 - 四种模式下，MemEx 与 profile 不同配置顺序都保留记忆客户端和已有设置。
-- 本地 HTTP/SSE 模拟服务检查四种模式 × Anthropic / OpenAI 的 **8 种实际请求组合**：确认自动召回内容进入请求、`memory_ingest` 和 `memory_search` 使用真实数据库、回复后自动入库。
+- 本地 HTTP/SSE 模拟服务检查四种模式 × Anthropic / OpenAI 的 **8 种实际请求组合**：检查 `memory_ingest` 和 `memory_search` 的实际读写、请求中没有自动召回片段，以及回复后没有新增对话记忆。
 - `Grep.include`、中文文本、相对路径、`Glob` 文件匹配与非法模式。
 - 原有 UTF-8 文件和 PowerShell 回归检查。
 
@@ -207,6 +203,8 @@ cargo test --locked -p deepseek-code-core --lib --tests
 文档站在其根目录执行 `npm.cmd run build`。
 
 ### 2026-10-14 验证结果（初次接入时）
+
+以下记录对应当时的版本；当前记忆行为见第 4.3 节。
 
 - `cargo test --lib native_engine::tool_loop::code_prompt_tests`：2 项通过，覆盖四种模式 × 两种协议共 8 种组合的自动召回、真实工具读写、回复后自动入库，以及不同初始化顺序下的配置保留。
 - `cargo test --lib prompt::`：13 项通过。

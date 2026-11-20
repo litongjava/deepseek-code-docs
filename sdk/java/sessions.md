@@ -55,6 +55,38 @@ public class Conversation {
 - `ResultMessage`：一轮结束，包含结果文本、轮次和结构化输出。
 - `StreamEvent`：开启 `includePartialMessages(true)` 后收到的增量事件，`getTextDelta()` 取增量文本，适合打字机效果。
 
+## 查询已保存的会话历史
+
+需要找回压缩前的路径、决定或报错时，dcl 的 SDK 持久会话也可使用 `ContextSearch`。模型先用 `ToolLoad` 加载 `{"names":["ContextSearch"]}`，再查询当前会话。应用可从返回的摘录中读取 `message_id` 和可用的 `tool_call_id`，定位原始记录。 完整参数见 [ContextSearch](/cli/tools#contextsearch)。
+
+## 读取 Shell 任务结果
+
+dcl 在 stream-json 的 `user` 消息里发送 `tool_result` 块。通过 `ToolResultBlock.getToolUseId()` 与之前的 `ToolUseBlock.getId()` 关联，按调用的工具名选择解析方式。前台 `Bash` 成功时，SDK 通常收到含 `stdout`、`stderr` 和 `exit_code` 的原始 JSON 文本。模型下一次请求收到的则是精简文本，例如只含标准输出，或静默成功时的 `(Completed with no output)`。调用失败时先检查 `isError()`，正文可能带有 `Error: ` 前缀。
+
+下面的方法处理已按 ID 确认为 `TaskGet` 的普通受管 Shell 快照。查询调用成功仍可能查到失败的任务，应读取快照的 `status`。已结束任务的 `output` 和 `result` 保留命令输出和必要状态；成功时无需匹配 `Exit code: 0`。
+
+```java
+import java.util.Map;
+import nexus.io.agent.sdk.json.Json;
+import nexus.io.agent.sdk.message.ToolResultBlock;
+
+class ShellTasks {
+  static void showSnapshot(ToolResultBlock block) {
+    if (block.isError()) {
+      System.err.println(block.getContentText());
+      return;
+    }
+    Map<String, Object> task = Json.parseObject(block.getContentText());
+    System.out.println(task.get("task_id") + " " + task.get("status"));
+    if (task.get("output") instanceof String) {
+      System.out.print(task.get("output"));
+    }
+  }
+}
+```
+
+对于 Linux PTY 或 Windows ConPTY 任务，`metadata.interaction` 为 `pty`。其终态 `output` / `result` 是 JSON 字符串，如需退出码或清理状态，可以再解析该字符串。普通 Shell 的输出即使命令恰好打印了 JSON，也按命令正文处理。
+
 ## 恢复和分叉
 
 - `resume(sessionId)`：恢复指定会话。
