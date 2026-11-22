@@ -2,6 +2,8 @@
 
 DeepSeek Code Desktop 使用 React 19、TypeScript、Tauri 2 和 Rust 构建桌面 AI 工作台。前端呈现聊天与辅助面板，Rust 负责本地数据、模型请求、工具执行和桌面能力。
 
+新聊天页、未固定的标签和助手回复使用 DeepSeek Code 标志，中央是 `>_` 终端提示符。
+
 ## 适合谁
 
 - 使用自己的模型服务进行对话，并在本机保留会话的使用者。

@@ -69,4 +69,4 @@ return reviews
 
 ## 内置的深度研究
 
-`/deep-research 问题` 运行内置的研究工作流，见[联网搜索与深度研究](./web-search.md#deep-research)。它只在你明确输入这个命令时运行，模型不会自行启动。
+启用 `deep-research` 技能后，`/deep-research 问题` 运行内置的研究工作流，见[联网搜索与深度研究](./web-search.md#deep-research)。它只在你明确输入这个命令时运行，模型不会自行启动。

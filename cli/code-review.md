@@ -7,6 +7,15 @@ dcl 内置两个只读的审查命令，都会先收集要审查的改动，再�
 | `/code-review` | 正确性回归、安全问题、数据丢失、取消与错误处理 |
 | `/security-review` | 只看可利用的安全漏洞，与 Claude Code 的 `/security-review` 对应 |
 
+## 启用审查技能
+
+两个审查技能默认关闭。按需要在会话中启用，设置会保存在当前数据目录，之后也可在其他项目使用：
+
+```text
+/skills state code-review user-only
+/skills state security-review user-only
+```
+
 ## 用法
 
 ```text

@@ -6,7 +6,7 @@ DeepSeek Code 可以在桌面、浏览器和手机上使用。界面和引擎可
 
 - 模型调用、命令执行和文件读写都发生在运行 `dcd-server` 的机器上，手机只负责显示和输入。
 - 会话保存在服务器的数据目录，换设备继续同一个会话。
-- 桌面版和 `dcd-server` 使用同一种数据目录格式，可以在两者之间切换。
+- 桌面版和 `dcd-server` 使用同一种数据目录格式：`global.db` 保存会话清单，`sessions/<storage_key>/session.db` 保存各会话历史。升级和备份见[数据维护](../maintenance/data.md)。
 
 ## 启动服务器
 

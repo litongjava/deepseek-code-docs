@@ -37,7 +37,7 @@ public class InProcessTools {
 
 工具抛出的异常会作为 `isError` 结果返回给 Agent，会话继续进行，模型可以据此换一种做法。
 
-使用 dcl 时，`SystemMessage.getTools()` 返回初始化消息中的工具名称清单。模型按需加载工具时，`ToolUseBlock.getName()` 返回 `ToolLoad`，`getInput().get("names")` 保留完整名称的数组，例如 `["ListDir","WebFetch"]`。名称区分大小写；若有未知或不可用的名称，dcl 在对应的 `tool_result` 中报告，整批都不会新增加载的工具。成功加载的新工具从下一次模型请求开始可用。
+使用 dcl 时，`SystemMessage.getTools()` 返回初始化消息中的工具名称清单。模型按需加载工具时，`ToolUseBlock.getName()` 返回 `ToolLoad`，`getInput().get("names")` 保留完整名称的数组，例如 `["ListDir","WebFetch"]`。名称区分大小写；若有未知或不可用的名称，dcl 在对应的 `tool_result` 中报告，整批都不会新增加载的工具。成功加载的新工具从下一次模型请求开始，按加载顺序追加在常驻工具之后。模型只看到一行确认，例如 `Loaded WebFetch. Available from the next request.`。SDK 的 `ToolResultBlock.getContentText()` 仍保留结构化 JSON 文本；应用可按调用 ID 关联结果，再读取 `content`、`loaded_tools`、`already_available` 和 `tools`。
 
 ## 子 Agent 与结构化输出
 
@@ -68,7 +68,7 @@ public class Structured {
 }
 ```
 
-如果子代理还要向队员分派工作，可以在其定义里设置 `skills`。使用 dcl 时，下面的定义让协调代理在启动时就得到内置只读技能 `task-template` 的正文，用来写清问题、具体改动、验证方法和报告要求：
+如果子代理还要向队员分派工作，可以在其定义里设置 `skills`。使用 dcl 时，下面的定义让协调代理在启动时就得到内置技能 `task-template` 的正文，用来写清问题、具体改动、验证方法和报告要求：
 
 ```java
 AgentDefinition coordinator = new AgentDefinition("向队员分派工作", "为每位队员写明任务和验收条件。")
@@ -76,4 +76,4 @@ AgentDefinition coordinator = new AgentDefinition("向队员分派工作", "为�
 AgentOptions options = new AgentOptions().cliPath("dcl").agent("coordinator", coordinator);
 ```
 
-该字段随 `initialize` 的 `agents.coordinator.skills` 发送，预加载作用于这个子代理。
+该字段随 `initialize` 的 `agents.coordinator.skills` 发送，预加载作用于这个子代理。要在普通交互会话中也能调用模板，可用 `dcl skills state task-template user` 启用。

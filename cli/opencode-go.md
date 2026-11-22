@@ -89,7 +89,7 @@ API key, or environment variable name (key:<key> forces a literal key) [OPENCODE
 
 OpenCode 要求每个请求带一个稳定的会话标识，用于路由和 prompt cache。dcl 对 OpenCode 的请求统一发送 `x-opencode-session`：
 
-- 会话内请求的值是会话 ID，同一对话的每次请求都相同；
+- 会话内请求的值是会话 ID，压缩和供应商原生联网搜索也沿用它。可用 `x-dcl-request-kind` 区分请求用途；
 - 连接测试等会话外请求回退为请求 ID，保证这个头始终存在；
 - 其他供应商不会收到这个头，也不会收到通用的 `x-session-id`、`session-id`、`thread-id`。
 

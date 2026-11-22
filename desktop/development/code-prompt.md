@@ -94,7 +94,7 @@ Git 操作通过 `Bash` 执行，例如 `git status`、`git diff`、`git add <�
 
 ## 5. 当前工具协议
 
-对齐后，Code 模式向模型提供的工具名称、参数和说明以参考 CLI 为准；本项目特有的工具（`memory_search`、`memory_ingest`、`ListDir`、`MultiEdit`、`computer_use` 等）继续保留。`prompt/code.rs` 只在原生说明后面追加一句 `Code mode:` 提示，**不改变参数 schema**。旧的 `Delegate`、`Worker`、`smart_grep`、`smart_edit`、`todo_write` 已删除，`cron` 和 `worktree` 只为旧会话记录保留执行入口，模型看不到。
+对齐后，Code 模式向模型提供的工具采用本项目的工具说明和参数定义；本项目特有的工具（`memory_search`、`memory_ingest`、`ListDir`、`MultiEdit`、`computer_use` 等）继续保留。`prompt/code.rs` 只在原生说明后面追加一句 `Code mode:` 提示，**不改变参数 schema**。旧的 `Delegate`、`Worker`、`smart_grep`、`smart_edit`、`todo_write` 已删除，`cron` 和 `worktree` 只为旧会话记录保留执行入口，模型看不到。
 
 ### Shell
 
@@ -113,8 +113,8 @@ PowerShell 包装器设置 UTF-8 输入输出与文件 cmdlet 编码。文件写
 
 ### 文件与搜索
 
-- `Read` 参数为 `file_path`、`offset`、`limit`、`pages`：文本带行号返回；图片作为图片内容交给支持图片的模型；PDF 按页范围读取；`.ipynb` 按单元格展示。
-- `Edit` 和覆盖已有文件的 `Write` **必须先 `Read`**，并且文件在读取之后被改动（修改时间或大小变化）时会拒绝，要求重新读取。读取记录按会话保存在运行目录，轮次之间的外部改动也能发现。
+- `Read` 参数为 `file_path`，可用 `offset`、`limit`、`pages` 选择范围，用 `raw: true` 保留文本中的长 Base64 数据：文本带行号返回；图片作为图片内容交给支持图片的模型；PDF 按页范围读取；`.ipynb` 按单元格展示。
+- `Edit` 和覆盖已有文件的 `Write` **必须先 `Read`**，并且文件在读取之后被改动（修改时间或大小变化）时会拒绝，要求重新读取。读取记录保存在本会话的数据库中，轮次之间的外部改动也能发现。
 - `Grep` 使用参考 CLI 的参数：`pattern`、`path`、`glob`、`type`、`output_mode`（`content`/`files_with_matches`/`count`）、`-i`、`-n`、`-A`/`-B`/`-C`/`context`、`multiline`、`head_limit`、`offset`。
 - `Glob` 返回匹配的文件路径；非法模式返回错误。
 - `NotebookEdit` 按单元格 id 编辑，支持 `edit_mode`（替换、插入、删除）。
@@ -134,25 +134,21 @@ HTTP / 原生聊天请求
   → 按 conversation_id 查询会话和可信项目
   → 读取已保存的 workspace_mode
   → 选择 PromptProfile::Code 或 Desktop
-  → 拼接 system prompt 和项目上下文
+  → 组装系统规则，在首条用户消息中加入会话上下文
   → 配置模式工具说明，接入统一记忆配置
   → Anthropic / OpenAI 工具循环
   → 模型供应商与本地请求快照
 ```
 
-Code 的系统提示词按参考 CLI 的布局分三块：
+默认 Code 系统提示词包含以下内容：
 
 1. 一行身份 `You are deepseek-code, an agentic coding tool for DeepSeek models.`，单独带缓存断点。
 2. `code.md` + `memory.md`，单独带缓存断点。默认的 `Execution and verification` 要求在探索性提问中先给建议和主要取舍，获得同意再实施；非交互运行给完建议就结束。改动界面时，应在条件允许时运行应用检查主要流程和边界情况，说明未能验证的部分。遇到阻碍先排查原因，改动陌生文件前先调查；范围较大的探索可委派，引用记忆中的路径前要在当前工作区核对。
-3. `# Environment`（项目名、主工作目录、是否 Git 仓库、平台、架构和日期；能检测时还会列出 Shell 路径、系统版本和 Node.js 版本）和请求自定义提示词（放在 `<additional_instructions>` 中），不带缓存标记。
+3. 若本次请求提供自定义提示词，放在 `<additional_instructions>` 中。
 
-项目名在主工作目录之前；有多个源码目录时，会在 Git 状态之后逐行列出目录。可用技能也按每行一个名称和说明排列。
+环境细节、项目指令、技能与工具清单随用户消息发送：
 
-每次请求还会追加运行时 `Tool directory`，分别列出当前可加载的内置工具和 MCP 工具。模型按目录中的完整名称调用 `ToolLoad`，见[工具目录与加载](/cli/tools#工具目录与加载)。
-
-指令文件和会话快照随用户消息发送：
-
-- **第一条用户消息**依次附上用户级指令、项目指令和会话开始时的 **Git 状态快照**（当前分支、主分支、`git status`、最近提交，状态最多 2000 字符）。快照每个会话只取一次，之后的请求复用，保证前缀稳定可缓存。
+- **第一条用户消息**在实际输入之前，依次附上用户级指令、`# Working environment`、项目指令、独立 CLI 的前端说明（如适用）、可加载工具、可调用技能、日期和会话开始时的 Git 快照。环境段含项目名、工作目录、Git 仓库状态、平台及架构，能检测时还列出 Shell 路径、系统版本和 Node.js 版本。有多个源码目录时逐行列出。首次请求的工具与技能清单保留在原位，之后的增减随最新用户消息提示。见[工具目录与加载](/cli/tools#工具目录与加载)。
 - **每轮用户消息**后面附上该轮的钩子附加内容和 `/技能` 展开的技能正文。这些内容按会话保存，之后的每次请求都放回同一条消息后面，不会在下一轮丢失。
 - 压缩之后，已调用技能的正文会作为提醒重新附上。
 
@@ -165,7 +161,7 @@ Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话�
 主要源码位于 CLI 与 Desktop 共用的核心引擎中：
 
 - `prompt/code.md`：Code 行为规则，编译时嵌入。
-- `prompt/code.rs`：8 项原生工具的 `Code mode:` 说明补充；保留实际参数 schema，包括记忆工具。
+- `prompt/code.rs`：部分原生工具的 `Code mode:` 说明补充；保留实际参数 schema，包括记忆工具。
 - `prompt/mod.rs`：提示词 profile、组装入口和缓存分块。
 - `native_engine/engine_core.rs`：选择 profile，组装项目说明、Git 快照和每轮附加内容。
 - `services/turn_context.rs`、`git_snapshot.rs`、`project_instructions.rs`：随用户消息附带的上下文。

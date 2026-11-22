@@ -33,6 +33,7 @@ dcl 和 Claude Code 一样提供两种让会话"过一会儿再做"的方式：
 
 ```text
 /loop 5m 看看部署完成了没有
+/skills state code-review user-only
 /loop 1h /code-review
 ```
 

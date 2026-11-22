@@ -33,7 +33,9 @@ Linux 上可以显式开启[本地协调](./local-coordination.md)，再用 `dcl
 
 | 路径 | 内容 |
 |---|---|
-| `deepseek_code.db` | 会话、消息、工具调用记录（SQLite） |
+| `global.db` | 全局目录（SQLite），保存会话清单、项目及共享设置 |
+| `sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库，保存消息、工具调用和请求历史 |
+| `session-locks/` | 会话存储的锁与初始化标记 |
 | `config.json` | 保存的提供商和模型；首次启动时粘贴的 API Key 也存在这里，文件只有你自己可读 |
 | `settings.json` | 用户设置，例如 hooks、提示和建议的开关，见[设置项参考](./settings.md) |
 | `plans/` | 计划模式写出的计划文件 |
@@ -42,11 +44,36 @@ Linux 上可以显式开启[本地协调](./local-coordination.md)，再用 `dcl
 | `pasted-images/` | 用 `Ctrl+V` 粘贴的图片 |
 | `session-presence/` | 打开中的会话持有的锁，供[会话消息](./session-messages.md)判断对方是否在线 |
 | `keybindings.json` | 自定义快捷键 |
-| `skills/` | 托管的技能 |
+| `skills/` | 个人技能，随附技能在 `skills/bundled/` |
 
 `settings.json` 可以配置 hooks（会执行命令），所以模型修改数据目录里的文件时，总是需要你确认（`workspaces/` 子目录除外）。
 
 开启[请求记录](./request-recording.md)后，原始模型请求与响应保存在 `request-records/<会话ID>/`。正文不脱敏；超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理。备份或分享数据目录时，请同时检查这些文件。
+
+## 升级与备份
+
+首次使用分库版本时，会话列表起初为空，即使数据目录中已有旧库也是如此。dcl 不打开、改名或删除旧的 `deepseek_code.db` 及其 `-wal`、`-shm` 文件，也不会自动导入旧历史。需要查阅升级前的会话时，可用旧版 dcl 打开原数据目录。
+
+整机迁移或备份时，先退出使用该目录的 dcl、Desktop、服务器和后台 Worker，再复制整个数据目录，包括 `global.db`、`sessions/`、`session-locks/` 和已有的 SQLite 配套文件。项目文件和外部附件另行备份。
+
+## 导出一个会话
+
+运行 `dcl sessions list`，从返回的 JSON 数组中复制目标会话的 `id`。导出时使用这个 ID，无需查找磁盘目录名。以下是两种输出方式：
+
+```bash
+read -r session_id  # 粘贴会话 ID，按 Enter
+dcl sessions export "$session_id"
+dcl sessions export "$session_id" --output session.jsonl
+```
+
+默认向标准输出写 UTF-8 JSONL，每行一个对象。`--output` 在成功后生成文件，标准输出为空；目标已存在时命令报错并保留原文件。自定义数据目录时，在命令中加上创建会话时使用的 `--data-dir`。会话运行中也可以导出，快照只包含取样时已提交的数据。外部附件保留路径引用；导出含原始输入、工具结果和已保存的请求正文，分享前请检查内容。
+
+读取 v1 文件时按 `type` 区分记录：
+
+- 第一行 `header` 的 `format` 为 `deepseek-code.session`，`version` 为 `1`，含 `session_id`、`content_revision` 和 `metadata_revision`。
+- `turn`、`message`、`tool_call` 等保存回合及其历史；已记录的请求体按摘要去重，写成 `request_blob`。运行中的回合可能先有 `mcp_output`，带 `occurrence_pending: true`；调用保存后再导出，可按 `tool_use_id` 找到对应记录。
+- 大字段带分块说明。按 `owner` 和 `field` 分组，依 `index` 顺序逐块解码 `chunk.data` 的 Base64，拼接字节后核对字段的 `bytes` 和 `sha256`，再按 `encoding` 读取内容。
+- 最后一行必须是 `end`。核对 `counts` 中各类型的记录数和 `sha256`。散列输入是末行之前的全部原始字节，包含每行末尾的 LF。缺少末行、计数或摘要不符时，文件不完整。
 
 ## 异常关机后的后台任务
 
@@ -66,7 +93,6 @@ Linux 上可以显式开启[本地协调](./local-coordination.md)，再用 `dcl
 
 Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但不会移动它们：
 
-- `~/.claude/skills`、`~/.claude/commands`：技能和自定义命令；
 - `~/.claude/ide`：IDE 扩展写入的锁文件；
 - `~/.claude/plugins`：在 Claude Code 中安装的插件，其中的 LSP 插件会被 dcl 使用，见[语言服务器](./lsp.md#使用-claude-code-里安装的-lsp-插件)；
 - 项目里的 `.claude/` 目录。
@@ -75,18 +101,17 @@ Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但�
 
 技能按以下顺序读取，后面的同名技能覆盖前面的：
 
-1. 内置工作流（随 dcl 发布，例如 `code-review`、`doctor`、`task-template`）；
-2. `CLAUDE_CONFIG_DIR` 指向的目录（未设置时为 `~/.claude`）下的 `skills/` 和 `commands/`；
-3. 数据目录的 `skills/`（默认 `~/.deepseek-code/skills`，可用 `--data-dir` 或 `DEEPSEEK_CODE_DATA_DIR` 改变）；
-4. 当前工作区的 `.claude/skills` 和 `.claude/commands`。
+1. 数据目录的 `skills/bundled/<名称>/`。首次启动时安装内置技能，升级时刷新未修改的文件，保留用户编辑过的文件。
+2. 数据目录的 `skills/<名称>/`。把个人技能放在这里，默认是 `~/.deepseek-code/skills/`。原先放在 `~/.claude/skills` 或 `$CLAUDE_CONFIG_DIR/skills` 的个人技能需要自行复制过来。用户级 `commands/` 也不再扫描。
+3. 当前工作区的 `.claude/skills` 和 `.claude/commands`。项目内的同名技能优先。
 
-同一名称只出现一次：项目覆盖用户，数据目录覆盖 `~/.claude`。数据目录的 `skills/bundled` 和 `skills/mcp` 仍会出现在列表中（斜杠列表原本就显示它们），但不会覆盖已经发现的内置或 `~/.claude` 同名技能；直接放在 `skills/<名称>` 的用户技能按“用户覆盖内置”处理。
+升级时会清理旧版生成且未经修改的 `legacy-build`、`legacy-commit`、`legacy-document`、`legacy-review` 和 `legacy-test`。编辑过正文或添加了文件的副本会保留。
 
-数据目录技能的命令名沿用旧版规则：取技能名称转小写、空格换成 `-`，其他标点保留。例如 `My Skill` 是 `/my-skill`，`R&D (team)'s check` 是 `/r&d-(team)'s-check`；多层集合也只使用技能自身名称，不加集合前缀。两个数据目录技能得到同一个名字时，两者都改用按文件路径计算的 `skill_<哈希>`，不会因为文件系统顺序只保留其中一个。`~/.claude`、项目和插件技能的名称规则不变。
+数据目录技能的命令名沿用旧版规则：取技能名称转小写、空格换成 `-`，其他标点保留。例如 `My Skill` 是 `/my-skill`，`R&D (team)'s check` 是 `/r&d-(team)'s-check`；多层集合也只使用技能自身名称，不加集合前缀。两个数据目录技能得到同一个名字时，两者都改用按文件路径计算的 `skill_<哈希>`，不会因为文件系统顺序只保留其中一个。项目和插件技能沿用各自的命名规则。
 
-模型看到的技能列表、`Skill` 工具和斜杠命令使用同一套结果。`enabled: false` 的技能不出现；`disable-model-invocation: true` 的技能仍可用斜杠命令，但模型看不到也不能调用；`user-invocable: false` 的技能只供模型调用。格式错误或无法读取的 `SKILL.md` 会被跳过，只在运行日志中显示路径。发现过程不会创建目录或文件，也不会跟随符号链接。技能说明中的 `references/setup.md` 等相对路径以 `SKILL.md` 所在目录为基准解析。
+模型看到的技能列表、`Skill` 工具和斜杠命令使用同一套结果。`enabled: false` 的技能不出现；`disable-model-invocation: true` 的技能仍可用斜杠命令，但模型看不到也不能调用；`user-invocable: false` 的技能只供模型调用。格式错误或无法读取的 `SKILL.md` 会被跳过，可在运行日志或 `/plugins` 的 Errors 页查看路径。发现过程不会创建目录或文件，也不会跟随符号链接。技能说明中的 `references/setup.md` 等相对路径以 `SKILL.md` 所在目录为基准解析。
 
-用 `dcl skills list`（或会话内 `/skills`）查看托管技能和内置清单条目：输出为 JSON，包含 `id`、`name`、`enabled`、`source` 和 `sourceDir`。这里的 `name` 是技能保存的名称，斜杠命令使用上面说明的小写规则。列表也包含内置的 `skill-creator` 和 `task-template`。后者的 `source` 是 `bundled`，`sourceDir` 为 `null`，可用 `dcl skills help task-template` 阅读正文。清单不包含项目 `.claude` 或 `~/.claude` 里的条目；这些条目会直接出现在模型可用的技能列表和斜杠命令中。
+用 `dcl skills list` 查看数据目录中的技能及其来源、路径和状态，包括已关闭的内置技能。用 `dcl skills help <名称>` 阅读正文，用 `dcl skills state <名称> user` 启用。默认状态与使用示例见[技能与插件面板](./skills.md)。
 
 ```bash
 # 查看托管技能和内置条目
@@ -96,4 +121,4 @@ dcl skills list
 dcl --data-dir /path/to/data skills list
 ```
 
-验证某个技能确实被模型看到时，在空的工作区里让模型“列出可用的技能”，或让模型直接调用 `Skill`；有磁盘资源的技能可根据返回的目录检查相对路径。要确认项目或 `~/.claude` 中的同名技能是否被选中，应检查运行时返回的内容。
+验证某个技能确实被模型看到时，在空的工作区里让模型“列出可用的技能”，或让模型直接调用 `Skill`；有磁盘资源的技能可根据返回的目录检查相对路径。要确认项目中的同名技能是否被选中，应检查运行时返回的内容。

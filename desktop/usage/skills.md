@@ -22,17 +22,15 @@ Skill 复用任务说明、方法和上下文。MCP 提供工具服务，Skill �
 
 ### 使用内置的 skill-creator
 
-Skills 入口的示例区包含内置的 `skill-creator`。它不写入数据目录，展开后显示真实的文件树（`SKILL.md`、`scripts/`、`references/`、`license.txt`、`NOTICE.md`），点击文件可以查看内容。它用于创建和校验新技能，模型会在合适时自动调用；也可以在 dcl 中运行 `/skill-creator`。命令行用法、脚本参数和 frontmatter 字段见 [用 skill-creator 创建技能](/cli/skill-creator)。
-
-旧版本写过一份占位技能。升级后，只有与旧占位完全一致的副本会被移除；改动过或加了文件的副本保持原样。
+Skills 入口的示例区包含内置的 `skill-creator`。文件保存在数据目录的 `skills/bundled/skill-creator/`，展开后显示文件树（`SKILL.md`、`scripts/`、`references/`、`license.txt`、`NOTICE.md`），点击文件可以查看内容。它用于创建和校验新技能，模型会在合适时自动调用；也可以在 dcl 中运行 `/skill-creator`。命令行用法、脚本参数和 frontmatter 字段见 [用 skill-creator 创建技能](/cli/skill-creator)。
 
 ### 给代理准备任务说明
 
-只读的内置技能 `task-template` 随应用提供。在聊天中选择它或输入 `/task-template` 并补充任务详情，可在委派前写清问题、具体改动、验证方法和报告要求。见[模板与命令行用法](/cli/skills#task-template)。
+内置技能 `task-template` 默认关闭，用 `dcl skills state task-template user` 启用后，在聊天中选择它或输入 `/task-template` 并补充任务详情，可在委派前写清问题、具体改动、验证方法和报告要求。见[模板与命令行用法](/cli/skills#task-template)。
 
 ## 查找与使用
 
-技能从数据目录 `skills/`、`~/.claude/skills` 和项目 `.claude/skills` 读取，同名时项目优先，其次数据目录，最后 `~/.claude`。模型可见的技能列表、`Skill` 工具和斜杠名称使用同一套结果，斜杠命令沿用数据目录的旧命名规则（小写、空格转 `-`，标点保留）。完整顺序、名称与重名规则、`enabled`/`disable-model-invocation` 开关和 `dcl skills list` 的验证方法见[数据目录](/cli/data-directory#技能从哪里读取)。
+先读取数据目录的 `skills/bundled/`，再读取个人技能 `skills/`，最后读取项目的 `.claude/skills` 和 `.claude/commands`。同名时项目优先。模型可见的技能列表、`Skill` 工具和斜杠名称使用同一套结果，斜杠命令沿用数据目录的旧命名规则（小写、空格转 `-`，标点保留）。完整顺序、名称与重名规则、`enabled`/`disable-model-invocation` 开关和 `dcl skills list` 的验证方法见[数据目录](/cli/data-directory#技能从哪里读取)。
 
 在列表筛选条目，查看详情和使用入口。项目页也有选择 Skill 的交互。选择后补充本次任务的材料；Skill 不会自动知道未提供的文件内容。
 
@@ -76,7 +74,7 @@ Skill 使用同一套会话执行与持久化流程。切换页面或断开流�
 
 - 使用内置提示词：可以展开查看完整内容。
 - 在内置提示词后追加：保留内置行为，再加上你的规则。
-- 完全替换内置提示词：编辑框从内置内容开始，改错了可以一键恢复。工作目录、操作系统等环境信息仍会自动附加。
+- 完全替换内置提示词：编辑框从内置内容开始，改错了可以一键恢复。工作目录、操作系统等环境信息随第一条用户消息发送。
 
 ## 工具
 

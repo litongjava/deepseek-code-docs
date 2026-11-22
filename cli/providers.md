@@ -12,6 +12,8 @@
 
 保存的提供商是一个列表，可以同时存在多个，彼此独立：每个提供商各自记录协议、接口地址、凭据来源和模型列表，用 `/provider` 切换，切换后对话历史保留。
 
+每个会话保存自己的提供商和模型。重启、从另一个终端恢复或交接给 Worker 时，会继续使用原绑定。要改用其他模型，请在会话中显式切换，或在恢复命令中指定 `--model provider::model`。
+
 常见用法：
 
 - 官方接口和代理地址各存一个，网络不通时换一个；
@@ -283,8 +285,8 @@ post_content_timeout_recovery = true
 模型请求会携带真实客户端信息和追踪 ID，便于在代理日志中按会话定位请求：
 
 - `user-agent`、`x-app`、`originator` 标识 dcl 或 Desktop；`x-dcl-runtime`、`x-dcl-os`、`x-dcl-arch` 描述运行环境。
-- `session-id`、`x-session-id`、`x-dcl-session-id` 对应当前会话 ID，恢复会话后保持不变。
-- `thread-id` 与当前会话 ID 相同，表示持续的对话线程，不是操作系统线程。子代理使用自己的会话 ID；可取得父会话关系时，附带 `x-parent-session-id`。
+- `x-dcl-session-id` 对应当前会话 ID，恢复会话后保持不变。子代理使用自己的会话 ID，可取得父会话关系时附带 `x-parent-session-id`。
+- `x-dcl-request-kind` 标识请求用途，包括 `turn`、`compaction` 和 `web-search`。压缩和供应商原生搜索也可以用会话 ID 与主请求关联。
 - `x-dcl-turn-id` 标识一次引擎执行。同一轮工具循环中的多个模型请求共享它；新一轮或恢复执行会生成新值。
 - `x-request-id` 与 `x-client-request-id` 标识一次模型请求，主循环中的值与请求详情中的 ID 一致。同一请求的网络重试保留此 ID；`x-dcl-retry-count` 从 `0` 开始递增。
 

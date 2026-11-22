@@ -45,4 +45,6 @@ dcd
 
 安装了 CLI 时，在终端运行 `dcl sessions list` 查找会话 ID，再用 `dcl requests <会话ID>` 列出请求及文件路径。CLI 必须指向 Desktop 使用的同一个数据目录。也可以直接打开记录目录中的文件；文件命名、完成状态和排查步骤见 [CLI 请求记录](../../cli/request-recording.md#保存位置与文件)。
 
+代理端可用 `x-dcl-session-id` 关联会话，按 `x-dcl-request-kind` 区分普通对话、压缩和原生联网搜索。详见[关联请求头](/cli/request-recording#在代理日志中关联请求)。
+
 超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理，清理检查间隔至少一小时。需要长期保留时提前复制到其他目录；备份整个应用数据目录也会包含这些敏感记录，见[数据备份](../maintenance/data.md#备份步骤)。
