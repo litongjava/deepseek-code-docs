@@ -18,6 +18,8 @@
 
 MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服务](./mcp.md)。
 
+读取文本时，`Read` 会把识别出的连续 Base64 数据折叠成一行（普通数据至少 1024 个字符，`data:` URI 载荷至少 256 个字符），例如 `[base64 data omitted: about 2048 bytes decoded, looks like PNG]`。需要核对原文时，传入 `{"file_path":"page.html","raw":true}`；也可加 `offset` 和 `limit` 只读相关行。原文件不受影响。
+
 ## dcl 自己的工具
 
 - `ToolLoad`：按目录中的完整名称加载工具定义，见[工具目录与加载](#工具目录与加载)。
@@ -37,7 +39,7 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 - `query` 是非空、区分大小写的字面子串，最多 512 个 UTF-8 字节。`regex: true` 使用 Rust 正则，例如用 `(?i)` 忽略大小写。普通文本按有重叠的窗口匹配，正则锚点以每个窗口为界。需要跨过较长片段时，可以先检索较短的关键词。
 - 可用 `role`（`user`、`assistant`、`tool`）、`tool_name`（完整工具名，忽略大小写，可与 `role: "tool"` 配合使用）、`range`（默认 `all`，也可选 `before`、`after`）和本会话的 `boundary_id` 过滤。首次查询默认选择最近的压缩边界。
 - 结果按来源从新到旧返回。默认 5 条，最多 10 条和 12 KiB JSON。引用包括 `message_id`、时间戳、角色，以及可用的 `turn_id`、`tool_name` 和 `tool_call_id`。有 `next_cursor` 时可以保留原查询和过滤条件继续翻页，即使本页没有匹配。
-- 每页检查最多 25,000 个元数据行，SQLite 读取预算为 24 MiB，包含元数据页和文本，每个文本窗口最多 8 MiB。升级会在本地数据库中为已有历史建立检索元数据，并把需要按偏移读取的大值另存为可独立读取的分块。`scan_truncated` 表示扫描因预算停止或有结构化来源被跳过，`has_more` 表示有已发现但本页未返回的匹配。需要完整投影的 `Bash`、`Read`、`Write`、`Edit`、`MultiEdit` 和 `ApplyPatch` 结果超过 8 MiB 或无法安全解析时，计入 `skipped_structured_sources`。图片原始数据、思考内容和请求记录不参与检索。
+- 每页检查最多 25,000 个元数据行，SQLite 读取预算为 24 MiB，包含元数据页和文本，每个文本窗口最多 8 MiB。检索按当前会话的数据库读取，长文本分块处理。`scan_truncated` 表示扫描因预算停止或有结构化来源被跳过，`has_more` 表示有已发现但本页未返回的匹配。需要完整投影的 `Bash`、`Read`、`Write`、`Edit`、`MultiEdit` 和 `ApplyPatch` 结果超过 8 MiB 或无法安全解析时，计入 `skipped_structured_sources`。图片原始数据、思考内容和请求记录不参与检索。
 - 摘录正文最多 384 个 UTF-8 字节，省略处以 `…` 标记。`excerpt_truncated` 说明来源有省略，`match_truncated` 说明匹配本身也被截短。可以用较短的关键词或正则查找所需部分，也可以凭消息和工具调用 ID 回看原始记录。
 
 ## 几个需要知道的行为
@@ -70,7 +72,7 @@ Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Ba
 
 **Agent**：默认在后台运行（`run_in_background` 默认为 `true`），子代理结束时通知模型；设为 `false` 时本轮等待结果。可以用 `subagent_type` 选择代理类型，`isolation: "worktree"` 让子代理在独立的 Git worktree 中工作。
 
-决定委派较大任务后，可以先用内置技能 [task-template](./skills.md#task-template) 写好任务说明，再把说明作为 `Agent` 的 `prompt`。
+决定委派较大任务后，可以先启用并使用内置技能 [task-template](./skills.md#task-template) 写好任务说明，再把说明作为 `Agent` 的 `prompt`。
 
 等待前台子代理的结果时（`Agent` 的 `run_in_background: false`），即使子代理执行失败，dcl 也会尝试停止它留下的受管后台 Bash 命令。父会话的工具结果会简要列出已停止的任务、5 秒内未确认停止的任务、停止失败的任务，或未能完成的检查。父回合中断时也会请求停止这些任务，停止可能尚未确认。该子代理启动的 Monitor（含续期中的监视）也归它所有，返回或中止时会清理。停止运行中的 Monitor 请用 `TaskStop`；`TaskUpdate` 不能把它标为完成或删除。
 
@@ -174,7 +176,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 ### 工具目录与加载
 
-每次模型请求的系统提示词都会附上 `Tool directory`。内置工具一栏给出名称和用途，MCP 一栏给出完整的 `mcp__服务名__工具名` 和简短说明。两栏都只列本次请求可以加载的工具，已提供定义、已加载、设置禁用或当前代理无权使用的工具都会略去。仅当 MCP 服务处于 `on-demand` 状态且有符合条件的工具时才显示 MCP 一栏。如果本次请求没有提供 `ToolLoad`，目录会说明无法加载工具。
+会话首次请求会在第一条用户消息中列出可按需加载的内置工具和 MCP 工具，每行一个完整名称和简短说明。之后启停工具或重新连接 MCP 时，可用项的变化会随最新的用户消息发送。加载时仍会检查当前工具设置和代理权限。
 
 模型调用 `ToolLoad` 时只传一个 `names` 数组，包含 1 至 64 个非空字符串。每项都必须是完整名称，区分大小写。例如，同时加载目录中的两个工具：
 
@@ -182,7 +184,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 {"names":["ListDir","WebFetch"]}
 ```
 
-重复名称按首次出现的顺序去重。成功时，`loaded_tools` 列出新加载的工具，`already_available` 列出已经可用的工具。新定义从下一次模型请求开始提供，因此模型需要分两次请求完成加载和调用。只要有一个名称未知或不可用，整批就不新增任何工具；结果中的 `unknown` 列出未知名称，`unavailable` 给出不可用的名称和原因。例如，把上例中的 `WebFetch` 写成 `webfetch` 会使整批失败。
+重复名称按首次出现的顺序去重。成功时，模型收到一行确认，例如 `Loaded ListDir, WebFetch. Available from the next request.`，下一次请求按加载顺序把新定义追加到常驻工具之后。SDK 和工具记录保留结构化结果，其中`loaded_tools` 列出新加载的工具，`already_available` 列出已经可用的工具。只要有一个名称未知或不可用，整批就不新增任何工具；结果中的 `unknown` 列出未知名称，`unavailable` 给出不可用的名称和原因。例如，把上例中的 `WebFetch` 写成 `webfetch` 会使整批失败。
 
 旧工具 `ToolSearch` 已移除，无兼容别名。升级时，调用方应把工具名、权限规则和 Hook 匹配器中的旧名改为 `ToolLoad`，把查询参数改为完整名称数组。旧调用记录保留原名；恢复旧会话时需要重新按名加载。
 

@@ -24,14 +24,14 @@
 
 MCP 连接外部工具服务，需要配置启动命令或服务连接信息。先确认服务能启动，再验证工具列表和具体工具调用。
 
-准备向代理分派任务时，可以在聊天中输入 `/task-template` 并附上任务详情，试用随应用提供的[任务模板](/cli/skills#task-template)。
+准备向代理分派任务时，先用 `dcl skills state task-template user` 启用技能，再在聊天中输入 `/task-template` 并附上任务详情，试用随应用提供的[任务模板](/cli/skills#task-template)。
 
 部分 MCP 管理入口仍直接调用 Tauri IPC，因此优先在桌面窗口测试。
 
 ## 本地数据与日志
 
-`src-tauri/src/main.rs` 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）保存 `deepseek_code.db`，知识库放在该目录下的 `knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
+Desktop 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）用 `global.db` 保存会话目录，用 `sessions/<storage_key>/session.db` 分别保存会话历史，知识库放在该目录下的 `knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
 
 日志初始化逻辑将滚动日志写入进程工作目录下的 `logs`。不同启动方式可能改变工作目录。
 
-备份数据库前关闭应用，以免得到不一致的副本。浏览器 localStorage、桌面 WebView 的存储和 Rust SQLite 是不同存储区域，不能互相等同。
+备份前退出共用该目录的客户端和 Worker，再复制整个数据目录。浏览器 localStorage、桌面 WebView 的存储和 Rust SQLite 是不同存储区域，不能互相等同。

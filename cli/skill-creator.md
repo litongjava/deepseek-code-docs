@@ -1,6 +1,6 @@
 # 用 skill-creator 创建技能
 
-DeepSeek Code 内置了 `skill-creator`。它不需要联网，也不需要事先安装：调用时才把 `SKILL.md`、脚本和参考资料物化到一个临时目录，结束后由进程清理。
+DeepSeek Code 内置了 `skill-creator`。首次启动时，dcl 将它安装在数据目录的 `skills/bundled/skill-creator/`，默认启用。脚本和参考资料都在该目录中，可离线使用。
 
 ## 调用方式
 
@@ -10,21 +10,13 @@ DeepSeek Code 内置了 `skill-creator`。它不需要联网，也不需要事�
 /skill-creator 创建一个整理会议纪要的技能
 ```
 
-模型在选择技能时也能通过 `Skill` 工具调用它，不需要用户先输入斜杠命令。技能返回的说明会给出本次物化目录，模型用 `Read` 查看参考文件、用 `Bash` 按正常权限运行脚本。
+模型在选择技能时也能通过 `Skill` 工具调用它，不需要用户先输入斜杠命令。技能返回的说明会给出技能的安装目录，模型用 `Read` 查看参考文件、用 `Bash` 按正常权限运行脚本。
 
 也可以直接描述任务，例如“帮我做一个能校验 CSV 列名的技能”，模型判断适用时会自动调用。
 
 ## 技能发现位置
 
-DeepSeek Code 从以下位置读取技能：
-
-- 数据目录：`$DEEPSEEK_CODE_DATA_DIR/skills`，未设置时是 `~/.deepseek-code/skills`。这是 dcl 和 Desktop 的 Skills 页面管理的目录。
-- 用户配置目录：`$CLAUDE_CONFIG_DIR/skills`，未设置时是 `~/.claude/skills`。
-- 项目目录：工作区下的 `.claude/skills`。
-
-`dcl skills list` 和自定义页会列出数据目录中的技能，以及内置的 `skill-creator` 和 [task-template](./skills.md#task-template)。前者用于编写技能，后者用于为队员或代理准备任务说明。同名的数据目录技能优先，每个名称只列一次。
-
-旧版本在 `skills/bundled/skill-creator` 写过一份占位技能。新版本只在文件与旧占位**完全一致**（`SKILL.md`、`agents/analyzer.md`、`agents/grader.md`，没有额外文件）时删除它；改动过的副本和不相关的兄弟技能不会被动。
+个人技能放在数据目录的 `skills/<名称>/SKILL.md`，供 CLI 和 Desktop 共用。项目专用技能放在工作区的 `.claude/skills/<名称>/SKILL.md`。查找顺序和升级后的目录变化见[技能从哪里读取](./data-directory.md#技能从哪里读取)。
 
 ## 技能结构
 
@@ -38,24 +30,38 @@ my-skill/
 
 `SKILL.md` 的正文只在技能被调用时加载。把常用规则、适用条件和路由放在正文，把只在某些模式下需要的细节放进 `references/`。
 
+例如，在 `skills/meeting-notes/SKILL.md` 写入：
+
+```markdown
+---
+name: meeting-notes
+description: 把会议记录整理为决定和待办
+---
+
+根据用户提供的会议记录列出决定和待办。待办中保留原文写明的负责人和截止日期。
+```
+
+用 `dcl skills help meeting-notes` 检查内容，再在会话中输入 `/meeting-notes` 并附上记录。
+
 ## 内置脚本
 
-调用后，返回的说明里会给出物化目录。用 `python3` 运行其中的脚本（只依赖 Python 3 标准库）：
+以下示例按默认数据目录或环境变量定位脚本。若启动时用了 `--data-dir`，请把 `data_dir` 换成同一目录。
 
 ```bash
-python3 <物化目录>/scripts/init_skill.py my-skill \
-  --path "${DEEPSEEK_CODE_DATA_DIR:-$HOME/.deepseek-code}/skills"
+data_dir="${DEEPSEEK_CODE_DATA_DIR:-$HOME/.deepseek-code}"
+creator="$data_dir/skills/bundled/skill-creator"
+python3 "$creator/scripts/init_skill.py" my-skill --path "$data_dir/skills"
 ```
 
 `init_skill.py` 创建技能目录和一份可继续编辑的 `SKILL.md`，可选 `--resources scripts,references,assets` 和 `--examples`。省略 `--path` 时默认写到数据目录的 `skills` 文件夹。
 
 ```bash
-python3 <物化目录>/scripts/quick_validate.py ~/.deepseek-code/skills/my-skill
+python3 "$creator/scripts/quick_validate.py" "$data_dir/skills/my-skill"
 ```
 
 `quick_validate.py` 检查 frontmatter 是否是映射、`name` 和 `description` 是否存在、名称字符（字母、数字、`-`、`_`、`:`、`.`）、布尔字段以及未完成的 `[TODO: ...]` 占位。它按 DeepSeek Code 的宽松规则接受未知键，不会因为额外的 `metadata` 等字段报错。验证通过只说明结构正确，不说明技能内容一定合适。
 
-完整字段说明见物化目录中的 `references/frontmatter.md`。常用字段：
+完整字段说明见安装目录中的 `references/frontmatter.md`。常用字段：
 
 - `enabled`：`false` 时不参与常规发现，默认 `true`。
 - `user-invocable`（别名 `userInvocable`）：是否允许 `/skill-name`，默认 `true`。
@@ -64,7 +70,7 @@ python3 <物化目录>/scripts/quick_validate.py ~/.deepseek-code/skills/my-skil
 
 ## 来源与许可证
 
-内置技能改编自 OpenAI Codex 的 `skill-creator`。物化目录保留原始 Apache-2.0 许可证（`license.txt`），`NOTICE.md` 说明修改内容；`SKILL.md` 开头也有同样的来源说明。不要删除这些文件。
+内置技能改编自 OpenAI Codex 的 `skill-creator`。安装目录保留原始 Apache-2.0 许可证（`license.txt`），`NOTICE.md` 说明修改内容；`SKILL.md` 开头也有同样的来源说明。不要删除这些文件。
 
 ## 验证
 

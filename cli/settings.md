@@ -19,6 +19,7 @@
 |---|---|---|
 | `spinnerTipsEnabled` | `true` | 运行中是否在状态行下显示提示，见[运行提示](./tips.md) |
 | `promptSuggestionEnabled` | `true` | 一轮结束后是否生成下一句建议，见[建议补全](./suggestions.md) |
+| `summarize_long_command_output` | `true` | 为模型标出长命令输出中省略的字节、整行和相关原文，见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果) |
 | `editorMode` | `normal` | 设为 `vim` 时使用 vim 风格编辑，见[vim 模式](./vim-mode.md) |
 | `hooks` | 无 | 工具调用前后执行的 hooks |
 | `sandbox` | 无 | 在沙箱中运行 Bash 命令，见[沙箱](./sandbox.md) |

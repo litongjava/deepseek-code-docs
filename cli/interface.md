@@ -1,6 +1,6 @@
 # 交互界面与快捷键
 
-直接运行 `dcl` 进入交互模式。普通对话显示在终端中；滚轮或翻页键可打开历史视图，输入框保持在底部。跨轮对话和调整窗口尺寸前的记录都可以回看。
+直接运行 `dcl` 进入交互模式。普通对话显示在终端中；滚轮或翻页键可打开历史视图，输入框保持在底部。跨轮对话和调整窗口尺寸前的记录都可以回看。关闭终端窗口或断开终端连接时，交互式 dcl 随之退出。
 
 和 Claude Code 一样，dcl 接管鼠标点击：点击折叠的工具结果（`… +N lines`）或修改摘要（`Updated path (+7 -0)`）会在原位置展开，再点一次收起，见[工具调用](./tool-calls.md)。双击工具标题复制完整指令，双击结果正文复制该工具的完整结果；双击用户消息复制消息内容。拖选文字后松开鼠标即可复制；按住 `Shift` 拖动则使用终端自身的选择功能。
 
@@ -165,13 +165,15 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/rewind` | [回退](./rewind.md)代码或对话；别名 `/checkpoint` |
 | `/ide` | 选择要连接的编辑器（列出打开了当前项目的编辑器，最后一项 None 断开）；没有可连接的编辑器时只提示一行。`/ide status` 显示详细状态 |
 | `/terminal-setup` | 说明如何在提示词里换行：任何终端都可以用 `Ctrl+J`、`\` + `Enter` 或 `Alt+Enter`；终端能区分时 `Shift+Enter` 也可以 |
-| `/code-review`、`/security-review` | [代码审查与安全审查](./code-review.md) |
+| `/code-review`、`/security-review` | 启用对应技能后可用，见[代码审查与安全审查](./code-review.md) |
 | `/vim` | 切换 [vim 模式](./vim-mode.md) |
 | `/rename 名称` | 给会话命名 |
 | `/clear` | 开始新的对话；别名 `/new`、`/reset` |
 | `/restart` | 重启 dcl：替换当前进程并在当前对话里继续，启动参数保留，改过的 `config.json` 和更新后的二进制会重新加载 |
 | `/config` | 设置对话框；别名 `/settings` |
 | `/exit` | 退出，并提示用 `dcl --resume 会话ID` 恢复 |
+
+旧版的 `/radio`、`/stickers`、`/mobile` 和 `/release-notes` 已移除。
 
 `/resume [ID]` 恢复历史并等待输入；`/continue` 显式继续当前会话。任务还在后台运行时，`/continue` 直接接回这个任务，不会重新执行。
 

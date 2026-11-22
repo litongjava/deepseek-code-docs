@@ -2,9 +2,21 @@
 
 每个技能有一个状态，决定它是否出现在模型看到的技能列表里、能否用 `/name` 调用。`/skills state` 用来查看和修改状态，`/plugins` 面板集中管理技能、插件和 MCP 服务，并查看技能的上下文开销与用量。
 
+## 启用随附技能
+
+dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator` 默认启用。`codegraph` 仅在 `PATH` 中能找到其可执行文件时默认启用。其他随附技能默认是 `off`。可先查看说明，再按需要启用：
+
+```bash
+dcl skills list
+dcl skills help verify
+dcl skills state verify user
+```
+
+随附技能包括 `commit`、`pr`、`debug`、`verify` 和 `run` 等。来自 `anthropics/skills` 的文件处理、设计和开发技能（例如 `pdf`、`frontend-design`、`mcp-builder`）在各自目录中附有 `NOTICE.md` 和 `LICENSE.txt`。需要核对来源时，查看 NOTICE 中的仓库、提交和原始路径。升级会保留编辑过的文件；另写个人版本可放在 `skills/<名称>/SKILL.md`。
+
 ## task-template
 
-决定通过 `Agent`、队员或后台代理委派较大的任务后，可用内置的只读技能 `task-template` 为接手人写任务说明。它默认对模型可见，模型可以通过 `Skill` 调用。也可以在交互会话中输入 `/task-template <任务详情>`。普通后台 Shell 命令无需此模板。
+决定通过 `Agent`、队员或后台代理委派较大的任务后，可用内置技能 `task-template` 为接手人写任务说明。先运行 `dcl skills state task-template user`，模型就可以通过 `Skill` 调用。也可以在交互会话中输入 `/task-template <任务详情>`。普通后台 Shell 命令无需此模板。
 
 | 任务说明 | 接手人需要的信息 |
 | --- | --- |
@@ -23,11 +35,11 @@ SDK 宿主也可以在子代理定义中设置 `"skills":["task-template"]`，�
 ## 技能状态
 
 - `off`：不列出，也不能用 `/name` 调用。
-- `user`（默认）：列出名称和说明，模型和用户都可以调用。
+- `user`：按技能文件的声明列出名称和说明，允许模型和用户使用各自可调用的技能。
 - `name-only`：只向模型列出名称，节省上下文；模型和用户都可以调用。
 - `user-only`：不列给模型，模型不能调用；用户仍可用 `/name` 调用。
 
-状态保存在数据目录下的 `skill-states.json`。没有写入这个文件的技能使用默认状态：除两个翻译技能外都默认 `user`，`translate-zh-en` 和 `translate-en-zh` 默认 `user-only`。状态对所有来源的技能都生效，包括内置技能、数据目录技能、项目技能和插件技能。
+状态保存在数据目录下的 `skill-states.json`。已保存的状态优先于安装默认值。个人和项目技能通常默认是 `user`；技能文件本身也可以限制谁能调用。
 
 修改后不需要重启：会话内的斜杠列表立即刷新，模型看到的技能列表在下一轮请求时按新状态生成。
 
@@ -88,7 +100,7 @@ dcl skills state translate-zh-en user
 
 - **skill**：技能名称。同步来的技能显示最后一段短名称，来源为 `synced`。
 - **source**：来源，例如插件 ID、`built-in`、`project`、`user` 或 `synced`。
-- **context**：技能在系统提示词中的一行列表所占的 token 数，每轮都会带上；`-` 表示当前列表中没有它，不占上下文，完整的 `SKILL.md` 只在技能运行时加载。
+- **context**：首条用户消息中该技能的清单项所占的估算 token 数；`-` 表示当前列表中没有它，不占上下文，完整的 `SKILL.md` 只在技能运行时加载。
 - **7d tokens**：最近 7 天本机会话中归到这个技能的 token 数。
 - **uses**：调用次数。
 - **last used**：多久之前使用过；从未使用会写 `never`。
@@ -108,10 +120,10 @@ dcl skills state translate-zh-en user
 
 两者都保留原意、语气和格式（Markdown、列表、代码块、链接），数字和名称保持原样；代码、命令、文件路径和标识符不翻译。只输出译文，不加解释；没有提供文本时会要求补充。
 
-两个技能默认是 `user-only`：不列给模型，只有你能用斜杠命令调用。要让模型也能使用其中一个，把它的状态改成 `user`：
+两个内置翻译技能默认关闭。只想手动翻译时，先在会话中启用对应命令：
 
 ```text
-/skills state translate-zh-en user
+/skills state translate-zh-en user-only
 ```
 
-改完后它会连同说明出现在模型看到的技能列表里，模型可以自行选择调用；改回 `user-only` 即可重新隐藏。也可以在 `/plugins` 的 Installed 页按 `Enter` 选择状态。技能从哪里读取见[数据目录](./data-directory.md#技能从哪里读取)，创建新技能见[用 skill-creator 创建技能](./skill-creator.md)。
+现在可用 `/translate-zh-en <文本>` 翻译。也可以在 `/plugins` 的 Installed 页按 `Enter` 选择状态。技能从哪里读取见[数据目录](./data-directory.md#技能从哪里读取)，创建新技能见[用 skill-creator 创建技能](./skill-creator.md)。

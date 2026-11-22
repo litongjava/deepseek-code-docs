@@ -4,11 +4,11 @@
 
 ## 数据位置
 
-Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录下的 `~/.deepseek-code`（Windows 为 `%USERPROFILE%\.deepseek-code`）。其中保存供应商配置 `config.json`、用户设置 `settings.json`、会话数据库 `deepseek_code.db`、MCP 配置 `mcp-servers.json`、技能 `skills/`、知识库 `knowledge/`、本地记忆 `memory.sqlite3`、上传文件 `uploads/`、App Studio 项目 `app-studio/` 和多代理编排设置 `orchestrator.toml`（没有这个文件时使用默认值）等。Rust 启动日志会打印实际使用的目录。
+Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录下的 `~/.deepseek-code`（Windows 为 `%USERPROFILE%\.deepseek-code`）。其中保存供应商配置 `config.json`、用户设置 `settings.json`、会话目录库 `global.db`、各会话的 `sessions/<storage_key>/session.db`、MCP 配置 `mcp-servers.json`、技能 `skills/`、知识库 `knowledge/`、本地记忆 `memory.sqlite3`、上传文件 `uploads/`、App Studio 项目 `app-studio/` 和多代理编排设置 `orchestrator.toml`（没有这个文件时使用默认值）等。Rust 启动日志会打印实际使用的目录。
 
 旧版本把上传文件、App Studio 项目和部分记忆放在系统本地数据目录下的 `claude-desktop/` 中（Linux 为 `~/.local/share/claude-desktop`，Windows 为 `%LOCALAPPDATA%\claude-desktop`）。新版本不再读取那里，也不会自动迁移；需要旧文件时手动复制到数据目录对应的子目录。
 
-内置的 `task-template` 随程序提供，备份 `skills/` 时只需处理实际保存在磁盘上的技能副本。
+个人技能位于 `skills/`，内置技能安装在 `skills/bundled/`。备份技能时一并保留记录启停选择的 `skill-states.json`。
 
 设置环境变量 `DEEPSEEK_CODE_DATA_DIR` 可以改用其他目录，CLI 还可以用 `--data-dir`。
 
@@ -22,17 +22,19 @@ Desktop 与 CLI（dcl）共用同一个数据目录，默认是用户主目录�
 
 ## 备份步骤
 
-1. 结束任务并退出应用，确认后端不再写入。
-2. 备份实际应用数据目录，不只复制可能正在写入的 SQLite 主文件。
+1. 结束任务，退出共用数据目录的 Desktop、dcl 和后台 Worker。
+2. 复制整个数据目录，包括 `global.db`、`sessions/`、`session-locks/` 和已有的 SQLite 配套文件。
 3. 单独备份项目文件、外部服务数据和配置说明。
 4. 记录版本、运行模式、供应商地址与模型 ID，凭据按自己的安全方式保管。
 5. 保留原备份，用副本验证恢复后的会话和知识条目。
+
+只需要一段会话历史时，可使用 `dcl sessions export <id> --output session.jsonl`。外部附件仍需另存。快照内容和完整性校验见[导出一个会话](/cli/data-directory#导出一个会话)。
 
 ## 更新
 
 备份后查看维护者的版本说明，再安装或构建新版本。启动后验证会话、供应商、项目与关键扩展。
 
-数据库迁移可能影响旧版本兼容性。回退不能只换回旧程序就假定数据可读，应使用兼容的数据备份。
+从共享数据库升级到分库版本后，新会话列表起初为空。新版不会打开、改名或删除 `deepseek_code.db` 及其 WAL/SHM 文件。旧历史仍可用旧版 dcl 查阅，新建会话保存在分库中。
 
 ## 迁移
 

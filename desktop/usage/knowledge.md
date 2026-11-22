@@ -34,6 +34,6 @@
 
 ## 数据处理
 
-删除条目或清空记忆前确认保留需求。知识库、MemEx 和会话 SQLite 可能位于不同位置，备份应覆盖实际数据源。
+删除条目或清空记忆前确认保留需求。备份时分别保存知识库和实际使用的记忆后端。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
 
 源码参考：`KnowledgePanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。

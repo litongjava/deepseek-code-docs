@@ -6,6 +6,10 @@
 请求体和响应正文**不脱敏**，可能包含完整对话、发给模型的文件内容、工具参数与工具结果，以及其中的密钥和个人信息。认证请求头（例如 `Authorization`、`Proxy-Authorization`、Cookie 和 API Key）会被移除，但这不代表整份记录已经脱敏。分享或上传前，请检查所有文件，只提供排查所需的内容。
 :::
 
+## 在代理日志中关联请求
+
+普通对话、上下文压缩和供应商原生联网搜索使用同一组关联请求头。通过 `x-dcl-request-kind` 区分 `turn`、`compaction` 和 `web-search`。有会话时可按 `x-dcl-session-id` 筛选，子会话有父 ID 时还会发送 `x-parent-session-id`。回合内的请求带 `x-dcl-turn-id`；手动压缩也可以只用会话 ID 关联。一次请求的重试共用 `x-request-id`，`x-dcl-retry-count` 从 0 递增。
+
 ## 开启与关闭
 
 默认关闭。只为本次 CLI 启动开启：

@@ -38,21 +38,22 @@ Responses 搜索使用消息数组形式的 `input`，携带 `web_search` 工具
 
 ## WebFetch
 
-参数：`url`、`prompt`，可选 `offset`。和 Claude Code 一样，WebFetch 不把整页内容交给模型，而是把网页转成文本后，用当前会话的模型按 `prompt` 回答，再把回答返回。终端里显示为 `Fetch(https://...)`。
+参数：`url`、`prompt`，可选 `offset`。和 Claude Code 一样，WebFetch 不把整页内容交给模型，而是把网页转成文本后，用当前会话的模型按 `prompt` 回答，再把回答返回。终端里显示为 `Fetch(https://...)`。网页文本中的长 Base64 数据会先折叠为一行占位符。需要原始响应正文时，可通过 `Bash` 运行 `curl -o page.html https://example.com/`。
 
 - 同一个 URL 15 分钟内重复读取时直接使用缓存。
 - 公网 `http://` 自动升级为 `https://`。
-- `localhost`、回环、内网、链路本地地址和不带点的主机名在访问前请求本次审批，包括 Plan、Auto 和 Bypass。批准后保留原始 HTTP/HTTPS 协议；拒绝或没有审批宿主时不发送请求。一次批准不授权下一次请求，跨主机重定向仍返回新地址供重新调用。
+- `localhost`、回环、内网、链路本地地址和不带点的主机名在 ask、Plan 和 Auto 等模式下会在访问前请求本次审批；需要审批而未获授权时不会发送请求。bypass 模式允许直接访问这些地址，显式 deny 规则仍适用。访问本机服务时保留原始 HTTP/HTTPS 协议。一次批准不授权下一次请求，跨主机重定向仍返回新地址供重新调用。
 - 仅支持 HTTP/HTTPS；`file://`、`ftp://` 等协议继续拒绝。
 - 跳转到其他主机时不自动跟随，而是把跳转地址返回给模型，由它决定是否再次读取；同一主机内的跳转照常跟随。
 - 页面较长时分段读取：结果带有 `next_offset` 时，用它作为 `offset` 继续读。
 - 需要登录的私有页面会失败，请改用有认证的 MCP 工具或 `gh` 等命令。
 
-访问新的网站前会请你确认，常见文档站点除外，见[访问新网站](./permissions.md#访问新网站)。
+新域名的审批还取决于权限模式和域名规则，见[访问新网站](./permissions.md#访问新网站)。
 
 ## /deep-research
 
 ```text
+/skills state deep-research user-only
 /deep-research Rust 2024 edition 有哪些不兼容的变化？
 ```
 

@@ -55,13 +55,15 @@ public class Conversation {
 - `ResultMessage`：一轮结束，包含结果文本、轮次和结构化输出。
 - `StreamEvent`：开启 `includePartialMessages(true)` 后收到的增量事件，`getTextDelta()` 取增量文本，适合打字机效果。
 
+接收 dcl 的输入建议时，同时设置 `initializeField("promptSuggestions", true)` 和 `includeRawFrames(true)`。有可用建议时，`RawMessage.getType()` 为 `prompt_suggestion`，`getRaw().get("suggestion")` 是建议文本，`getSessionId()` 标识会话。建议可在本轮 `result` 之后到达；在长连接上用 `nextMessage(...)` 或 `receiveMessages()` 继续读取。恢复时 dcl 可再次发送尚有效的建议，无需发起新的模型请求。
+
 ## 查询已保存的会话历史
 
 需要找回压缩前的路径、决定或报错时，dcl 的 SDK 持久会话也可使用 `ContextSearch`。模型先用 `ToolLoad` 加载 `{"names":["ContextSearch"]}`，再查询当前会话。应用可从返回的摘录中读取 `message_id` 和可用的 `tool_call_id`，定位原始记录。 完整参数见 [ContextSearch](/cli/tools#contextsearch)。
 
 ## 读取 Shell 任务结果
 
-dcl 在 stream-json 的 `user` 消息里发送 `tool_result` 块。通过 `ToolResultBlock.getToolUseId()` 与之前的 `ToolUseBlock.getId()` 关联，按调用的工具名选择解析方式。前台 `Bash` 成功时，SDK 通常收到含 `stdout`、`stderr` 和 `exit_code` 的原始 JSON 文本。模型下一次请求收到的则是精简文本，例如只含标准输出，或静默成功时的 `(Completed with no output)`。调用失败时先检查 `isError()`，正文可能带有 `Error: ` 前缀。
+dcl 在 stream-json 的 `user` 消息里发送 `tool_result` 块。通过 `ToolResultBlock.getToolUseId()` 与之前的 `ToolUseBlock.getId()` 关联，按调用的工具名选择解析方式。前台 `Bash` 成功时，SDK 通常收到含 `stdout`、`stderr` 和 `exit_code` 的原始 JSON 文本。模型下一次请求收到的则是精简文本，例如只含标准输出，或静默成功时的 `(Completed with no output)`。长命令的模型预览可能附带 `Omitted output:`，SDK 应按原始结果字段读取。调用失败时先检查 `isError()`，正文可能带有 `Error: ` 前缀。
 
 下面的方法处理已按 ID 确认为 `TaskGet` 的普通受管 Shell 快照。查询调用成功仍可能查到失败的任务，应读取快照的 `status`。已结束任务的 `output` 和 `result` 保留命令输出和必要状态；成功时无需匹配 `Exit code: 0`。
 
@@ -93,4 +95,6 @@ class ShellTasks {
 - `continueConversation(true)`：继续当前目录最近的会话。
 - `forkSession(true)`：恢复时分叉出新会话，原会话不变。
 
-会话与 `dcl` 共用同一份数据，也可以在终端用 `dcl --resume` 打开。
+使用 dcl 时，会话 ID 可从 `SystemMessage` 或 `ResultMessage` 的 `getSessionId()` 取得。恢复或交接会话会沿用保存的提供商和模型，需要切换时再显式指定模型。
+
+在与 SDK 子进程相同的数据目录下，用 `dcl sessions list` 查看已保存会话，用 `dcl sessions export <id> --output session.jsonl` 导出其中一个。自定义目录时，两条命令都加上相同的 `--data-dir`。dcl 用 `global.db` 保存清单，用 `sessions/<storage_key>/session.db` 保存各会话历史。升级前的 `deepseek_code.db` 仍供旧版读取，新布局从空清单开始。导出文件是带 `header` 和校验记录 `end` 的 v1 JSONL 快照，需与实时 stream-json 消息分开读取。记录种类和校验步骤见[导出一个会话](/cli/data-directory#导出一个会话)。

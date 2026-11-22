@@ -7,7 +7,7 @@
 ```text
 React 前端（Tauri WebView 或普通浏览器）
   ├─ fetch / HTTP ─────────→ Rust Axum Bridge :30085
-  │                           ├─ SQLite / 本地文件
+  │                           ├─ 全局目录 global.db / 各会话的 session.db / 本地文件
   │                           ├─ 模型与工具执行
   │                           └─ SSE 流式响应 → 前端
   └─ invoke / listen ──────→ Tauri 原生桥接 → Rust command

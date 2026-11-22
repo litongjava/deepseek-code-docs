@@ -88,7 +88,7 @@ Desktop 的 Code 模式发送前必须选择项目，并确认源目录信任。
 
 删除记录前确认关联资料的保留需求。不要假定删除记录等于删除磁盘项目，也不要假定一定能从 UI 恢复。
 
-代码仓库应有自己的版本管理和备份，客户端数据库备份不能代替项目文件备份。
+代码仓库单独做版本管理和备份。要保留项目关联的会话，按[数据备份步骤](../maintenance/data.md#备份步骤)备份整个数据目录；单个会话也可用 `dcl sessions export` 导出。
 
 源码参考：`SidebarNavigation.tsx`、`ProjectsPage.tsx`、`features/project/`、`src-tauri/src/bridge/routes/projects.rs` 和 `crates/core/src/db/project_repo.rs`。
 
