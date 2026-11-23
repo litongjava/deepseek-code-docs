@@ -103,7 +103,8 @@ Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但�
 
 1. 数据目录的 `skills/bundled/<名称>/`。首次启动时安装内置技能，升级时刷新未修改的文件，保留用户编辑过的文件。
 2. 数据目录的 `skills/<名称>/`。把个人技能放在这里，默认是 `~/.deepseek-code/skills/`。原先放在 `~/.claude/skills` 或 `$CLAUDE_CONFIG_DIR/skills` 的个人技能需要自行复制过来。用户级 `commands/` 也不再扫描。
-3. 当前工作区的 `.claude/skills` 和 `.claude/commands`。项目内的同名技能优先。
+3. 当前工作区的 `.claude/skills` 和 `.claude/commands`，保留 Claude Code 项目的兼容读取。
+4. 当前工作区的 `.agents/skills`。与 Claude 目录同名时以 `.agents` 为准，适合不想依赖 `.claude` 的项目。
 
 升级时会清理旧版生成且未经修改的 `legacy-build`、`legacy-commit`、`legacy-document`、`legacy-review` 和 `legacy-test`。编辑过正文或添加了文件的副本会保留。
 

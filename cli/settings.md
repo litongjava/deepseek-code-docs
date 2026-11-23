@@ -43,7 +43,7 @@
 
 ## 记忆开关
 
-`dcl config memory` 查看全局记忆开关和检索设置；`dcl config memory off` 关闭，`on` 重新开启。也可以用 `dcl config set memory.enabled false`。开关保存在数据目录的数据库里，Desktop 与 CLI 共用：关闭后新请求不再注入 `MEMORY.md` 索引，记忆目录的写入会被拒绝，系统提示词也会省略记忆说明；已保存内容保留。详见[长期记忆](./memory.md#关闭记忆)。
+`dcl config memory` 查看全局记忆开关和检索设置；`dcl config memory off` 关闭，`on` 重新开启。在交互界面运行 `/config`，可以在 Config 页的 `Long-term memory` 一行直接切换。也可以用 `dcl config set memory.enabled false`。开关保存在数据目录的数据库里，Desktop 与 CLI 共用：关闭后新请求不再注入 `MEMORY.md` 索引，记忆目录的写入会被拒绝，系统提示词也会省略记忆说明；已保存内容保留。详见[长期记忆](./memory.md#关闭记忆)。
 
 ## Shell 配置
 

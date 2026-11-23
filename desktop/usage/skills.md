@@ -30,7 +30,7 @@ Skills 入口的示例区包含内置的 `skill-creator`。文件保存在数据
 
 ## 查找与使用
 
-先读取数据目录的 `skills/bundled/`，再读取个人技能 `skills/`，最后读取项目的 `.claude/skills` 和 `.claude/commands`。同名时项目优先。模型可见的技能列表、`Skill` 工具和斜杠名称使用同一套结果，斜杠命令沿用数据目录的旧命名规则（小写、空格转 `-`，标点保留）。完整顺序、名称与重名规则、`enabled`/`disable-model-invocation` 开关和 `dcl skills list` 的验证方法见[数据目录](/cli/data-directory#技能从哪里读取)。
+先读取数据目录的 `skills/bundled/`，再读取个人技能 `skills/`，最后读取项目的 `.claude/skills` 和 `.claude/commands`，以及 `.agents/skills`。同名时项目优先，项目内 `.agents` 又优先于 `.claude`。模型可见的技能列表、`Skill` 工具和斜杠名称使用同一套结果，斜杠命令沿用数据目录的旧命名规则（小写、空格转 `-`，标点保留）。完整顺序、名称与重名规则、`enabled`/`disable-model-invocation` 开关和 `dcl skills list` 的验证方法见[数据目录](/cli/data-directory#技能从哪里读取)。
 
 在列表筛选条目，查看详情和使用入口。项目页也有选择 Skill 的交互。选择后补充本次任务的材料；Skill 不会自动知道未提供的文件内容。
 
