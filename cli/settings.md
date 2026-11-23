@@ -41,6 +41,10 @@
 
 流式请求的读取空闲超时和内容后超时恢复在 `config/orchestration.toml` 的 `[http]` 段配置。默认分别为 `300` 秒和 `false`。完整配置示例见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
 
+## 记忆开关
+
+`dcl config memory` 查看全局记忆开关和检索设置；`dcl config memory off` 关闭，`on` 重新开启。也可以用 `dcl config set memory.enabled false`。开关保存在数据目录的数据库里，Desktop 与 CLI 共用：关闭后新请求不再注入 `MEMORY.md` 索引，记忆目录的写入会被拒绝，系统提示词也会省略记忆说明；已保存内容保留。详见[长期记忆](./memory.md#关闭记忆)。
+
 ## Shell 配置
 
 `shell` 与其他设置共用数据目录的 `settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。

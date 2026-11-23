@@ -140,11 +140,13 @@ HTTP / 原生聊天请求
   → 模型供应商与本地请求快照
 ```
 
-默认 Code 系统提示词包含以下内容：
+默认系统提示词在 Code 与 Desktop 下相同，包含以下内容：
 
 1. 一行身份 `You are deepseek-code, an agentic coding tool for DeepSeek models.`，单独带缓存断点。
-2. `code.md` + `memory.md`，单独带缓存断点。默认的 `Execution and verification` 要求在探索性提问中先给建议和主要取舍，获得同意再实施；非交互运行给完建议就结束。改动界面时，应在条件允许时运行应用检查主要流程和边界情况，说明未能验证的部分。遇到阻碍先排查原因，改动陌生文件前先调查；范围较大的探索可委派，引用记忆中的路径前要在当前工作区核对。
-3. 若本次请求提供自定义提示词，放在 `<additional_instructions>` 中。
+2. `code.md`，单独带缓存断点。默认的 `Execution and verification` 要求在探索性提问中先给建议和主要取舍，获得同意再实施；非交互运行给完建议就结束。改动界面时，应在条件允许时运行应用检查主要流程和边界情况，说明未能验证的部分。遇到阻碍先排查原因，改动陌生文件前先调查；范围较大的探索可委派，引用记忆中的路径前要在当前工作区核对。
+3. `behavior.md`，单独带缓存断点：跨模式通用的回答与工具行为。
+4. `memory.md`，单独带缓存断点；全局记忆关闭时省略这一段。
+5. 若本次请求提供自定义提示词，放在 `<additional_instructions>` 中。
 
 环境细节、项目指令、技能与工具清单随用户消息发送：
 
@@ -154,15 +156,17 @@ HTTP / 原生聊天请求
 
 用户级指令和项目指令分属两个提醒块，空组略去，导语只出现一次。Anthropic 保留各个文本块，Responses 使用独立的 `input_text`，Chat Completions 为兼容服务端而合并成字符串。文件查找顺序见[项目说明](/cli/memory-notes#会加载哪些说明文件)。
 
-Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话中最后一个用户块再放一个滚动断点。
+Anthropic 请求在静态系统提示词各段上各放一个缓存断点（记忆关闭时为三段），对话中最后一个用户块再放一个滚动断点。
 
-`chat`、`work`、`study` 使用 Desktop 提示词，也通过显式调用读写长期记忆。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
+`chat`、`work`、`study` 与 Code 使用同一份静态提示词，记忆通过显式的文件读写维护。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
 
 主要源码位于 CLI 与 Desktop 共用的核心引擎中：
 
-- `prompt/code.md`：Code 行为规则，编译时嵌入。
-- `prompt/code.rs`：部分原生工具的 `Code mode:` 说明补充；保留实际参数 schema，包括记忆工具。
-- `prompt/mod.rs`：提示词 profile、组装入口和缓存分块。
+- `prompt/code.md`：编码与运行环境行为规则，编译时嵌入。
+- `prompt/behavior.md`：跨模式通用的回答与工具行为，编译时嵌入。
+- `prompt/memory.md`：记忆使用说明，编译时嵌入，记忆关闭时省略。
+- `prompt/code.rs`：部分原生工具的 `Code mode:` 说明补充；保留实际参数 schema。
+- `prompt/mod.rs`：提示词组装入口、静态分段、记忆开关和缓存分块。
 - `native_engine/engine_core.rs`：选择 profile，组装项目说明、Git 快照和每轮附加内容。
 - `services/turn_context.rs`、`git_snapshot.rs`、`project_instructions.rs`：随用户消息附带的上下文。
 - `native_engine/tool_loop.rs`：两种协议使用同一工具适配逻辑。
@@ -178,7 +182,7 @@ Anthropic 请求在前两块系统提示词上各放一个缓存断点，对话�
 
 自动化验证包括：
 
-- Code / Desktop 提示词隔离、模型身份、自定义指令保留。
+- Code / Desktop 使用同一静态提示词、记忆开关省略引导段、模型身份、自定义指令保留。
 - 数据库会话模式选择和内部任务默认值。
 - 工具名称和 schema 保持原生实现，Code 与其他模式均提供记忆工具。
 - 四种模式下，MemEx 与 profile 不同配置顺序都保留记忆客户端和已有设置。
