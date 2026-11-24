@@ -4,7 +4,7 @@
 
 ## 启用随附技能
 
-dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator` 默认启用。`codegraph` 仅在 `PATH` 中能找到其可执行文件时默认启用。其他随附技能默认是 `off`。可先查看说明，再按需要启用：
+dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator`、`test-dcl`、`llm-proxy-data-troubleshooting` 和 `project-docs` 默认启用；`codegraph` 仅在 `PATH` 中能找到其可执行文件时默认启用；其他随附技能默认是 `off`。可先查看说明，再按需要启用：
 
 ```bash
 dcl skills list
@@ -13,6 +13,18 @@ dcl skills state verify user
 ```
 
 随附技能包括 `commit`、`pr`、`debug`、`verify` 和 `run` 等。来自 `anthropics/skills` 的文件处理、设计和开发技能（例如 `pdf`、`frontend-design`、`mcp-builder`）在各自目录中附有 `NOTICE.md` 和 `LICENSE.txt`。需要核对来源时，查看 NOTICE 中的仓库、提交和原始路径。升级会保留编辑过的文件；另写个人版本可放在 `skills/<名称>/SKILL.md`。
+
+## 仓库工具技能
+
+以下三个随附技能默认启用，服务于本仓库和配套工具的日常维护：
+
+| 技能 | 用途 |
+| --- | --- |
+| `test-dcl` | 按层验证 dcl 改动：核心单测、CLI 二进制、真实进程与 PTY 面板；附带 `scripts/drive_dcl.py`。 |
+| `llm-proxy-data-troubleshooting` | 从 `proxy.db` 还原一次请求：会话、四类 body、SSE、思考回放与路由问题；附带 `scripts/peek_session.py`。 |
+| `project-docs` | 按书/部/章/篇/节约定维护 VitePress 文档站，生成四级侧边栏并校验锚点与链接。 |
+
+不需要时用 `dcl skills state <名称> off` 关闭；`dcl skills help <名称>` 查看正文。
 
 ## task-template
 

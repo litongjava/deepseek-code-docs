@@ -24,6 +24,8 @@ Skill 复用任务说明、方法和上下文。MCP 提供工具服务，Skill �
 
 Skills 入口的示例区包含内置的 `skill-creator`。文件保存在数据目录的 `skills/bundled/skill-creator/`，展开后显示文件树（`SKILL.md`、`scripts/`、`references/`、`license.txt`、`NOTICE.md`），点击文件可以查看内容。它用于创建和校验新技能，模型会在合适时自动调用；也可以在 dcl 中运行 `/skill-creator`。命令行用法、脚本参数和 frontmatter 字段见 [用 skill-creator 创建技能](/cli/skill-creator)。
 
+`test-dcl`、`llm-proxy-data-troubleshooting` 和 `project-docs` 也随 dcl 安装并默认启用，分别用于验证 dcl、从 `proxy.db` 排查 java-llm-proxy 的数据、维护 VitePress 文档站。它们与 `skill-creator` 一样出现在 Skills 列表里，可在详情中查看 `SKILL.md` 与附带的 `scripts/`；不需要时在列表中设为关闭。命令行状态管理见[技能与插件面板](/cli/skills#仓库工具技能)。
+
 ### 给代理准备任务说明
 
 内置技能 `task-template` 默认关闭，用 `dcl skills state task-template user` 启用后，在聊天中选择它或输入 `/task-template` 并补充任务详情，可在委派前写清问题、具体改动、验证方法和报告要求。见[模板与命令行用法](/cli/skills#task-template)。
