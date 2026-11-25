@@ -22,8 +22,9 @@
 | `summarize_long_command_output` | `true` | 为模型标出长命令输出中省略的字节、整行和相关原文，见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果) |
 | `editorMode` | `normal` | 设为 `vim` 时使用 vim 风格编辑，见[vim 模式](./vim-mode.md) |
 | `hooks` | 无 | 工具调用前后执行的 hooks |
-| `sandbox` | 无 | 在沙箱中运行 Bash 命令，见[沙箱](./sandbox.md) |
+| `sandbox` | 无 | 在沙箱中运行 Bash 和 Python 命令，见[沙箱](./sandbox.md) |
 | `shell` | 工具使用 Bash，手动终端保留原默认值 | 共用 Shell 配置，见下文 |
+| `python` | 无 | 默认 Python 解释器，见[Python 解释器](#python-解释器) |
 | `permissions` | 无 | `allow`、`ask`、`deny` 规则列表，见[权限](./permissions.md#规则) |
 | `remoteControlAtStartup` | `false` | 交互会话启动时自动连接远程控制，见[远程控制](./remote-control.md#启动时自动连接) |
 | `localCoordination.enabled` | `false` | 开启 Linux CLI 的本地协调，见[本地协调](./local-coordination.md) |
@@ -88,6 +89,38 @@ dcl config set shell.terminalDefault wsl
 必须明确指定已经安装的发行版，不会使用系统默认发行版。发行版内需要 Bash、`wslpath` 和 `setsid`；`wsl.bashPath` 是 Linux 绝对路径。Windows 项目路径通过所选发行版的 `wslpath` 转换，包含空格和中文的路径按独立参数传递。工作目录按会话和发行版分别保存。
 
 前台超时、取消、后台任务停止会结束本次调用拥有的 Linux 进程组，不会终止整个发行版。主动脱离进程组的守护进程不在这一保证内。启用的沙箱目前不能隔离 WSL 时会明确拒绝执行，不能通过指定 WSL 绕过沙箱。
+
+## Python 解释器
+
+`Python` 工具在不传 `interpreter` 或 `conda` 时使用默认解释器。可以在数据目录的 `settings.json` 中指定：
+
+```json
+{
+  "python": {
+    "path": "/usr/bin/python3"
+  }
+}
+```
+
+```powershell
+dcl config set python.path /usr/bin/python3
+dcl config set python.path ""        # 清除，恢复自动解析
+dcl config show                      # 查看保存值
+```
+
+`python.path` 可以是绝对路径，也可以是 PATH 上的程序名。解析顺序是：
+
+1. 工具参数 `interpreter`（绝对路径或 PATH 程序名）；
+2. 工具参数 `conda` 指定的 conda 环境；
+3. `settings.json` 的 `python.path`；
+4. 环境变量 `VIRTUAL_ENV`；
+5. 环境变量 `CONDA_PREFIX`；
+6. 工作区的 `.venv`、`venv`、`env`；
+7. PATH：Windows 先试 `py -3`，再试 `python3`、`python`。Windows 会跳过 `WindowsApps` 中的 Microsoft Store 占位程序。
+
+`interpreter` 和 `conda` 互斥，同时传入会直接报错。显式路径不存在、环境名找不到或 PATH 上没有解释器时，工具会列出尝试过的候选并提示用 `Bash` 执行 `py -0p`、`conda env list` 或 `which python`。配置的路径失效不会回退到 PATH，而是明确报错，避免静默使用别的环境。
+
+新会话的环境块会列出默认解释器的绝对路径和版本，和 Node.js 版本并列。工具结果每次仍带 `interpreter` 与 `interpreter_source`；模型预览只在解释器与请求不同，或工作区虚拟环境替换了默认解释器时多显示一行。
 
 ## 环境变量
 
