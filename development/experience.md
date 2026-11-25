@@ -25,7 +25,7 @@
 | 触发 | 每轮自动记录 | 模型显式写入 |
 | 存储 | SQLite `learning.experience.*` | `<workspace>/.agents/experience/*.md` |
 | 可见性 | 不进入提示词 | `name`/`description`/路径进入首条消息 |
-| 开关 | `learning.enabled`，默认 `false` | P1 无开关；目录为空时只有一段说明 |
+| 开关 | `learning.enabled`，默认 `false` | `experience.enabled`，默认开启；/config 可关闭 |
 | 代码类型 | `learning::Experience` | `experience::Entry`（新模块禁止再定义 `Experience` 类型） |
 
 实现时如果需要在同一文件里同时引用两者，必须写全路径：`crate::learning::Experience` 与 `crate::experience::Entry`，不要用 `use` 把两个 `Experience` 带进同一作用域。
@@ -70,7 +70,7 @@
 | 写入方式 | 模型用普通 `Write`/`Edit` | 不新增工具，权限与审计沿用现有路径 |
 | 解析 | 只读每个文件前 8 KiB 的 frontmatter | 控制每轮扫描成本 |
 | 上限 | 120 条 / 8 KiB，超出加截断标记 | 防止索引无限膨胀 |
-| 开关 | P1 无独立开关 | 目录为空时只多一段说明；P2 再加 |
+| 开关 | P1 有 experience.enabled，默认开启；/config 可关闭 | 关闭后新会话不注入；当前会话保持冻结 |
 
 ## 5. 目录与文件格式
 
@@ -85,7 +85,7 @@
 
 - `workspace` 取引擎当前的会话工作区（`engine_core.rs` 的 `workspace`），与 `.agents/skills` 使用同一个根。
 - 多根项目只扫描主工作区，不合并其他 folder（P1 明确不做）。
-- 如果 `workspace` 是数据目录下的内部会话目录（`<data>/workspaces/<id>`），不注入、不扫描：那是 Desktop 无项目会话的草稿目录，写进去不可见。判断方式：`workspace.starts_with(self.workspaces_dir)`。
+- 如果 `workspace` 是数据目录下的内部会话目录（`<data>/workspaces/<id>`），不注入、不扫描：那是 Desktop 无项目会话的草稿目录，写进去不可见。判断方式：`crate::experience::is_internal_workspace(&workspace, &self.workspaces_dir)`，两侧先规范化再比较，避免 `/var` 与 `/private/var` 之类的符号链接误判。
 - 扫描是只读的：目录不存在就当作空列表，绝不创建目录。
 - 如果支持workspace下面的二级目录,仅仅支持二级目录,例如 `workspace/docs/.agents/experience` 和 `workspace/code/.agents/experience`
 
@@ -177,38 +177,42 @@ Windows PowerShell 5.1 默认按系统 ANSI 代码页解码无 BOM 文件；`Out
 
 ### 6.1 扫描算法
 
-下面的仅为示例,实际需要支持二级目录
 ```text
 scan(workspace):
-  root = workspace/.agents/experience
-  if root 不存在或不是目录（含符号链接）: return 空
+  roots = [workspace/.agents/experience]
+  对 workspace 的每个一级子目录（按名称排序；跳过隐藏目录、符号链接和非目录项）:
+    roots.push(<child>/.agents/experience)
+  roots 超过 MAX_SCAN_DIRS 时截断并记 debug
   entries = []
-  for 目录项 in root（只取一层，不递归）:
-    只保留普通文件、.md、valid_filename
-    先看 metadata 长度，超过 64 KiB 的整个文件跳过
-    读取前 8 KiB + 1 字节并解析 frontmatter；失败则记 debug 并跳过
-    校验 name/description 长度、控制字符、凭据启发式
-    entries.push(Entry { name, description, relative_path })
-  按 name 去重（同 name 保留 path 排序第一个）
+  for root in roots（不递归）:
+    if root 不存在或不是目录（含符号链接）: continue
+    for 目录项 in root（只取一层，不递归）:
+      只保留普通文件、.md、valid_filename
+      先看 metadata 长度，超过 64 KiB 的整个文件跳过
+      读取前 8 KiB + 1 字节并解析 frontmatter；失败则记 debug 并跳过
+      校验 name/description 长度、控制字符、凭据启发式
+      entries.push(Entry { name, description, relative_path })
   按 (name, relative_path) 排序
+  按 name 去重（同 name 保留排序后的第一个；根目录因 `.` 排在子目录前而优先）
   return entries
 ```
 
 要求：
 
 - 不跟随符号链接（目录或文件都不跟随），与 `skills/discovery.rs` 的只读发现一致。
+- 只扫描二级：`workspace/.agents/experience` 与每个一级子目录的 `<child>/.agents/experience`；`<child>/<grandchild>/.agents/experience` 不扫描。
 - 不读正文；只读 frontmatter 所需的前 8 KiB。
 - 排序必须是确定的：按 `name` 的 UTF-8 字节序，再按相对路径。不要依赖目录枚举顺序。
-- 相对路径统一用 `/`：`Path::strip_prefix(workspace)` 后把 `\` 替换成 `/`，渲染为 `.agents/experience/<file>.md`。
+- 相对路径统一用 `/`：`Path::strip_prefix(workspace)` 后把 `\` 替换成 `/`，根下条目渲染为 `.agents/experience/<file>.md`，子目录条目保留前缀，例如 `docs/.agents/experience/<file>.md`。
 
 ### 6.2 行格式
 
 ```text
-- {name}: {one_sentence(description, 120)} — {relative_path}
+- {relative_path} | {name}: {one_sentence(description, 120)}
 ```
 
 - 复用 `crate::prompt::one_sentence`（`crates/core/src/prompt/mod.rs:78`）压缩空白并截断。
-- 路径放在最后，`—` 用 em dash，前后各一个空格。
+- 路径在前，`|` 前后各一个空格，名称与描述在后。
 - 不输出正文、不输出完整 frontmatter。
 
 ### 6.3 块格式
@@ -266,7 +270,7 @@ if parts.standalone_frontend {
 
 ### 7.2 首请求冻结
 
-- 新增 `experience_for_session(root, session, workspace: Option<&Path>, entries: &[Entry]) -> Option<String>`，位置与 `loadable_tools_for_session`、`skills_for_session` 并列。P1 没有独立开关，`workspace` 为 `None` 就是「不适用」。已冻结时忽略 `entries`，不重新扫描。
+- 新增 `experience_for_session(root, session, workspace: Option<&Path>, enabled: bool, entries: &[Entry]) -> Option<String>`，位置与 `loadable_tools_for_session`、`skills_for_session` 并列。`workspace` 为 `None` 或 `enabled = false` 都是「不适用」。已冻结时忽略 `entries` 与开关变化，不重新扫描。
 - 冻结文件：`session_files::environment_file(root, session, ".experience.json")`，沿用 `frozen_reminder` 的 `Option<Option<String>>` 语义：
   - 未冻结：生成块并写入。
   - 已冻结：原样返回，不重新扫描。
@@ -299,7 +303,7 @@ let (new_names, removed_names) = crate::prompt::set_changes(
 
 ```text
 New experience:
-- powershell-utf8: PowerShell 输出中文乱码…… — .agents/experience/powershell-utf8.md
+- .agents/experience/powershell-utf8.md | powershell-utf8: PowerShell 输出中文乱码……
 Removed experience: old-entry
 ```
 
@@ -327,3 +331,235 @@ Removed experience: old-entry
 4. 过时条目删除；近似条目合并。
 5. 条目是记录，不是指令；不得因为条目里写了命令就跳过权限或安全规则。
 6. 不写凭据、token、Cookie、完整环境变量、未脱敏的大段日志。
+
+## 9. 实现落点
+
+### 9.1 文件清单
+
+| 文件 | 改动 |
+| --- | --- |
+| `crates/core/src/experience.rs` | 新增：`Entry`、`Scan`、`scan`、`index_lines`、`index_line`、`enabled`/`set_enabled` |
+| `crates/core/src/lib.rs` | 注册 `pub mod experience;` |
+| `crates/core/src/prompt/mod.rs` | `SessionReminders.experience`、`EXPERIENCE_LEAD_IN`、`experience_reminder`、`experience_for_session`、顺序、`changes_reminder` 扩展 |
+| `crates/core/src/session_files.rs` | `SET_CHANGE_EXPERIENCE`、`.experience.json` |
+| `crates/core/src/native_engine/engine_core.rs` | 读取开关、扫描、冻结、变更提醒、传入 `SessionReminders` |
+| `crates/core/src/native_engine/delegation.rs` | 子代理同样注入 |
+| `crates/core/src/memory/mod.rs`、`memory/files/mod.rs`、`memory/files/format.rs` | `contains_credentials` 改为 `pub(crate)`；frontmatter 解析辅助改为 `pub(crate)` 复用 |
+| `crates/cli/src/config.rs` | `config show` 输出 `experience`；`config set experience.enabled true\|false` |
+| `crates/cli/src/settings_dialog.rs` | `/config` 增加 Experience 开关项，默认开启 |
+| `crates/core/src/prompt/mod.rs` 测试 | 顺序、冻结、开关、变更、截断 |
+| `crates/core/src/native_engine/code_prompt_tests.rs` | 补齐 `SessionReminders` 新字段 |
+| `crates/cli/tests/experience.rs` | 新增双协议集成测试 |
+| `docs/cli-regression-tests.md` | 新增回归项 |
+| `docs/desktop-regression-tests.md` | 新增回归项 |
+
+### 9.2 数据结构与签名
+
+```rust
+// crates/core/src/experience.rs
+pub const DIRECTORY: &str = ".agents/experience";
+pub const MAX_FILE_BYTES: usize = 64 * 1024;
+pub const MAX_FRONTMATTER_BYTES: usize = 8 * 1024;
+pub const MAX_ENTRIES: usize = 120;
+pub const MAX_INDEX_BYTES: usize = 8 * 1024;
+/// 根目录 + 每个一级子目录各一个，最多扫描这么多根。
+pub const MAX_SCAN_DIRS: usize = 100;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Entry {
+    pub name: String,
+    pub description: String,
+    /// 相对 workspace，`/` 分隔，例如 `.agents/experience/a.md` 或 `docs/.agents/experience/a.md`
+    pub relative_path: String,
+}
+
+#[derive(Debug, Default)]
+pub struct Scan {
+    pub entries: Vec<Entry>,
+    /// 被跳过的文件，仅用于 debug 日志与 P2 的 doctor；不进入提示词。
+    pub skipped: Vec<(std::path::PathBuf, String)>,
+}
+
+pub fn scan(workspace: &std::path::Path) -> Scan;
+/// `- {relative_path} | {name}: {one_sentence(description, 120)}`
+pub fn index_line(entry: &Entry) -> String;
+/// 已按 120 条 / 8 KiB 裁剪；非空时最后一行可能是截断标记。
+pub fn index_lines(entries: &[Entry]) -> Vec<String>;
+
+/// `experience.enabled`，未设置时为 true。
+pub fn enabled(context: &crate::services::ServiceContext) -> bool;
+pub fn set_enabled(context: &crate::services::ServiceContext, enabled: bool) -> anyhow::Result<()>;
+```
+
+```rust
+// crates/core/src/prompt/mod.rs
+pub const EXPERIENCE_LEAD_IN: &str = "Verified fixes recorded for this project. ..."; // 6.3 的完整说明段
+/// 说明段 + 条目；lines 为空时末尾是 "No entries yet."。
+pub fn experience_reminder(lines: &[String]) -> String;
+pub fn experience_for_session(
+    root: &std::path::Path,
+    session: &str,
+    workspace: Option<&std::path::Path>,
+    enabled: bool,
+    entries: &[crate::experience::Entry],
+) -> Option<String>;
+```
+
+### 9.3 关键实现约束
+
+- 不要定义 `struct Experience`；新类型叫 `Entry`，避免与 `learning::Experience` 混淆。
+- 扫描根：`workspace/.agents/experience`，加上每个一级子目录的 `<child>/.agents/experience`。只到二级，`<child>/<grandchild>/.agents/experience` 不扫描。
+- 一级子目录按名称排序；跳过隐藏目录、符号链接和非目录项。根数量超过 `MAX_SCAN_DIRS` 时截断并记 debug，不报错。
+- 相对路径保留子目录前缀：根下条目是 `.agents/experience/a.md`，子目录条目是 `docs/.agents/experience/a.md`。
+- 同名条目跨根去重：先按 `(name, relative_path)` 排序，再按 `name` 保留第一个；根目录因为 `.` 排在子目录之前，天然优先。
+- 开关读取 `GlobalSetting::MachinePreference("experience.enabled")`，未设置按 `true`。关闭时不注入、不产生变更提醒，但不清空已有条目。
+- `scan` 不创建目录、不写文件、不跟随符号链接。
+- `experience_for_session` 不自己扫描：调用方每轮扫一次，同时用于冻结块与 `set_changes`；已冻结时直接读 JSON，忽略传入的条目和开关变化。
+- `engine_core.rs` 的扫描放入现有 `spawn_blocking`（`loadable_tools_for_session` 附近），不要把文件 I/O 放到 async 热路径。
+- `changes_reminder` 是唯一扩展点；不要再造一个并行的提醒函数。新增/删除都用 `name` 作为身份，路径迁移不单独提醒（下个会话重建索引时修正）。
+- 冻结 JSON 用 `serde_json` 序列化 `Option<String>`，与 `store_frozen_reminder` 完全一致，不要自定义格式。
+- 所有新增文案用英文，与现有 system-reminder 风格一致；条目正文语言不限。
+
+## 10. 测试与验收
+
+### 10.1 Core 单元测试
+
+在 `experience.rs` 内或 `crates/core/src/experience/tests.rs` 覆盖：
+
+| 测试 | 断言 |
+| --- | --- |
+| `parses_name_and_description` | 合法 frontmatter 得到两个字段与相对路径 |
+| `rejects_missing_description` | 条目被跳过，`scan` 不 panic |
+| `rejects_oversized_frontmatter` | 8 KiB 以上跳过 |
+| `rejects_non_utf8_and_symlink` | 跳过，不跟随 |
+| `scans_root_and_one_child_level` | 根与 `docs/.agents/experience` 都进入结果 |
+| `does_not_scan_third_level` | `docs/sub/.agents/experience` 不进入结果 |
+| `dedupes_same_name_across_roots` | 同名保留相对路径排序第一个 |
+| `sorts_deterministically` | 两次扫描顺序一致，按 name 排序 |
+| `renders_path_first_line` | 行以相对路径开头，`|` 后是名称与描述 |
+| `renders_empty_as_no_entries` | 空列表只有说明段与 `No entries yet.` |
+| `truncates_after_limit` | 121 条产生截断标记，总字节不超 8 KiB |
+| `does_not_read_body_into_index` | 索引里没有正文标记文本 |
+| `rejects_credential_like_description` | 命中启发式的条目被跳过 |
+| `enabled_defaults_to_true_and_persists` | 未设置返回 true；`set_enabled(false)` 后返回 false |
+
+### 10.2 Prompt 测试
+
+在 `crates/core/src/prompt/mod.rs` 的测试模块：
+
+- `first_message_reminders_keep_the_stable_order`：Experience 块位于 MEMORY 索引之后、CLI 前端说明之前。
+- `experience_freezes_on_first_request`：第一次返回块并写 `.experience.json`；之后再调用即使条目变化也返回同一字符串。
+- `experience_absent_for_internal_workspace`：传入 `None` 时冻结 `None`，之后不出现。
+- `experience_absent_when_disabled`：`enabled = false` 时冻结 `None`，之后即使打开也不在当前会话出现。
+- `changes_reminder_reports_new_experience_once`：新增一次只出现一行 `New experience:`，重复调用不再出现。
+- `changes_reminder_reports_removed_experience`：删除后出现 `Removed experience:`。
+
+### 10.3 CLI 双协议测试
+
+新增 `crates/cli/tests/experience.rs`，参照 `crates/cli/tests/memory_files.rs` 的本地 mock：
+
+1. 在工作区根与 `docs/.agents/experience/` 各放条目，另放一个 `docs/sub/.agents/experience/` 条目。
+2. 首次请求（OpenAI 与 Anthropic 两个 `api_format` 各跑一次）的首条用户消息包含且仅包含一个 `# Experience` 块：
+   - 根与一级子目录条目都在；
+   - 三级条目不在；
+   - 行以相对路径开头；
+   - 不含正文标记文本。
+3. 第二次请求使用同一会话：冻结块逐字一致，不重复。
+4. 会话中途写入 `gamma.md`：下一次请求出现一次 `New experience: gamma`，冻结块不变；再下一次不再出现。
+5. 删除一个条目：出现一次 `Removed experience: <name>`。
+6. 恢复同一会话：块与首次逐字一致。
+7. 关闭开关后新建会话：首条消息没有 Experience 块，也没有变更提醒；重新打开后恢复。
+8. 无效文件（无 frontmatter、符号链接、超大文件）不进入块，请求成功。
+
+### 10.4 Desktop 手工验证
+
+按 `docs/desktop-regression-tests.md` 的既有格式新增一条：
+
+- 在项目工作区根与 `docs/.agents/experience/` 各放一个条目，新建会话，检查 MEMORY.md 索引之后出现 Experience 块，且不含正文。
+- 在同一会话里让模型新增一个条目，确认下一轮只有一条变更提醒，首条消息不变。
+- 手动压缩上下文，确认 Experience 块重新附在剩余的第一条用户消息上，且只出现一次。
+- 无项目会话（内部草稿工作区）不出现 Experience 块。
+- 在 `/config` 关闭 Experience，新建会话确认不出现；重新打开后恢复。
+
+### 10.5 命令
+
+```powershell
+cd D:\code\project\project-harven\deepseek-code
+cargo fmt -p deepseek-code-core
+cargo test --locked -p deepseek-code-core --lib -- experience prompt
+cargo test --locked -p deepseek-code-cli --test experience
+cargo test --locked -p deepseek-code-cli --test peripheral config_memory_switch
+cargo check --locked -p deepseek-code-desktop --all-targets
+git diff --check
+```
+
+按 `AGENTS.md` 的要求，在 `docs/cli-regression-tests.md` 与 `docs/desktop-regression-tests.md` 里补充实际执行方式与断言。完成后调用一次 `aoci_maintain`，不要手改 `aoci.txt`。
+
+### 10.6 验收清单
+
+- [ ] `/config` 显示 Experience 开关，默认开启；关闭后新会话不出现块，重新打开恢复。
+- [ ] 已有条目时，新会话首请求的 Experience 块位于 MEMORY 索引之后、CLI 前端说明之前。
+- [ ] 根目录与一级子目录都扫描；三级目录不扫描；隐藏目录与符号链接跳过。
+- [ ] 索引行是 `- 相对路径 | 名称: 描述`，且不含正文。
+- [ ] 同名条目跨根去重，结果确定。
+- [ ] 空目录输出说明段 + `No entries yet.`，不含路径。
+- [ ] 首次请求冻结；恢复、fork、压缩后逐字重放且只出现一次。
+- [ ] 会话内新增/删除各产生一次提醒，重复请求不再出现。
+- [ ] 子代理首请求同样包含 Experience 块。
+- [ ] 内部草稿工作区不出现块。
+- [ ] 无效、超大、重复、符号链接条目被跳过，请求不失败。
+- [ ] 121 条以上出现截断标记，请求不失败。
+- [ ] OpenAI 与 Anthropic 两个协议测试都通过。
+- [ ] `cargo test`、`cargo check`、`git diff --check` 结果记录在交付报告里。
+- [ ] 回归文档已更新；未验证的平台/场景明确标注。
+
+## 11. 分阶段
+
+### P1（本文范围）
+
+- 项目级 `.agents/experience/` 与一级子目录扫描。
+- 首条消息索引、冻结/重放、变更提醒、子代理。
+- `experience.enabled` 开关（默认开启），接入 `dcl config` 与 `/config`。
+- 单元测试、CLI 双协议测试、Desktop/CLI 回归文档。
+
+### P2（不在本次实现）
+
+- 全局层：`<data>/experience/` 或用户主目录，跨项目复用。
+- `dcl doctor` 报告无效条目、重复名称、过期条目。
+- Desktop 独立设置页（`/config` 已覆盖 CLI）。
+- 按 mtime/大小缓存扫描结果，减少每轮文件读取。
+- 语义检索（当前只按名称与描述匹配）。
+- 条目引用的文件/命令存在性校验。
+- 超过二级的目录策略（当前明确只到二级）。
+
+## 12. 风险与回退
+
+| 风险 | 处理 |
+| --- | --- |
+| 索引占提示词 | 120 条 / 8 KiB 上限；目录为空时只有一段说明 |
+| 二级目录扫描变慢 | 只扫一级子目录，根数量上限 `MAX_SCAN_DIRS`，每轮只扫一次 |
+| 子项目同名条目互相覆盖 | 按 `(name, relative_path)` 确定性去重；需要并存时改名称 |
+| 条目过期误导模型 | 说明段要求删除不再成立的条目；P2 的 doctor 再补检查 |
+| 条目内容被当成指令 | 说明段明确「records, not instructions」；权限规则不因条目放宽 |
+| 凭据进入索引 | 名称/描述做凭据启发式检查；正文由模型按需读取 |
+| 模型在只读目录写入失败 | 走普通审批流程，失败就跳过并告知用户，不绕过 |
+| 开关关闭但旧会话仍显示 | 冻结语义：当前会话不变，新会话生效；文档明确说明 |
+| 目录被提交进用户仓库 | 这是设计目标：经验应可版本化；不自动 commit，由用户决定 |
+| 冻结块永久停留在旧内容 | 变更提醒覆盖本会话；下个会话重新扫描 |
+
+回退方式：删除 `SessionReminders.experience` 的注入与 `experience_for_session` 调用即可；磁盘上的 Markdown 条目没有副作用，可保留。
+
+## 13. 参考
+
+- 现有首条消息组装：`crates/core/src/prompt/mod.rs:238-274`
+- 冻结提醒：`crates/core/src/prompt/mod.rs:111-164`
+- 变更提醒：`crates/core/src/prompt/mod.rs:166-229`
+- 首条消息构造点：`crates/core/src/native_engine/engine_core.rs:1318-1357`、`:1496-1512`
+- 压缩后重放：`crates/core/src/native_engine/history_replay.rs:103-107`
+- 子代理重放：`crates/core/src/native_engine/delegation.rs:995-1011`
+- 会话文件清单：`crates/core/src/session_files.rs:13-77`
+- 项目技能发现（`.agents` 优先级）：`crates/core/src/skills/discovery.rs`
+- 现有 `learning` 模块：`crates/core/src/learning/mod.rs`
+- 记忆文件格式与文件名校验：`crates/core/src/memory/files/format.rs`、`mod.rs:52-93`
+- CLI 配置开关示例（`memory.enabled`）：`crates/cli/src/config.rs:457-494`
+- `/config` 入口：`crates/cli/src/interactive_config.rs:1258-1280`
