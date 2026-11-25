@@ -1,12 +1,12 @@
 # 沙箱
 
-开启沙箱后，模型通过 `Bash` 运行的命令和 Claude Code 一样在操作系统级的隔离环境中执行：除了项目目录和临时目录，文件系统只读；网络可以完全关闭，或只允许访问指定域名。沙箱默认关闭。
+开启沙箱后，模型通过 `Bash` 或 `Python` 执行的命令和 Claude Code 一样在操作系统级的隔离环境中执行：除了项目目录和临时目录，文件系统只读；网络可以完全关闭，或只允许访问指定域名。沙箱默认关闭。
 
 | 平台 | 实现 |
 |---|---|
 | Linux | bubblewrap（`bwrap`），需要先安装，例如 `apt install bubblewrap` |
 | macOS | 系统自带的 `sandbox-exec`（尚未在 macOS 上实测） |
-| Windows | 不支持；开启后命令会报错，需要把 `sandbox.enabled` 设回 `false` |
+| Windows | 不支持；开启后 Bash 和 Python 调用都会报错，需要把 `sandbox.enabled` 设回 `false` |
 
 ## 开启
 
@@ -68,9 +68,9 @@
 
 - `*.example.com` 匹配所有子域名，但不匹配 `example.com` 本身。
 - 权限规则中的 `WebFetch(domain:...)` 放行规则也会加入允许列表，和 Claude Code 一样。
-- 命令本身没有网络，只能通过 dcl 在本机启动的过滤代理（HTTP/CONNECT）访问外部；dcl 会为命令设置 `HTTP_PROXY`、`HTTPS_PROXY`。不经过代理的连接会失败。
+- 命令本身没有网络，只能通过 dcl 在本机启动的过滤代理（HTTP/CONNECT）访问外部；dcl 会为命令设置 `HTTP_PROXY`、`HTTPS_PROXY`。不经过代理的连接会失败。`Python` 进程使用同一套代理环境变量。
 
-命令访问允许列表之外的主机时，dcl 在输入框的位置询问：
+Bash 或 Python 访问允许列表之外的主机时，dcl 在输入框的位置询问：
 
 ```text
 Network request outside of sandbox
@@ -83,8 +83,17 @@ Network request outside of sandbox
 ```
 
 - 选第 2 项会把 `WebFetch(domain:pypi.org)` 写入项目的 `.claude/settings.local.json`，之后自动加入允许列表。
-- 没有人可以回答时（例如 `-p` 模式），这个主机被拒绝。被拒绝的请求返回 403，`Bash` 的结果会列出被拦截的主机，模型可以据此请你放行，而不是反复猜测。
-- 配置了允许列表时，同一轮里的多个 `Bash` 调用依次执行，以便逐个询问。
+- 没有人可以回答时（例如 `-p` 模式），这个主机被拒绝。被拒绝的请求返回 403，`Bash` 或 `Python` 的结果会列出被拦截的主机，模型可以据此请你放行，而不是反复猜测。
+- 配置了允许列表时，同一轮里的多个 `Bash`/`Python` 调用依次执行，以便逐个询问。
+
+## Python 工具
+
+`Python` 和 `Bash` 使用同一个沙箱策略，但绕过了 shell：dcl 把解释器本身交给 `bwrap` 或 `sandbox-exec`，再追加 `-X utf8 -u <script>`。因此：
+
+- 开启沙箱后，Python 不会成为未隔离的旁路；网络允许列表、主机审批和被拦截主机列表与 Bash 相同。
+- Windows 上 dcl 明确返回“不支持沙箱”，Python 调用直接失败，不会偷偷在沙箱外执行。
+- 临时脚本写在系统临时目录；`save_name` 的草稿写在 `<工作区>/temp/`。写入发生在启动子进程之前，由 dcl 完成；沙箱内只需要能读脚本。`save_name` 仍被限制在工作区 `temp/` 下并拒绝符号链接。
+- Python 不提供 `dangerouslyDisableSandbox`。确实需要绕过沙箱时，改用 `Bash` 并显式设置该参数，或调整 `sandbox.enabled`。
 
 ## 在沙箱之外运行
 
@@ -98,7 +107,7 @@ Network request outside of sandbox
 
 此后这类调用会直接失败。
 
-以 `--full-access` 启动时，所有命令都在沙箱之外运行，见[完全访问](./permissions.md#完全访问)。
+以 `--full-access` 启动时，所有 Bash 和 Python 调用都在沙箱之外运行，见[完全访问](./permissions.md#完全访问)。
 
 ## 常见错误
 

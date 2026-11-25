@@ -24,6 +24,7 @@ MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服
 
 - `ToolLoad`：按目录中的完整名称加载工具定义，见[工具目录与加载](#工具目录与加载)。
 
+- `Python`：直接运行一段 Python 源码，不经过 shell，见下文。
 - [`ContextSearch`](#contextsearch)：在当前会话已保存的历史中检索原文。
 - `memory_search`、`memory_ingest`：检索和写入长期记忆，和 Desktop 共用。
 - `ListDir`、`MultiEdit`：列目录、一次多处编辑。
@@ -69,6 +70,15 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 需要长时间监视时，再传入整数 `max_runtime_ms`，它必须大于 `timeout_ms` 且最多为 86400000（24 小时）。例如 `"timeout_ms":600000,"max_runtime_ms":7200000` 表示每 10 分钟续期，总共最多 2 小时。只要原脚本仍在运行，就延长本次监视，不重启脚本；总时限从启动时算起。续期通知最多每分钟一条。脚本退出、任务停止、达到总时限或一分钟内输出事件超过 30 个时，监视结束并报告原因。
 
 Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Bash 命令走同一套[权限规则与审批](./permissions.md)，用 `TaskStop` 传入返回的 `task_id` 停止。它默认按需加载：模型调用 `ToolLoad` 并传入 `{"names":["Monitor"]}` 后，从下一次请求开始可以用它。
+
+**Python**：把模型给的源码写成文件，用选定的解释器执行。它不经过 shell，管道、重定向、`$VAR`、`&&` 和通配符都不会被解释；`python -m ...`、带参数的脚本或不可信代码继续用 `Bash`。脚本以 `__main__` 运行，`__file__` 指向真实文件；stdin 为空，`input()` 会立即遇到 EOF 并抛出 `EOFError`。前台复用 Bash 的捕获、超时和结果截断，后台复用受管任务，用 `TaskGet` 读取、`TaskStop` 停止。
+
+- **解释器**：`interpreter` 与 `conda` 至多传一个。都不传时依次尝试 `settings.json` 的 `python.path`、`VIRTUAL_ENV`、`CONDA_PREFIX`、工作区的 `.venv`/`venv`/`env`、PATH；Windows 先试 `py -3`，并跳过 Microsoft Store 的 `WindowsApps` 占位程序。显式路径必须存在，裸名必须在 PATH 上。模型可用 `Bash` 执行 `py -0p`、`conda env list` 或 `which python` 查询。
+- **保存脚本**：传 `save_name` 时写到 `<工作区>/temp/<save_name>`，自动创建目录、覆盖已有 `.py` 文件，并在结果的 `script_path` 返回绝对路径。`save_name` 必须是相对路径、只含 `.py`、不能有 `..`，最多 8 层目录。目标已存在且是符号链接时拒绝写入。不传时写系统临时文件，前台调用结束后删除，结果的 `script_saved` 为 `false`。
+- **环境变量**：`env` 在解释器启动前合并到继承环境。`PYTHONPATH` 不是替换而是合并：`cwd` → `env` 中的条目 → 继承的 `PYTHONPATH`，按顺序去重，因此项目模块总是可导入。`env` 最多 32 个键、总计 16 KiB，不能设置宿主保留的 `DEEPSEEK_CODE_*` 后台变量。
+- **超时**：`timeout` 以毫秒计，1–600000，前台默认 120000。后台模式下不传则没有任务超时。结果包含每次的 `interpreter` 和 `interpreter_source`；模型可见的预览只在与请求不同，或工作区虚拟环境替换了默认解释器时显示 `interpreter:`，存在 `script_path` 时显示 `script:`，输出使用小写 `stdout:`/`stderr:`。
+- **权限与沙箱**：`Python(...)` 的 subject 是 `code`，不是 shell 命令；`Python(*)` 等价于放行任意代码，不能当作代码审查。计划模式默认拒绝 Python。开启[沙箱](./sandbox.md)时解释器直接被沙箱包装，Windows 上和 Bash 一样明确报错，不会静默放行。Python 不提供 `dangerouslyDisableSandbox`。
+- **默认加载**：和 `Monitor` 一样默认只开“按需加载”，模型调用 `ToolLoad` 并传入 `{"names":["Python"]}` 后，从下一次请求开始可以用它。新会话的环境块会列出默认解释器路径和版本。系统提示还会要求：纯 Python 片段、数值实验或查看 Python 对象时优先加载并使用 Python 工具，不要用 Bash heredoc 或 `python -c`；需要 shell 语法、脚本参数或 `python -m` 时才用 Bash。
 
 **Agent**：默认在后台运行（`run_in_background` 默认为 `true`），子代理结束时通知模型；设为 `false` 时本轮等待结果。可以用 `subagent_type` 选择代理类型，`isolation: "worktree"` 让子代理在独立的 Git worktree 中工作。
 
@@ -156,7 +166,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 - 只开按需：默认不加载；模型用 `ToolLoad` 加载后，从下一次请求开始可以调用。
 - 两个都关：目录中不列出，加载和直接调用都会被拒绝。
 
-默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `TaskGet`、`ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
+默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `TaskGet`、`Python`、`ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
 
 “启用”不是总开关：关掉它只表示不再默认加载，模型仍然可以按需发现这个工具。核心名单只决定默认值，任何一个工具的开关都可以修改。
 
