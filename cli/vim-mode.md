@@ -1,6 +1,6 @@
 # vim 模式
 
-`/vim` 打开或关闭 vim 风格的输入框编辑；也可以和 Claude Code 一样，在 `/config` 的 Config 页把 Editor mode 改为 `vim`（`Enter` 或空格切换）。设置保存在[数据目录](./data-directory.md)的 `settings.json` 中（`"editorMode": "vim"`），下次启动依然生效。
+`/vim` 打开或关闭 vim 风格的输入框编辑；也可以和 Claude Code 一样，在 `/config` 的 Config 页把 Editor mode 改为 `vim`（`Enter` 或空格切换）。设置保存在[数据目录](./data-directory.md)的 `config/settings.json` 中（`"editorMode": "vim"`），下次启动依然生效。
 
 ## 模式
 

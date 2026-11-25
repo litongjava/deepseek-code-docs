@@ -26,7 +26,7 @@
 
 ![编辑一条记忆](/desktop-memory-edit.png)
 
-Desktop 和 [dcl](/cli/memory) 共用数据目录，任一端的修改另一端都能看到。旧归档保存在 `memory.sqlite3`，项目记忆保存在数据目录的 `memory/` 下。
+Desktop 和 [dcl](/cli/memory) 共用数据目录，任一端的修改另一端都能看到。旧归档保存在 `data/memory.sqlite3`，项目记忆保存在数据目录的 `data/memory/` 下。
 
 ## 数据处理
 

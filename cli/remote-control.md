@@ -28,7 +28,7 @@ Remote Control connected.
 
 ### 启动时自动连接
 
-和 Claude Code 一样，在[数据目录](./data-directory.md)的 `settings.json` 中设置：
+和 Claude Code 一样，在[数据目录](./data-directory.md)的 `config/settings.json` 中设置：
 
 ```json
 { "remoteControlAtStartup": true }

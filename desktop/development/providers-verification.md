@@ -40,7 +40,7 @@
 - Settings → Models 保留原设置页导航和整体布局，仅显示供应商配置；新增页面包含“第三方模型供应商”和“自定义模型 API”两类。
 - 第三方目录显示 40 个供应商。目录共 1354 个模型，来源为本机 DeepSeek Harness 中的 `@earendil-works/pi-ai@0.85.1`。
 - 浏览器创建临时自定义供应商，填写 ID、Name、URL、Key、OpenAI 协议。Key 在 URL 下方且遮挡显示。
-- 模型设置输入 `1M`、`32K` 并选择 Text / Image，保存后本地 `config.json` 中分别为 `1000000`、`32000`、`supports_vision=true`。后端重启后重新打开页面，仍显示 `1M`、`32K` 和 Image 选中状态。
+- 模型设置输入 `1M`、`32K` 并选择 Text / Image，保存后本地 `config/config.json` 中分别为 `1000000`、`32000`、`supports_vision=true`。后端重启后重新打开页面，仍显示 `1M`、`32K` 和 Image 选中状态。
 - 输入 `0` 时表单报告无效并显示“Token 数量超出有效范围”。Rust 拒绝输出上限超过上下文窗口的配置。
 - 旧浏览器供应商 “Local Claude 8317” 及其 47 个模型迁移成功；测试结束保留该配置。
 - 新建会话的模型菜单按供应商分组；Effort 菜单显示 Off / Low / High / Max。
@@ -86,6 +86,6 @@ npm.cmd run build
 
 ## 供应商重命名回归
 
-在可见 Chrome 中打开已保存的临时供应商，将顶部 Name 从 `Rename Test Before` 修改为 `Rename Test After`，点击顶部“保存”。列表和本地 `config.json` 均读回新名称。TypeScript 检查与生产构建通过，测试供应商随后清理。
+在可见 Chrome 中打开已保存的临时供应商，将顶部 Name 从 `Rename Test Before` 修改为 `Rename Test After`，点击顶部“保存”。列表和本地 `config/config.json` 均读回新名称。TypeScript 检查与生产构建通过，测试供应商随后清理。
 
 ![供应商名称编辑与保存](../../assets/provider-name-edit.png)

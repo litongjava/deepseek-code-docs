@@ -11,7 +11,7 @@
 export OPENCODE_API_KEY=oc_sk_...
 ```
 
-Windows 使用 `setx OPENCODE_API_KEY "oc_sk_..."`，设置后需要打开新的终端。也可以不设环境变量，在引导流程里直接粘贴 Key，Key 会保存在数据目录的 `config.json`，只有当前用户可读。
+Windows 使用 `setx OPENCODE_API_KEY "oc_sk_..."`，设置后需要打开新的终端。也可以不设环境变量，在引导流程里直接粘贴 Key，Key 会保存在数据目录的 `config/config.json`，只有当前用户可读。
 
 ## 首次启动选择 OpenCode Go
 

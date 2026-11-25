@@ -296,7 +296,7 @@ dcl
 /remote-control mac-dev --server https://rc-api.example.com --save
 ```
 
-`--save` 保存服务地址到 Mac 数据目录的 `remote-control.json`，不会保存 token。重新启动 dcl 时仍需提供 token；模型的 API key 与 Remote Control token 分别配置。
+`--save` 保存服务地址到 Mac 数据目录的 `config/remote-control.json`，不会保存 token。重新启动 dcl 时仍需提供 token；模型的 API key 与 Remote Control token 分别配置。
 
 连接建立后会显示类似：
 
@@ -343,7 +343,7 @@ Mac 上的 dcl 前端必须持续运行；退出 dcl 会断开、归档远程会
 /remote-control disconnect
 ```
 
-如果希望以后自动连接，在 Mac 数据目录 `settings.json` 中合并：
+如果希望以后自动连接，在 Mac 数据目录 `config/settings.json` 中合并：
 
 ```json
 {"remoteControlAtStartup":true}

@@ -124,7 +124,7 @@ GitHub 连接由 Bridge 提供，无需另外启动服务。两种连接方式�
 - **个人访问令牌**：在“自定义 → 连接器”中填写带 `repo` 权限的令牌即可，适合浏览器和手机。
 - **OAuth 授权**：启动 `dcd` 或 `dcd-server` 前设置 `GITHUB_CLIENT_ID` 和 `GITHUB_CLIENT_SECRET`，连接按钮会打开 GitHub 授权页。OAuth 应用的回调地址填写 Bridge 的 `/api/github/callback`，例如 `http://127.0.0.1:30085/api/github/callback`。
 
-令牌保存在数据目录的 `github-token.json`，只有当前用户可读。
+令牌保存在数据目录的 `config/github-token.json`，只有当前用户可读。
 
 ## 启动文档站
 

@@ -2,9 +2,9 @@
 
 本页汇总可以调整 dcl 行为的设置项和环境变量。每一项的详细说明见对应的功能文档。
 
-## settings.json
+## config/settings.json
 
-位于[数据目录](./data-directory.md)下，JSON 格式。文件不存在时，所有项使用默认值。
+位于[数据目录](./data-directory.md)的 `config/settings.json`，JSON 格式。文件不存在时，所有项使用默认值。
 
 ```json
 {
@@ -34,7 +34,7 @@
 
 ## 请求记录
 
-在数据目录的 `settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
+在 `config/settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
 
 优先级是 `--record-requests` 强制开启 → `DEEPSEEK_CODE_RECORD_REQUESTS` 的有效值 → `requestRecording.enabled` → 完全访问模式自动开启。环境变量支持 `1`、`true`、`0`、`false`。请求体不脱敏，完整示例、保存位置与隐私说明见[请求记录](./request-recording.md)。Desktop 使用同一份数据目录配置。
 
@@ -48,7 +48,7 @@
 
 ## Shell 配置
 
-`shell` 与其他设置共用数据目录的 `settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
+`shell` 与其他设置共用 `config/settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
 
 ```json
 {
@@ -92,7 +92,7 @@ dcl config set shell.terminalDefault wsl
 
 ## Python 解释器
 
-`Python` 工具在不传 `interpreter` 或 `conda` 时使用默认解释器。可以在数据目录的 `settings.json` 中指定：
+`Python` 工具在不传 `interpreter` 或 `conda` 时使用默认解释器。可以在 `config/settings.json` 中指定：
 
 ```json
 {
@@ -112,7 +112,7 @@ dcl config show                      # 查看保存值
 
 1. 工具参数 `interpreter`（绝对路径或 PATH 程序名）；
 2. 工具参数 `conda` 指定的 conda 环境；
-3. `settings.json` 的 `python.path`；
+3. `config/settings.json` 的 `python.path`；
 4. 环境变量 `VIRTUAL_ENV`；
 5. 环境变量 `CONDA_PREFIX`；
 6. 工作区的 `.venv`、`venv`、`env`；

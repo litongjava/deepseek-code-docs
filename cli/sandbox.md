@@ -22,7 +22,7 @@
 
 设置按以下顺序合并，后面的覆盖前面的：
 
-1. [数据目录](./data-directory.md)的 `settings.json`（用户设置）；
+1. [数据目录](./data-directory.md)的 `config/settings.json`（用户设置）；
 2. 项目的 `.claude/settings.json`；
 3. 项目的 `.claude/settings.local.json`。
 

@@ -10,14 +10,14 @@ dcl 内置一个 LSP 客户端，模型可以用 `LSP` 工具做跳转定义、�
 ❯ /lsp
 Language servers (used by the LSP tool for definitions, references and diagnostics)
   ✓ Rust                   rust-analyzer                /usr/local/cargo/bin/rust-analyzer
-  ✓ Python                 pylsp                        ~/.deepseek-code/lsp/python/bin/pylsp
-  ✓ TypeScript/JavaScript  typescript-language-server   ~/.deepseek-code/lsp/node/node_modules/.bin/...
+  ✓ Python                 pylsp                        ~/.deepseek-code/resources/lsp/python/bin/pylsp
+  ✓ TypeScript/JavaScript  typescript-language-server   ~/.deepseek-code/resources/lsp/node/node_modules/.bin/...
   ✗ C/C++                  clangd                       not installed · sudo apt install clangd
-  ✓ Java                   jdtls                        ~/.deepseek-code/lsp/jre/bin/java
+  ✓ Java                   jdtls                        ~/.deepseek-code/resources/lsp/jre/bin/java
   ✗ C#                     csharp-ls                    not installed · /lsp install csharp
 From plugins:
   ✓ rust-analyzer-lsp@claude-plugins-official:rust-analyzer  rust-analyzer  .rs
-Managed installs: ~/.deepseek-code/lsp
+Managed installs: ~/.deepseek-code/resources/lsp
 ```
 
 命令行里也可以用 `dcl lsp`。
@@ -47,17 +47,17 @@ Vue 使用 2.x 版本的语言服务器：3.x 只能通过 TypeScript 服务器�
 ❯ /lsp install typescript
 Install typescript-language-server for TypeScript/JavaScript?
   This installs typescript and typescript-language-server from npm.
-  Location: ~/.deepseek-code/lsp
+  Location: ~/.deepseek-code/resources/lsp
 Continue? [y/N] y
 Installing typescript-language-server for TypeScript/JavaScript... (Ctrl+C to cancel)
   …
 Installed TypeScript/JavaScript (4.2s).
-  Command: ~/.deepseek-code/lsp/node/node_modules/.bin/typescript-language-server
+  Command: ~/.deepseek-code/resources/lsp/node/node_modules/.bin/typescript-language-server
   Use /lsp list to check availability.
 ```
 
 - **先说明再确认**：安装前会说明要下载什么、装到哪里，确认后才执行。命令行中用 `dcl lsp install java --yes` 跳过确认。
-- **装在哪里**：所有内容都装在[数据目录](./data-directory.md)的 `lsp/` 下，**不需要管理员权限**，也不会改动系统里的 Node、Python 或 Java。
+- **装在哪里**：所有内容都装在[数据目录](./data-directory.md)的 `resources/lsp/` 下，**不需要管理员权限**，也不会改动系统里的 Node、Python 或 Java。
 - **安装失败**：会显示具体原因和下一步，例如 `dotnet was not found on PATH; install the .NET SDK first`。下载的文件不是压缩包（比如服务器维护时返回了网页）时会拒绝安装，已有的安装保持可用。
 - **重新安装**：再执行一次 `/lsp install` 即可覆盖。
 
@@ -69,7 +69,7 @@ Installed TypeScript/JavaScript (4.2s).
 
 1. dcl 插件声明的语言服务器；
 2. 在 Claude Code 里安装的 LSP 插件（见下一节）；
-3. 内置列表：先找 `PATH`，再找 `lsp/` 下的托管安装。
+3. 内置列表：先找 `PATH`，再找 `resources/lsp/` 下的托管安装。
 
 都找不到时，`LSP` 工具不会只报"无法启动"，而是说明缺哪个服务端、怎么安装，模型会把这些信息转告你：
 

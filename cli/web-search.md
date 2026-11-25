@@ -13,7 +13,7 @@ dcl config set search.base_url https://api.deepseek.com/anthropic/v1
 dcl config set search.model deepseek-flash
 ```
 
-- 配置保存在[数据目录](./data-directory.md)的 `config.json` 中（`deepseek_search`），`dcl config show` 显示时密钥会被隐藏。
+- 配置保存在[数据目录](./data-directory.md)的 `config/config.json` 中（`deepseek_search`），`dcl config show` 显示时密钥会被隐藏。
 - 对话用的 API Key 不会被拿来代替搜索密钥。没有配置时，`WebSearch` 返回配置说明，模型会转告你，而不会假装搜索成功。
 - 每次搜索时读取配置，修改后不需要重启。搜索请求只包含查询词，不包含对话内容。
 - 其他提供商（OpenAI、Anthropic）使用它们接口自带的搜索，不需要这一步；兼容代理也需要完整支持相应的原生搜索请求与结果。

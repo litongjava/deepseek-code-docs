@@ -1,6 +1,6 @@
 # 长期记忆
 
-长期记忆跨对话保存重要的事实。当前运行时按项目或会话隔离保存 Markdown 记忆文件，各级 `MEMORY.md` 索引在会话开始时加载；模型用普通的 Read、Write、Edit 维护条目，由引擎校验路径和版本。Desktop 的“记忆”页可以浏览、搜索和编辑，旧版本留在 `memory.sqlite3` 中的条目作为归档保留，可在面板的“Legacy archive / remote settings”中查看和管理。
+长期记忆跨对话保存重要的事实。当前运行时按项目或会话隔离保存 Markdown 记忆文件，各级 `MEMORY.md` 索引在会话开始时加载；模型用普通的 Read、Write、Edit 维护条目，由引擎校验路径和版本。Desktop 的“记忆”页可以浏览、搜索和编辑，旧版本留在 `data/memory.sqlite3` 中的条目作为归档保留，可在面板的“Legacy archive / remote settings”中查看和管理。
 
 新消息不会自动检索记忆正文，回复结束也不会把本轮对话写成记忆。续接旧会话时，过去自动附加的记忆片段会被跳过。要找回当前会话压缩前的原文，见 [ContextSearch](./tools.md#contextsearch)。
 

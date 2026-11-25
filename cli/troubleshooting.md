@@ -8,6 +8,16 @@
 
 **处理**：当前版本最多等待 3 秒首个字节，详见[非交互模式](./non-interactive.md#标准输入)。没有输入时用 `< /dev/null` 运行。
 
+## 启动提示数据目录布局警告
+
+**现象**：启动时打印 `Data layout warning: unexpected entries remain in ...`，或 `/doctor` 显示 `data layout leftovers` / `data layout unknown entries`。
+
+**原因**：数据目录从旧布局迁移到 v2 后，根目录仍有旧的路径或程序不认识的条目。dcl 不会删除未知文件，只把它们列在启动日志和诊断快照中。
+
+**处理**：先退出所有共用该目录的 dcl、Desktop、服务器和后台 Worker，再重新启动，让中断的迁移继续。仍存在的旧路径会显示在 `data layout leftovers`；确认内容已在新位置后，可以手动移走旧副本。`data layout unknown entries` 中的文件如果是自己放的，可以保留；不再需要时手动移走。不要删除 `layout.json` 或整个数据目录来消除提示。
+
+提示 `Layout conflict` 时，旧路径和新路径同时存在；先确认哪一份要保留，手动合并或移走另一份。提示布局版本高于当前程序时，升级 dcl/Desktop，不要用旧版本继续写这个目录。只读的 `dcl --info` 和 `dcl sessions export` 不会初始化不存在或为空的目录；其他命令首次启动时可能写入 `layout.json` 和 `README.md`。
+
 ## 启动时报 Session worker startup failed
 
 **现象**：macOS 上启动 dcl 后只显示 `Error: Session worker startup failed:`，冒号后没有内容；会话 Worker 目录里的 `stderr.log` 记录 `Session host failed: path must be shorter than SUN_LEN`。
@@ -229,7 +239,7 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 普通失败诊断输出会先经过脱敏：密钥、`Authorization`、`Proxy-Authorization`、`Cookie` 与 `Set-Cookie`、代理认证信息和 URL 查询参数都不会写入诊断摘要、日志、诊断请求快照或会话中的失败诊断记录。
 
-开启[请求记录](./request-recording.md)后，`request-records` 中另行保存实际请求体和原始响应正文，**这些正文不脱敏**。排查请求、压缩或工具调用问题时，可用 `dcl requests <会话ID>` 找到文件；以下诊断脱敏规则不适用于这些原始正文，分享前需要逐份检查。
+开启[请求记录](./request-recording.md)后，`diagnostics/request-records` 中另行保存实际请求体和原始响应正文，**这些正文不脱敏**。排查请求、压缩或工具调用问题时，可用 `dcl requests <会话ID>` 找到文件；以下诊断脱敏规则不适用于这些原始正文，分享前需要逐份检查。
 
 几个容易漏掉的情况也一并处理：
 
@@ -252,7 +262,7 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 默认在第 1 至第 7 次失败后分别等待 2、4、8、16、32、64、128 秒；第 8 次失败后结束。等待从失败返回后开始，请求自身耗时另计。首次显示“正在重连”，后续显示“第2次重连”至“第7次重连”，并注明等待秒数和可以取消。HTTP 重试配置仍可覆盖默认次数与基础间隔。
 
-经共享发送层执行的模型请求，其每次 HTTP 尝试详情独立保存在数据目录的 `logs/request-attempts/<session-id>.jsonl`，不依赖 tracing 日志是否启用。记录时间、与请求快照及请求头对应的本地请求 ID、尝试次数、耗时、已知 HTTP 状态/阶段/类别、等待时间及后续动作；本轮结束另记完成、失败或取消状态。各次失败分别保存，因此能区分连续 500 和不同类别的失败。响应头收到不等于响应流已完成，`response_received` 只表示前者。
+经共享发送层执行的模型请求，其每次 HTTP 尝试详情独立保存在数据目录的 `diagnostics/logs/request-attempts/<session-id>.jsonl`，不依赖 tracing 日志是否启用。记录时间、与请求快照及请求头对应的本地请求 ID、尝试次数、耗时、已知 HTTP 状态/阶段/类别、等待时间及后续动作；本轮结束另记完成、失败或取消状态。各次失败分别保存，因此能区分连续 500 和不同类别的失败。响应头收到不等于响应流已完成，`response_received` 只表示前者。
 
 日志不保存请求正文或任意服务端自由文本；HTTP 错误只保留状态、类别、白名单内的错误码，以及可提取且通过 UUID 校验的服务端 request ID。传输错误使用脱敏原因链。无法获得的信息保持未知。若服务端未返回有效 UUID 格式的 request ID，不猜测该字段。
 
@@ -277,11 +287,11 @@ Markdown 等文本文件支持 Read。模型传入空的 `pages`、空白字符�
 
 若出现 `--depth 1` 变成 `--depth1`、代码语言标签与命令粘连，先比较代理记录中的上游原文、下游原文和会话保存内容。纯空白 delta 也是正文：独立的空格、换行、制表符都需要保留。会话内容与下游一致时，应检查协议转换的文本保真；更新转换端后，新回答会保留这些边界，历史中已经缺失的空白不会自动补回。
 
-交互终端的底层诊断日志写入数据目录的 `logs/cli-<进程号>.log`，避免异步日志占用正在绘制的行。用户需要处理的请求错误仍显示在界面中；显式指定调试文件时优先使用该文件。
+交互终端的底层诊断日志写入数据目录的 `diagnostics/logs/cli-<进程号>.log`，避免异步日志占用正在绘制的行。用户需要处理的请求错误仍显示在界面中；显式指定调试文件时优先使用该文件。
 
 ## 查询 CPU 和内存采样
 
-Windows 下，CLI 默认每 10 秒记录一次本进程及仍在运行的后代进程，采样使用系统接口，不启动 PowerShell。记录保存在数据目录的 `logs/resources/process-<PID>-<启动时间>.jsonl`，每行包含 UTC 时间、会话 ID、进程与父进程 ID、CPU 使用率、常驻内存、私有内存、线程数及系统可用内存。首次采样没有 CPU 差值，`cpu_percent` 为 `null`；后续以单个逻辑核的满载为 100%，多核进程可以超过 100%。尚未绑定会话的宿主记录中，`session` 可以为空。
+Windows 下，CLI 默认每 10 秒记录一次本进程及仍在运行的后代进程，采样使用系统接口，不启动 PowerShell。记录保存在数据目录的 `diagnostics/logs/resources/process-<PID>-<启动时间>.jsonl`，每行包含 UTC 时间、会话 ID、进程与父进程 ID、CPU 使用率、常驻内存、私有内存、线程数及系统可用内存。首次采样没有 CPU 差值，`cpu_percent` 为 `null`；后续以单个逻辑核的满载为 100%，多核进程可以超过 100%。尚未绑定会话的宿主记录中，`session` 可以为空。
 
 单文件约 1 MiB 时轮转，每个采样器保留当前文件和上一份；每分钟清理最旧的采样文件，使总量回落到约 32 MiB。每次最多采集 128 个相关进程，不记录命令参数、环境变量、路径或消息正文，也不向终端输出采样内容。短于采样间隔的进程可能没有记录；这些数据用于定位持续资源占用。
 

@@ -35,7 +35,7 @@ dcl -m openrouter::anthropic/claude-sonnet-4.5
 Model exists in several providers; select --provider or provider::model
 ```
 
-提供商保存在数据目录下的 `config.json`，与 Desktop 共用。Desktop 里添加的供应商，dcl 执行 `/provider` 时同样会列出来。
+提供商保存在数据目录下的 `config/config.json`，与 Desktop 共用。Desktop 里添加的供应商，dcl 执行 `/provider` 时同样会列出来。
 
 ## 保存一个提供商：`/provider add`
 
@@ -77,7 +77,7 @@ Switch this session to llm-proxy now? [Y/n]:
 - **选择模型**：填好地址和凭据后，dcl 会先向该接口查询可用模型，按 `1`、`2`、`3` 编号列出，输入编号即可，例如 `1,3` 保存第 1 和第 3 个，输入 `all` 保存全部，直接回车保存第 1 个。编号顺序就是列表顺序，排在前面的编号是默认模型。
 - **查询不到模型时**：地址不通、凭据还只是未设置的环境变量、或接口不提供模型列表时，dcl 会说明原因，并改为手动输入逗号分隔的模型 ID。手动输入同样有效，不会因此中断保存。
 - **答错时**：会说明原因并重新询问，最多 3 次；3 次都不合格时放弃，不保存任何内容。
-- **直接填 Key**：Key 写入数据目录 `config.json` 的 `api_key` 字段，只有当前用户可读，Desktop 也直接使用，不需要再设置环境变量。换 Key 时重新运行 `/provider edit <ID>`。
+- **直接填 Key**：Key 写入数据目录 `config/config.json` 的 `api_key` 字段，只有当前用户可读，Desktop 也直接使用，不需要再设置环境变量。换 Key 时重新运行 `/provider edit <ID>`。
 - **填环境变量名**：配置里只保存名字，Key 留在环境变量中。变量尚未设置时会提示，选择该提供商前先设置：
   - bash / zsh：`export DEEPSEEK_API_KEY=sk-...`
   - Windows：`setx DEEPSEEK_API_KEY sk-...`，设置后需要打开新的终端。
@@ -103,7 +103,7 @@ dcl 不把 API Key 写进会话记录，使用时按下面的顺序确定读哪�
 
 前两项属于显式指定：变量不存在或为空时，dcl 直接报错 `API key environment variable ... is empty or unset`，不会用空 Key 发请求。
 
-如果提供商在 `config.json` 里直接保存了 `api_key`（即在 `/provider add` 中直接填 Key，或由 Desktop 添加），且没有设置对应的环境变量时，dcl 会直接使用它，不需要再配置环境变量。该字段是明文，请确保数据目录只有本人可读，不要在共享机器上保存正式 Key。
+如果提供商在 `config/config.json` 里直接保存了 `api_key`（即在 `/provider add` 中直接填 Key，或由 Desktop 添加），且没有设置对应的环境变量时，dcl 会直接使用它，不需要再配置环境变量。该字段是明文，请确保数据目录只有本人可读，不要在共享机器上保存正式 Key。
 
 ## 切换提供商和模型
 
@@ -168,7 +168,7 @@ dcl config reset                     # 只删除 CLI 管理的提供商和偏好
 
 ## 手工编辑 `config.json`
 
-需要批量调整，或者想把配置复制到另一台机器时，可以直接编辑数据目录下的 `config.json`。保存后执行 `/provider` 就能看到新的提供商，不需要重启。
+需要批量调整，或者想把配置复制到另一台机器时，可以直接编辑数据目录下的 `config/config.json`。保存后执行 `/provider` 就能看到新的提供商，不需要重启。
 
 ```json
 {
@@ -246,7 +246,7 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 
 - [接入 DeepSeek](./deepseek.md)
 - [接入 OpenCode Go](./opencode-go.md)
-- [数据目录](./data-directory.md)：`config.json` 和会话数据的位置
+- [数据目录](./data-directory.md)：`config/config.json` 和会话数据的位置
 - [状态查看](./status.md)：查看当前使用的提供商、模型和接口地址
 
 ## 使用 Responses 接口

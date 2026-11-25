@@ -31,30 +31,54 @@ Linux 上可以显式开启[本地协调](./local-coordination.md)，再用 `dcl
 
 ## 目录里有什么
 
+数据目录根只放固定入口和七个分类目录。分类目录按需创建，没有使用到的功能不会留下空目录。
+
 | 路径 | 内容 |
 |---|---|
-| `global.db` | 全局目录（SQLite），保存会话清单、项目及共享设置 |
-| `sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库，保存消息、工具调用和请求历史 |
-| `session-locks/` | 会话存储的锁与初始化标记 |
-| `config.json` | 保存的提供商和模型；首次启动时粘贴的 API Key 也存在这里，文件只有你自己可读 |
-| `settings.json` | 用户设置，例如 hooks、提示和建议的开关，见[设置项参考](./settings.md) |
-| `plans/` | 计划模式写出的计划文件 |
-| `lsp/` | `/lsp install` 托管安装的语言服务器，见[语言服务器](./lsp.md) |
-| `tips.json` | 运行提示的显示记录 |
-| `pasted-images/` | 用 `Ctrl+V` 粘贴的图片 |
-| `session-presence/` | 打开中的会话持有的锁，供[会话消息](./session-messages.md)判断对方是否在线 |
-| `keybindings.json` | 自定义快捷键 |
-| `skills/` | 个人技能，随附技能在 `skills/bundled/` |
+| `global.db` | 全局目录（SQLite），保存会话清单、项目及共享设置；`-wal`、`-shm`、`-journal` 是配套文件，移动或备份时必须一起保留 |
+| `layout.json` | 布局版本和迁移状态；不要编辑或删除 |
+| `README.md` | 首次初始化时生成的说明文件 |
+| `AGENTS.md`、`CLAUDE.md` | 用户级全局指令，见 [`#` 写入项目说明](./memory-notes.md) |
+| `skills/` | 个人技能；随附技能在 `skills/bundled/`，启停状态在 `config/skill-states.json` |
+| `mcp-servers.json`、`mcp-servers.lock` | 应用级 MCP 配置和锁，见 [MCP](./mcp.md) |
+| `config/` | 供应商和用户配置：`config.json`、`settings.json`、`providers.json`、`keybindings.json`、`tips.json`、`customization.json`、`skill-states.json`、`mcp-states.json`、`agent-models.json`、`remote-control.json`、`github-token.json`、`startup-prompts.json`、`cli.json`、`statusline.json`、`composio_config.json`、`orchestrator.toml`、`anthropic-oauth.dat`/`.lock`、`scroll-speed`，以及 `backups/` |
+| `data/sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库，保存消息、工具调用和请求历史 |
+| `data/global-blobs/` | 共享附件和导出正文 |
+| `data/session-tasks/` | 旧版 `tasks/` 的会话任务数据库迁到这里；`projects/` 保存项目任务数据库 |
+| `data/workspaces/` | 应用托管的会话工作区 |
+| `data/pasted-images/` | 用 `Ctrl+V` 粘贴的图片 |
+| `data/memory.sqlite3`、`data/memory/` | 本地记忆归档和 Markdown 记忆文件 |
+| `data/teams/`、`data/agent-memory/`、`data/agent-messages.sqlite3`、`data/team-server.sqlite3` | 团队和代理消息数据 |
+| `data/schedules.sqlite3`、`data/knowledge/`、`data/costs/`、`data/analytics/`、`data/uploads/`、`data/app-studio/` | 定时任务、知识库、成本、分析、上传和 App Studio 数据 |
+| `data/backups/` | 导入或恢复前的备份 |
+| `data/legacy/` | 旧版 `conversations/` 和 `claude-desktop.json` 的迁移目标 |
+| `state/` | 启动、暂存、在线状态、Worker、回合完成、Shell 工作目录、会话环境、运行辅助目录（`hook-once/`、`plugin-runs/`、`skill-runs/`）和各类锁；`state/locks/session/` 是会话存储的锁与初始化标记，`state/presence/` 供[会话消息](./session-messages.md)判断会话是否在线 |
+| `tasks/` | 可恢复任务：`background/`、`shell/`、`detached-shells/`、`checkpoints/`、`plans/`、`turn-context/`、`design-plans/`、`super-agent/`、`toolscript-jobs/`、`workflows/`、`workplans/`、`wakeups/` |
+| `cache/` | 可重建缓存：环境、MCP 工具快照、工具输出、Git 状态、文件状态、压缩、截图、更新和 `plugins/` 插件缓存 |
+| `diagnostics/` | `request-records/<会话ID>/`、`logs/`、`debug/`、`design-conversions/`、`hook-transcripts/` |
+| `resources/lsp/`、`resources/linux/rootfs/` | `/lsp install` 托管安装的语言服务器（见[语言服务器](./lsp.md)），以及 Android 应用的 Ubuntu 根文件系统 |
 
-`settings.json` 可以配置 hooks（会执行命令），所以模型修改数据目录里的文件时，总是需要你确认（`workspaces/` 子目录除外）。
+`config/config.json` 保存提供商和模型；首次启动时粘贴的 API Key 也存在这里，文件只有你自己可读。`config/settings.json` 可以配置 hooks（会执行命令），所以模型修改数据目录里的文件时，总是需要你确认（`data/workspaces/` 子目录除外）。
 
-开启[请求记录](./request-recording.md)后，原始模型请求与响应保存在 `request-records/<会话ID>/`。正文不脱敏；超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理。备份或分享数据目录时，请同时检查这些文件。
+开启[请求记录](./request-recording.md)后，原始模型请求与响应保存在 `diagnostics/request-records/<会话ID>/`。正文不脱敏；超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理。备份或分享数据目录时，请同时检查这些文件。
+
+## 布局迁移
+
+当前布局版本是 2。第一次用新版本打开旧目录时，dcl 会自动迁移：生成 `layout.json` 和 `README.md`，把旧根目录条目移动到 `config/`、`data/`、`state/`、`tasks/`、`cache/`、`diagnostics/` 和 `resources/`。迁移期间 `layout.json` 的 `state` 是 `migrating`，完成后是 `ready` 并写入 `migrated_at`。
+
+迁移前会检查是否有正在运行的实例。提示 `Another DeepSeek Code / dcl / Desktop instance is running` 时，退出所有共用该目录的 dcl、Desktop、服务器和后台 Worker，再重新启动。
+
+如果旧路径和新路径同时存在，迁移会停止并提示 `Layout conflict`。这通常来自手工复制或旧版程序写入了同名数据；先确认哪一份是要保留的，手动合并或移走其中一份，再重试。
+
+无法识别的根目录条目会保持原位，启动时打印 `Data layout warning`。`/doctor` 和 `/doctor status` 的 `data layout` 检查会显示布局版本、`data layout leftovers`（仍存在的旧路径）和 `data layout unknown entries`（未知条目）；`/doctor errors` 只列出 error 级别的检查，布局警告不会出现在那里。`layout.json` 的版本高于当前程序时，程序拒绝打开目录，需要升级 dcl 或 Desktop。
+
+只读命令 `dcl --info` 和 `dcl sessions export` 不会初始化不存在或为空的目录；导出已有的旧目录时会先完成迁移再读取。`layout.json` 损坏、缺失或被手动修改时，迁移可能失败；保留现场并查看错误信息，不要直接删除整个数据目录。
 
 ## 升级与备份
 
 首次使用分库版本时，会话列表起初为空，即使数据目录中已有旧库也是如此。dcl 不打开、改名或删除旧的 `deepseek_code.db` 及其 `-wal`、`-shm` 文件，也不会自动导入旧历史。需要查阅升级前的会话时，可用旧版 dcl 打开原数据目录。
 
-整机迁移或备份时，先退出使用该目录的 dcl、Desktop、服务器和后台 Worker，再复制整个数据目录，包括 `global.db`、`sessions/`、`session-locks/` 和已有的 SQLite 配套文件。项目文件和外部附件另行备份。
+整机迁移或备份时，先退出使用该目录的 dcl、Desktop、服务器和后台 Worker，再复制整个数据目录，包括根目录的 `global.db`、`layout.json`、`README.md`、`skills/`、`mcp-servers.json`，以及 `config/`、`data/`、`state/`、`tasks/`、`cache/`、`diagnostics/`、`resources/`。`state/locks/` 是运行时锁，停止实例后不需要保留，但和其他目录一起复制不会损坏数据。项目文件和外部附件另行备份。
 
 ## 导出一个会话
 
@@ -77,7 +101,7 @@ dcl sessions export "$session_id" --output session.jsonl
 
 ## 异常关机后的后台任务
 
-后台任务状态保存在 `background-tasks/<任务ID>/state.json`。状态更新使用临时文件、落盘同步和原子替换，减少突然断电时丢失状态的风险。
+后台任务状态保存在 `tasks/background/<任务ID>/state.json`。状态更新使用临时文件、落盘同步和原子替换，减少突然断电时丢失状态的风险。
 
 启动和任务列表扫描会跳过无法解析的状态记录，并写入诊断日志，让其他会话继续使用。损坏文件会保留，便于排查；不会自动重跑任务，也不会把未知结果当成成功。直接查看或停止这个损坏任务仍会报告错误。
 

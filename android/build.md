@@ -84,7 +84,7 @@ adb shell am start -n com.deepseek.code/.MainActivity
 以下数据检查适用于调试包：
 
 ```bash
-adb shell run-as com.deepseek.code ls linux/rootfs/.deepseek-ready
+adb shell run-as com.deepseek.code ls resources/linux/rootfs/.deepseek-ready
 adb logcat -d -s RustStdoutStderr Tauri/Console
 ```
 

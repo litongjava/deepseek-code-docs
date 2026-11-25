@@ -88,4 +88,4 @@ dcl -m deepseek-flash --api-format anthropic \
 
 `run.err` 包含引擎日志（`INFO`/`ERROR`），排查接口错误时先看这里。
 
-需要核对实际发给模型的请求体、原始响应和每次 HTTP 重试时，可以加上 `--record-requests`。记录单独保存在数据目录的 `request-records/<会话ID>/`，用 `result.session_id` 对应的 ID 运行 `dcl requests <会话ID>` 查看。正文不脱敏，具体用法与分享前的检查说明见[请求记录](./request-recording.md)。
+需要核对实际发给模型的请求体、原始响应和每次 HTTP 重试时，可以加上 `--record-requests`。记录单独保存在数据目录的 `diagnostics/request-records/<会话ID>/`，用 `result.session_id` 对应的 ID 运行 `dcl requests <会话ID>` 查看。正文不脱敏，具体用法与分享前的检查说明见[请求记录](./request-recording.md)。

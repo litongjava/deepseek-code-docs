@@ -43,9 +43,9 @@ dcl
 
 关闭时将值改为 `0` 或 `false`。若要恢复由配置和启动参数决定，Linux / macOS 使用 `unset DEEPSEEK_CODE_RECORD_REQUESTS`，PowerShell 使用 `Remove-Item Env:DEEPSEEK_CODE_RECORD_REQUESTS -ErrorAction SilentlyContinue`。环境变量变更后需要重新启动应用及对应 Worker。
 
-### settings.json
+### config/settings.json
 
-在[数据目录](./data-directory.md)的 `settings.json` 中加入以下设置；已有文件时合并字段，保留其他设置：
+在[数据目录](./data-directory.md)的 `config/settings.json` 中加入以下设置；已有文件时合并字段，保留其他设置：
 
 ```json
 {
@@ -93,7 +93,7 @@ dcl requests $sessionId
 
 ## 保存位置与文件
 
-记录位于 `<数据目录>/request-records/<会话ID>/`。默认数据目录是 Linux / macOS 的 `~/.deepseek-code`、Windows 的 `%USERPROFILE%\.deepseek-code`。
+记录位于 `<数据目录>/diagnostics/request-records/<会话ID>/`。默认数据目录是 Linux / macOS 的 `~/.deepseek-code`、Windows 的 `%USERPROFILE%\.deepseek-code`。
 
 同一次 HTTP 尝试的各个文件使用相同的文件名前缀 `NNNN-<请求ID>-aK`：`NNNN` 是会话内递增序号，至少四位；`K` 是尝试次数，从 `1` 开始，重试为 `a2`、`a3` 等，每次重试也分配新的会话内序号。恢复会话后继续编号，不覆盖已有文件。
 

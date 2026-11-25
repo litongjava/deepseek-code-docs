@@ -4,7 +4,7 @@
 
 ## 启用登记
 
-在要参与登记的 dcl [数据目录](./data-directory.md)下，把以下配置加入 `settings.json`，然后重新启动 dcl：
+在要参与登记的 dcl [数据目录](./data-directory.md)下，把以下配置加入 `config/settings.json`，然后重新启动 dcl：
 
 ```json
 {

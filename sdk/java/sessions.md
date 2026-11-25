@@ -97,4 +97,4 @@ class ShellTasks {
 
 使用 dcl 时，会话 ID 可从 `SystemMessage` 或 `ResultMessage` 的 `getSessionId()` 取得。恢复或交接会话会沿用保存的提供商和模型，需要切换时再显式指定模型。
 
-在与 SDK 子进程相同的数据目录下，用 `dcl sessions list` 查看已保存会话，用 `dcl sessions export <id> --output session.jsonl` 导出其中一个。自定义目录时，两条命令都加上相同的 `--data-dir`。dcl 用 `global.db` 保存清单，用 `sessions/<storage_key>/session.db` 保存各会话历史。升级前的 `deepseek_code.db` 仍供旧版读取，新布局从空清单开始。导出文件是带 `header` 和校验记录 `end` 的 v1 JSONL 快照，需与实时 stream-json 消息分开读取。记录种类和校验步骤见[导出一个会话](/cli/data-directory#导出一个会话)。
+在与 SDK 子进程相同的数据目录下，用 `dcl sessions list` 查看已保存会话，用 `dcl sessions export <id> --output session.jsonl` 导出其中一个。自定义目录时，两条命令都加上相同的 `--data-dir`。dcl 用 `global.db` 保存清单，用 `data/sessions/<storage_key>/session.db` 保存各会话历史。升级前的 `deepseek_code.db` 仍供旧版读取，新布局从空清单开始。导出文件是带 `header` 和校验记录 `end` 的 v1 JSONL 快照，需与实时 stream-json 消息分开读取。记录种类和校验步骤见[导出一个会话](/cli/data-directory#导出一个会话)。

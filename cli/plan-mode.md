@@ -28,7 +28,7 @@ Here is DeepSeek Code's plan:
    2. Yes, manually approve edits
    3. Tell DeepSeek Code what to change
       shift+tab to approve with this feedback
- ctrl+g to edit in vi · ~/.../plans/....md
+ ctrl+g to edit in vi · ~/.../tasks/plans/....md
 ```
 
 - **1. Yes, auto-accept edits**：批准计划，之后的文件修改直接放行（`accept-edits` 模式）。已经配置[自动权限模式](./auto-mode.md)时，这一项是"Yes, and use auto mode"，批准后切换到 `auto` 模式。
@@ -45,7 +45,7 @@ Here is DeepSeek Code's plan:
 ## 计划期间能做什么
 
 - **可以**：读文件、搜索、列目录、联网查资料，以及执行未被危险命令过滤器拒绝的 Shell 命令，包括构建、测试和安装依赖。Git 查询（如 `git status`、`git diff`、`git log`）通过 `Bash` 执行。`Read`、`Glob`、`Grep` 可以访问当前项目之外的文件和目录，无需先添加工作目录；操作系统访问权限和显式工具规则仍然适用。
-- **直接编辑工具**：`Edit`、`Write` 等在计划期间可以修改本会话的计划文件；子代理也可以修改直属父代理的计划文件。计划保存在[数据目录](./data-directory.md)的 `plans/` 下。Shell 命令可能生成文件或修改依赖，Plan 并非文件系统只读沙箱。
+- **直接编辑工具**：`Edit`、`Write` 等在计划期间可以修改本会话的计划文件；子代理也可以修改直属父代理的计划文件。计划保存在[数据目录](./data-directory.md)的 `tasks/plans/` 下。Shell 命令可能生成文件或修改依赖，Plan 并非文件系统只读沙箱。
 
 `EnterPlanMode` 返回的 `planFilePath` 可直接用于 Read、Write、Edit，无需把整个数据目录加入工作目录。Windows 的正反斜杠、盘符大小写和扩展路径前缀可以等价使用。切换权限模式后仍可访问本会话的计划文件，访问按当前权限模式检查。子代理可直接读取、修改直属父代理的计划文件，用于审阅和完善计划；Plan 中对其他独立会话的计划文件仅允许读取。
 

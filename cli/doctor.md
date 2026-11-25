@@ -46,6 +46,7 @@
 
 - `/doctor skills` 显示与 `/plugins` 的 Stats 选项卡相同的文本：每个技能每轮列出的上下文开销、最近 7 天消耗的 token、使用次数和最近使用时间，以及 MCP 服务的状态和上下文开销；这些内容不会发送给模型。
 - `/doctor errors` 列出无效的技能、代理、设置和快捷键文件，以及启动失败的 MCP 服务，同样不经过模型；所有配置都有效时只说明没有发现问题。
+- `/doctor` 和 `/doctor status` 的本地快照包含数据目录布局检查：`data layout` 显示 `layout.json` 的版本和状态，`data layout leftovers` 列出仍留在根目录的旧路径，`data layout unknown entries` 列出程序不认识的根条目。这些检查只读，不会触发迁移或删除文件；启动时打印的 `Data layout warning` 与它们对应。迁移步骤见[数据目录](./data-directory.md#布局迁移)。
 
 ## 与其他命令的关系
 

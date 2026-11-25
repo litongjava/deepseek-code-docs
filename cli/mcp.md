@@ -91,7 +91,7 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 
 `ListMcpResources` 和 `ReadMcpResource` 不受状态影响。
 
-状态保存在数据目录的 `mcp-states.json`，按服务 ID 记录；没有记录的服务是 `user`。设为 `off` 只会停用服务，不改动保存的状态，所以重新启用后会回到原来的状态。修改后不需要重启，模型在下一轮请求中使用新状态。
+状态保存在数据目录的 `config/mcp-states.json`，按服务 ID 记录；没有记录的服务是 `user`。设为 `off` 只会停用服务，不改动保存的状态，所以重新启用后会回到原来的状态。修改后不需要重启，模型在下一轮请求中使用新状态。
 
 查看和设置：
 
