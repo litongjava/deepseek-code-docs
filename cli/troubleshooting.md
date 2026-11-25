@@ -191,7 +191,7 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 任务长时间没有响应但进程还在时，可以用 `/tasks show ID` 查看，或用 `/clear` 开始新会话。
 
-直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出；右击会复制并取消选中，底部显示复制结果。在 tmux 中需要先执行 `tmux set -g mouse on`，否则 dcl 收不到拖动和右击事件。通过 SSH 使用时，如果外层终端不支持 OSC 52，文字仍会写入 tmux buffer，可用 tmux 的粘贴快捷键（默认先按 `Ctrl+B`，再按 `]`）取回。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
+直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出；右击或按 `c` 会复制并取消选中，底部显示复制结果。在 tmux 中需要先执行 `tmux set -g mouse on`，否则 dcl 收不到拖动和右击事件。通过 SSH 使用时，如果外层终端不支持 OSC 52，文字仍会写入 tmux buffer，可用 tmux 的粘贴快捷键（默认先按 `Ctrl+B`，再按 `]`）取回。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
 
 ## 计划模式下 Bash 被禁用
 
