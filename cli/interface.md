@@ -29,7 +29,7 @@ tmux set -g mouse on
 
 外层终端还需要支持 OSC 52，文字才能进入本地系统剪贴板；不支持时文字仍会写入 tmux buffer，可用 tmux 的粘贴快捷键（默认先按 `Ctrl+B`，再按 `]`）取回，或按住 `Shift` 拖动使用终端自身的选择和复制。没有选区时右击不会复制。
 
-右击复制成功后选区高亮会消失，底部短暂显示 `Copied N characters to clipboard`，按任意键后恢复普通页脚；复制失败时显示 `Copy failed; the clipboard is unavailable`，同样取消选中。`Ctrl+O` 全页记录和文件差异页使用各自页脚的同一提示。
+右击复制成功后选区高亮会消失，底部短暂显示 `Copied N characters to clipboard`，约 2 秒后自动恢复普通页脚，按任意键也会立即恢复；复制失败时显示 `Copy failed; the clipboard is unavailable`，同样取消选中。`Ctrl+O` 全页记录和文件差异页使用各自页脚的同一提示。
 
 ## 启动时的确认
 
