@@ -105,11 +105,23 @@ dcl 不把 API Key 写进会话记录，使用时按下面的顺序确定读哪�
 
 如果提供商在 `config/config.json` 里直接保存了 `api_key`（即在 `/provider add` 中直接填 Key，或由 Desktop 添加），且没有设置对应的环境变量时，dcl 会直接使用它，不需要再配置环境变量。该字段是明文，请确保数据目录只有本人可读，不要在共享机器上保存正式 Key。
 
-## 切换提供商和模型
+## 切换与管理提供商：`/provider` 面板
+
+在交互式终端里直接运行 `/provider`，会打开交互式提供商面板，包含 `provider`、`Accounts`、`Models` 三个页面（按 `Tab` 切换，`Esc` 关闭）：
+
+- **`provider` 页面**：顶部输入框支持实时搜索筛选；上方 `connected` 列出已保存的提供商（当前会话提供商带 `•` 标记，显示协议、主机、模型数和凭据状态），下方 `add a connection` 列出常用提供商预设（默认首项为 `OpenCode · OpenAI Responses · opencode.ai`）。
+  - `↑` / `↓`：选择条目；
+  - `Enter`：在已连接提供商上查看并切换其模型；在 `add a connection` 预设上打开预填表单；
+  - `Ctrl+A`：打开新增连接表单（`name` / `protocol` / `address` / `key`，`Tab` 切字段，`←` / `→` 切换 `OpenAI` / `OpenAI Responses` / `Anthropic` / `Gemini` 协议）；填写凭据后按 `Enter` 自动抓取模型列表；
+  - `Ctrl+E`：编辑选中的已连接提供商；
+  - `Ctrl+N`：手动添加连接或模型（跳过自动拉取模型列表）；
+  - `Ctrl+D`：删除选中的已连接提供商。
+- **抓取模型列表**：拉取后展示每个模型的上下文预算与识图能力（未声明时显示 `capabilities not declared`），直接输入关键字搜索，按 `Space` 多选，按 `Enter` 进入确认页。
+- **模型确认页**：按 `Enter`（`connect and use`）保存、测试连接并切换当前会话；`Ctrl+S`（`save only`）仅保存不切换；`Ctrl+O` 展开高级设置（上下文预算、最大输出、识图开关）；`Ctrl+F` 重新从端点拉取模型列表；`Esc` 返回。
 
 | 命令 | 作用 |
 |---|---|
-| `/provider` | 列出已启用的提供商并选择一个 |
+| `/provider` | 打开交互式提供商面板（非交互终端下列出已启用的提供商并选择） |
 | `/provider list` | 只列出已启用的提供商，不切换 |
 | `/provider <ID>` | 直接切换到指定提供商 |
 | `/provider refresh [ID]` | 刷新模型列表；省略 ID 时刷新当前提供商 |
