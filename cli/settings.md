@@ -40,7 +40,7 @@
 
 ## 流式模型请求
 
-流式请求的读取空闲超时和内容后超时恢复在 `config/orchestration.toml` 的 `[http]` 段配置。默认分别为 `300` 秒和 `false`。完整配置示例见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
+流式请求的读取空闲超时（`request_timeout_secs`）、连接池空闲时长（`pool_idle_timeout_secs`）和内容后超时恢复（`post_content_timeout_recovery`）在 `config/orchestration.toml` 的 `[http]` 段配置。默认分别为 `300` 秒、`300` 秒和 `false`，修改后需重启进程生效。完整配置示例见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
 
 ## 记忆开关
 
