@@ -46,6 +46,20 @@
 
 `dcl config memory` 查看全局记忆开关和检索设置；`dcl config memory off` 关闭，`on` 重新开启。在交互界面运行 `/config`，可以在 Config 页的 `Long-term memory` 一行直接切换。也可以用 `dcl config set memory.enabled false`。开关保存在数据目录的数据库里，Desktop 与 CLI 共用：关闭后新请求不再注入 `MEMORY.md` 索引，记忆目录的写入会被拒绝，系统提示词也会省略记忆说明；已保存内容保留。详见[长期记忆](./memory.md#关闭记忆)。
 
+## 联网搜索与网页抓取代理
+
+独立联网搜索（`deepseek_search`）与 `WebFetch` 代理（`web_fetch.proxy`）保存在 `config/config.json`，每次调用实时生效，无需重启：
+
+```bash
+dcl config set search.provider deepseek|openai|anthropic
+dcl config set search.api_key sk-...
+dcl config set search.base_url https://api.deepseek.com/anthropic/v1
+dcl config set search.model deepseek-flash
+dcl config set fetch.proxy http://127.0.0.1:10808   # 设为空字符串 "" 可清除
+```
+
+在交互会话中也可通过 `/search-config`、`/config search`、`/config fetch-proxy`，或在 `/config` 面板的 `Config` 页（`Web search` / `Web fetch proxy`）直接配置。详见[联网搜索与深度研究](./web-search.md)。
+
 ## Shell 配置
 
 `shell` 与其他设置共用 `config/settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。

@@ -4,7 +4,7 @@
 
 ## 启用随附技能
 
-dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator`、`test-dcl`、`llm-proxy-data-troubleshooting` 和 `project-docs` 默认启用；`codegraph` 仅在 `PATH` 中能找到其可执行文件时默认启用；其他随附技能默认是 `off`。可先查看说明，再按需要启用：
+dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator`、`dc-docs`、`llm-proxy-data-troubleshooting` 和 `project-docs` 默认启用（`user`）；`codegraph` 在 `PATH` 中能找到其可执行文件时默认为 **`always`**（首轮直接注入完整 CLI 使用说明，允许无索引时执行 `codegraph init` 建索引，未安装时默认为 `off`、0 token 开销）；其他随附技能默认是 `off`。可先查看说明，再按需要启用：
 
 ```bash
 dcl skills list
@@ -50,6 +50,7 @@ SDK 宿主也可以在子代理定义中设置 `"skills":["task-template"]`，�
 - `user`：按技能文件的声明列出名称和说明，允许模型和用户使用各自可调用的技能。
 - `name-only`：只向模型列出名称，节省上下文；模型和用户都可以调用。
 - `user-only`：不列给模型，模型不能调用；用户仍可用 `/name` 调用。
+- `always`：在会话首条用户消息中直接注入该技能正文全文（并在首轮冻结到 `.inline-skills.json` 以保持 prompt cache），模型第一轮即可直接使用完整指令而无需额外调用 `Skill`；不再重复出现在单行技能清单中，模型和用户仍可调用。
 
 状态保存在数据目录的 `config/skill-states.json`。已保存的状态优先于安装默认值。个人和项目技能通常默认是 `user`；技能文件本身也可以限制谁能调用。
 
@@ -63,7 +64,7 @@ SDK 宿主也可以在子代理定义中设置 `"skills":["task-template"]`，�
 /skills state <技能> <状态>    # 设置状态
 ```
 
-状态名是 `off`、`user`、`name-only` 或 `user-only`。写错状态名会提示可用的四个值；技能名不在已知技能中时不会写入。
+状态名是 `off`、`user`、`name-only`、`user-only` 或 `always`。写错状态名会提示可用的五个值；技能名不在已知技能中时不会写入。
 
 在会话外也可以用子命令：
 
@@ -96,9 +97,9 @@ dcl skills state translate-zh-en user
 
 - 直接输入文字筛选列表。
 - 在技能或 MCP 服务上按 `空格` 在 `off` 与 `user` 之间切换；在插件上按 `空格` 启用或停用。
-- 在技能或 MCP 服务上按 `Enter` 打开状态选择，四项状态各有一句说明，选中后立即保存；MCP 服务的选择列表最后一项 `Details` 查看详情。在插件上按 `Enter` 查看详情。
-- MCP 服务一行显示它的状态；`user` 和 `on-demand` 的服务还显示它占用的上下文 token 数（`user` 按全部工具定义估算，`on-demand` 按列表行估算）。
-- `←`/`→` 切换页，`Esc` 关闭。
+- 在技能或 MCP 服务上按 `Enter` 打开状态选择，技能提供五项状态（含 `always`），每项各有一句说明，选中后立即保存；MCP 服务的选择列表最后一项 `Details` 查看详情。在插件上按 `Enter` 查看详情。
+- MCP 服务一行显示它的状态；`user` 和 `on-demand` 的服务还显示它占用的上下文 token 数（`user` 按全部工具定义估算，`on-demand` 按列表行估算）。`always` 状态的技能按正文全文估算上下文 token 数。
+- 面板与 `/config`、`/skills`、`/tools` 一致采用顶部对齐渲染，切换标签页时不会出现顶部空行或垂直跳动。`←`/`→` 切换页，`Esc` 关闭。
 
 修改会立即反映在面板中；关闭面板时斜杠列表重新载入，模型在下一轮请求中使用新状态。
 
