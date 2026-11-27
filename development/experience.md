@@ -253,7 +253,7 @@ No entries yet.
 `crates/core/src/prompt/mod.rs` 的 `first_message_reminders` 目前顺序是：
 
 ```text
-用户级指令 → 工作环境 → 项目指令 → resident_indexes（MEMORY.md）→ CLI 前端说明 → 可加载工具 → 技能列表 → 日期 → Git 快照 → 压缩后恢复的技能
+用户级指令 → 工作环境 → 项目指令 → resident_indexes（MEMORY.md）→ Experience → CLI 前端说明 → 可加载工具 → 技能列表 → 内联技能 → 日期 → Git 快照 → 压缩后恢复的技能 → 会话 Shell/批处理提示（session_tips）
 ```
 
 在 `resident_indexes` 之后、`standalone_frontend` 之前插入 Experience：
@@ -381,7 +381,7 @@ pub struct Scan {
 }
 
 pub fn scan(workspace: &std::path::Path) -> Scan;
-/// `- {relative_path} | {name}: {one_sentence(description, 120)}`
+/// `- {relative_path} | {name}: {one_line_bounded(description, LISTING_DESCRIPTION_MAX_CHARS)}`（统一 300 字符上限）
 pub fn index_line(entry: &Entry) -> String;
 /// 已按 120 条 / 8 KiB 裁剪；非空时最后一行可能是截断标记。
 pub fn index_lines(entries: &[Entry]) -> Vec<String>;

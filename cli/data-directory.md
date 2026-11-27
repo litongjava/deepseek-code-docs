@@ -42,7 +42,7 @@ Linux 上可以显式开启[本地协调](./local-coordination.md)，再用 `dcl
 | `skills/` | 个人技能；随附技能在 `skills/bundled/`，启停状态在 `config/skill-states.json` |
 | `mcp-servers.json`、`mcp-servers.lock` | 应用级 MCP 配置和锁，见 [MCP](./mcp.md) |
 | `config/` | 供应商和用户配置：`config.json`、`settings.json`、`providers.json`、`keybindings.json`、`tips.json`、`customization.json`、`skill-states.json`、`mcp-states.json`、`agent-models.json`、`remote-control.json`、`github-token.json`、`startup-prompts.json`、`cli.json`、`statusline.json`、`composio_config.json`、`orchestrator.toml`、`anthropic-oauth.dat`/`.lock`、`scroll-speed`，以及 `backups/` |
-| `data/sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库，保存消息、工具调用和请求历史 |
+| `data/sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库（当前架构版本 v15），保存消息、工具调用和请求历史；`tool_calls` 通过 `request_id` / `provider_call_id` 关联 `model_requests`，支持按步精确重放每轮思考与工具调用，并去重恢复工具图片输出 |
 | `data/global-blobs/` | 共享附件和导出正文 |
 | `data/session-tasks/` | 旧版 `tasks/` 的会话任务数据库迁到这里；`projects/` 保存项目任务数据库 |
 | `data/workspaces/` | 应用托管的会话工作区 |

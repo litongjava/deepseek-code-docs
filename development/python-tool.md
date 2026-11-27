@@ -571,11 +571,3 @@ git diff --check
 | 与 Bash 行为漂移 | 执行、捕获、超时、任务全部复用现有函数，不复制逻辑 |
 | `command_preview` 漏改 | 加测试，否则 `interpreter` / `script_path` 会落到 `Metadata:` 兜底，且路径可能被 JSON 转义成双反斜杠 |
 | 文档范围不一致 | `cli/sandbox.md` 同步更新 |
-
-## 13. 交付物
-
-- `python.rs` 与注册/分发改动。
-- 上述测试，全部通过。
-- `docs/cli-regression-tests.md`、`docs/desktop-regression-tests.md` 增补对应检查项。
-- 本仓库相关用户文档更新。
-- 实现说明：实际解释器解析顺序、沙箱验证平台、未验证项。

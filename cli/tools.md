@@ -54,13 +54,14 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 **Bash**：
 
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
-- `shell` 参数列出本机可用的 Shell，并标明默认项。模型看到的命令语法和路径提示跟随 [shell.toolDefault](./settings.md)。例如 Git Bash 使用 Unix 语法，PowerShell 使用 `$env:NAME`，cmd 使用 `%NAME%`。原始结果记录实际程序路径，发给模型的文本只在发生回退时显示路径。
-- `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。前台命令到时间仍未结束时不会被终止，而是转为后台受管任务继续运行：模型拿到已有输出和任务编号，再决定用 `TaskGet` 等待或用 `TaskStop` 停止，对话里显示“Still running after 2m; moved to the background”。子代理里的命令到时间仍会被终止。
-- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出（默认立即返回当前快照；`block: true` 最多等待 `timeout` 毫秒，默认 30000、最多 600000，等待超时不会结束进程）、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
-- **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
+- `shell` 参数列出本机可用的 Shell，并标明默认项。模型看到的命令语法和路径提示跟随 [shell.toolDefault](./settings.md)。例如 Git Bash 使用 Unix 语法，PowerShell 使用 `$env:NAME`，cmd 使用 `%NAME%`。需要运行非默认解释器（如 PowerShell）脚本时，提示模型直接传 `shell` 参数而非在默认 Shell 里嵌套调用，避免转义问题。原始结果记录实际程序路径，发给模型的文本只在发生回退时显示路径。
+- `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。前台命令到时间仍未结束时不会被终止，而是转为后台受管任务继续运行：模型拿到已有输出和任务编号，引导其继续处理其他工作或直接结束本轮等待完成通知（仅在需要查看中间输出或怀疑卡死时调用非阻塞 `TaskGet`，需要终止时用 `TaskStop`），对话里显示“Still running after 2m; moved to the background”。子代理里的命令到时间仍会被终止。
+- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知并唤醒模型；工具返回明确引导模型继续其他工作或结束本轮等待通知，避免刚启动就用 `TaskGet(block: true)` 阻塞轮询。需要查看中间输出或排查卡死时可用非阻塞 `TaskGet` 读取快照，用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
+- **调用结束会清理整棵子进程树**，包括命令自己启动的后台子进程和自动拉起的守护进程。需要跨调用、跨进程存活的常驻服务（例如前端开发服务器 `vite`/`pnpm dev`、后端 API 服务、本地浏览器/数据库守护进程）必须用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。`run_in_background: true` 仅用于会自行结束并回调通知的有限耗时任务；`detach: true` 不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，原始结果里 `pipeline_sigpipe` 和 `success` 均为 `true`。模型会看到退出码和下游提前关闭管道的说明。其他输出规则见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
-- **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
-- 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。当命令包含冗余的前置 `cd <当前目录>`、仅用 `cat`/`sed`/`grep`/`ls`/`wc` 读搜文件、同一轮拆分多个前台 `Bash` 调用，或连续多轮每次只发单个前台 `Bash` 调用时，前台 `Bash` 结果还会限频附带简短提示，引导模型省略冗余 `cd`、用 `&&`/`;` 合并相关命令，或改用并行 `Read`/`Grep`/`Glob`。
+- **工作目录在调用之间保留（批内快照隔离）**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持；shell 变量不保留。同一轮模型输出多个前台 `Bash` 调用时，会在批前冻结 `batch_start_cwd`，批内每条命令均以同一批前目录启动，不读取同批前序调用刚写入的目录变更，仅在整批结束后提交最终有效目录变更，避免同批多条 `cd <子目录>` 互相踩踏报错。
+- 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。当 `shell-cwd` 位于子目录（不同于工作区根目录）且命令重复前置 `cd <当前目录>`（含 Git Bash `/d/...` 与 Windows `D:/...` 路径写法）时，结果 metadata 会直接提示 `Bash already runs in <目录>; omit redundant leading 'cd'.`。
+- **运行中纠偏与首条提示（`SESSION_TIPS`）**：首条用户消息末尾附带静态 `<system-reminder>` 提示，覆盖多行短脚本合并、优先使用 `codegraph` CLI、项目相关文件落盘规范（临时文件写 `./temp/`、非临时文件写 `./permanent/`、文档写 `./docs/`，避免写入系统临时目录）以及 `detach: true` 规范。执行过程中，引擎还会对 5 类高置信度反模式向模型注入**非落库、每类独立 4 轮冷却**的临时 `<system-reminder>` 纠偏（同轮多命中合并为一条）：① 冗余前置 `cd`；② 前台 `sleep` / `for` 轮询等待；③ 高频独立内联 `python -c` / heredoc（≥ 2 次且 `Python` 工具可用）；④ Git Bash 内多次嵌套 `powershell`/`pwsh -Command`（≥ 2 次）；⑤ 高频纯独立单条 `grep`/`rg`（≥ 2 次且 `Grep` 工具完全支持）。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
 
 **Monitor**：在后台运行一段 shell 脚本，把输出的每一行变成通知来唤醒模型，适合盯日志、构建或 CI。脚本应只在需要处理的事情发生时才输出一行，例如 `tail -f app.log | grep --line-buffered ERROR`，每一级管道都要逐行刷新。200 毫秒内到达的多行合并成一条通知；stderr 只写入日志，不通知。它和 Bash 的 `run_in_background` 不同：后者只在命令结束时通知一次，Monitor 每有输出就通知。
@@ -150,7 +151,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 ## 调整工具和系统提示词
 
-工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 自定义页的[提示词](/desktop/usage/skills#提示词)和[工具](/desktop/usage/skills#工具)页面编辑，dcl 自动生效，下一次模型请求开始使用。
+工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 自定义页的[提示词](/desktop/usage/skills#提示词)和[工具](/desktop/usage/skills#工具)页面编辑；工具目录的逐行说明（`tool_summaries`）目前直接写在这个文件里。dcl 自动生效，下一次模型请求开始使用。
 
 ## 启用与按需加载
 
@@ -186,7 +187,9 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 ### 工具目录与加载
 
-会话首次请求会在第一条用户消息中列出可按需加载的内置工具和 MCP 工具，每行一个完整名称和简短说明。之后启停工具或重新连接 MCP 时，可用项的变化会随最新的用户消息发送。加载时仍会检查当前工具设置和代理权限。
+会话首次请求会在第一条用户消息中列出可按需加载的内置工具和 MCP 工具，每行一个完整名称和一行说明。内置工具使用各自维护的 `summary`；MCP 和自定义工具没有 `summary`，使用其说明文本。说明会折叠空白为单行，并与 Experience、Skill 列表统一按 300 字符上限截断（超出时末尾加 `…`），避免超长说明挤占首条消息上下文。之后启停工具或重新连接 MCP 时，可用项的变化会随最新的用户消息发送。加载时仍会检查当前工具设置和代理权限。
+
+想改某一行，在 `customization.json` 的 `tool_summaries` 里按工具名写文本，例如 `"tool_summaries": {"Python": "用工作区解释器运行 Python 代码"}`。优先级是 `tool_summaries`、`tool_descriptions`、内置 `summary`、完整 `description`，空字符串视为未设置。目录在这个会话的首条消息里固定下来，改配置不会重写它；新建会话才使用新文本。
 
 模型调用 `ToolLoad` 时只传一个 `names` 数组，包含 1 至 64 个非空字符串。每项都必须是完整名称，区分大小写。例如，同时加载目录中的两个工具：
 
