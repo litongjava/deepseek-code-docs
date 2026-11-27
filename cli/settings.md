@@ -4,7 +4,7 @@
 
 ## settings.json
 
-位于[数据目录](./data-directory.md)下，JSON 格式。文件不存在时，所有项使用默认值。
+文件位于[数据目录](./data-directory.md)下的 `config/settings.json`，使用 JSON 格式。文件不存在时，所有项使用默认值。
 
 ```json
 {
@@ -31,9 +31,11 @@
 
 `localCoordination.enabled` 和 `localCoordination.registry` 是 `localCoordination` 对象中的字段。嵌套写法见[启用登记](./local-coordination.md#启用登记)。
 
+要控制后续回合中的本地文件记忆，在 `/config` 的 Config 页切换 **Long-term memory**，或使用 `dcl config memory on`、`dcl config memory off`。配置团队索引目录时，在用户设置中填写绝对路径 `memory.team_dir`。见[长期记忆](./memory.md)。
+
 ## 请求记录
 
-在数据目录的 `settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
+在数据目录的 `config/settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
 
 优先级是 `--record-requests` 强制开启 → `DEEPSEEK_CODE_RECORD_REQUESTS` 的有效值 → `requestRecording.enabled` → 完全访问模式自动开启。环境变量支持 `1`、`true`、`0`、`false`。请求体不脱敏，完整示例、保存位置与隐私说明见[请求记录](./request-recording.md)。Desktop 使用同一份数据目录配置。
 
@@ -43,7 +45,7 @@
 
 ## Shell 配置
 
-`shell` 与其他设置共用数据目录的 `settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
+`shell` 与其他设置共用数据目录的 `config/settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
 
 ```json
 {
@@ -84,6 +86,10 @@ dcl config set shell.terminalDefault wsl
 必须明确指定已经安装的发行版，不会使用系统默认发行版。发行版内需要 Bash、`wslpath` 和 `setsid`；`wsl.bashPath` 是 Linux 绝对路径。Windows 项目路径通过所选发行版的 `wslpath` 转换，包含空格和中文的路径按独立参数传递。工作目录按会话和发行版分别保存。
 
 前台超时、取消、后台任务停止会结束本次调用拥有的 Linux 进程组，不会终止整个发行版。主动脱离进程组的守护进程不在这一保证内。启用的沙箱目前不能隔离 WSL 时会明确拒绝执行，不能通过指定 WSL 绕过沙箱。
+
+## 系统资源提醒
+
+dcl 默认每 10 秒采样 CPU、可用内存和磁盘空间。压力持续多个采样周期时，终端显示系统资源提醒，Desktop 显示通知。在用户设置 `config/settings.json` 中可用 `{"resourceMonitor":{"enabled":false}}` 关闭，或调整 `intervalSecs`、`cpuPercentThreshold` 等字段。环境变量 `DEEPSEEK_CODE_RESOURCE_MONITOR=0` 或 `1` 优先于文件中的开关。
 
 ## 环境变量
 

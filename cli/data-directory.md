@@ -34,27 +34,29 @@ Linux 上可以显式开启[本地协调](./local-coordination.md)，再用 `dcl
 | 路径 | 内容 |
 |---|---|
 | `global.db` | 全局目录（SQLite），保存会话清单、项目及共享设置 |
-| `sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库，保存消息、工具调用和请求历史 |
-| `session-locks/` | 会话存储的锁与初始化标记 |
-| `config.json` | 保存的提供商和模型；首次启动时粘贴的 API Key 也存在这里，文件只有你自己可读 |
-| `settings.json` | 用户设置，例如 hooks、提示和建议的开关，见[设置项参考](./settings.md) |
-| `plans/` | 计划模式写出的计划文件 |
-| `lsp/` | `/lsp install` 托管安装的语言服务器，见[语言服务器](./lsp.md) |
-| `tips.json` | 运行提示的显示记录 |
-| `pasted-images/` | 用 `Ctrl+V` 粘贴的图片 |
-| `session-presence/` | 打开中的会话持有的锁，供[会话消息](./session-messages.md)判断对方是否在线 |
-| `keybindings.json` | 自定义快捷键 |
+| `data/sessions/<storage_key>/session.db` | 每个会话独立的 SQLite 数据库，保存消息、工具调用和请求历史 |
+| `state/locks/session/` | 会话存储的锁与初始化标记 |
+| `config/config.json` | 保存的提供商和模型；首次启动时粘贴的 API Key 也存在这里，文件只有你自己可读 |
+| `config/settings.json` | 用户设置，例如 hooks、提示和建议的开关，见[设置项参考](./settings.md) |
+| `tasks/plans/` | 计划模式写出的计划文件 |
+| `resources/lsp/` | `/lsp install` 托管安装的语言服务器，见[语言服务器](./lsp.md) |
+| `config/tips.json` | 运行提示的显示记录 |
+| `data/pasted-images/` | 用 `Ctrl+V` 粘贴的图片 |
+| `state/presence/` | 打开中的会话持有的锁，供[会话消息](./session-messages.md)判断对方是否在线 |
+| `config/keybindings.json` | 自定义快捷键 |
 | `skills/` | 个人技能，随附技能在 `skills/bundled/` |
 
-`settings.json` 可以配置 hooks（会执行命令），所以模型修改数据目录里的文件时，总是需要你确认（`workspaces/` 子目录除外）。
+`config/settings.json` 可以配置 hooks（会执行命令），所以模型修改数据目录里的文件时，总是需要你确认（`data/workspaces/` 子目录除外）。
 
-开启[请求记录](./request-recording.md)后，原始模型请求与响应保存在 `request-records/<会话ID>/`。正文不脱敏；超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理。备份或分享数据目录时，请同时检查这些文件。
+开启[请求记录](./request-recording.md)后，原始模型请求与响应保存在 `diagnostics/request-records/<会话ID>/`。正文不脱敏；超过 14 天未修改、且没有正在写入记录的会话目录会在后续写入时自动清理。备份或分享数据目录时，请同时检查这些文件。
 
 ## 升级与备份
 
+目录布局 v2 的首次启动会按 `layout.json` 的迁移记录原地移动已知旧路径。升级前先退出共用该目录的进程。迁移中断后重新启动可继续；`global.db`、`skills/`、`mcp-servers.json` 和全局说明文件保留在根目录。文件记忆与旧档案的位置见[长期记忆](./memory.md)。
+
 首次使用分库版本时，会话列表起初为空，即使数据目录中已有旧库也是如此。dcl 不打开、改名或删除旧的 `deepseek_code.db` 及其 `-wal`、`-shm` 文件，也不会自动导入旧历史。需要查阅升级前的会话时，可用旧版 dcl 打开原数据目录。
 
-整机迁移或备份时，先退出使用该目录的 dcl、Desktop、服务器和后台 Worker，再复制整个数据目录，包括 `global.db`、`sessions/`、`session-locks/` 和已有的 SQLite 配套文件。项目文件和外部附件另行备份。
+整机迁移或备份时，先退出使用该目录的 dcl、Desktop、服务器和后台 Worker，再复制整个数据目录，包括 `global.db`、`data/sessions/`、`state/locks/session/` 和已有的 SQLite 配套文件。项目文件和外部附件另行备份。
 
 ## 导出一个会话
 
@@ -77,7 +79,7 @@ dcl sessions export "$session_id" --output session.jsonl
 
 ## 异常关机后的后台任务
 
-后台任务状态保存在 `background-tasks/<任务ID>/state.json`。状态更新使用临时文件、落盘同步和原子替换，减少突然断电时丢失状态的风险。
+后台任务状态保存在 `tasks/background/<任务ID>/state.json`。状态更新使用临时文件、落盘同步和原子替换，减少突然断电时丢失状态的风险。
 
 启动和任务列表扫描会跳过无法解析的状态记录，并写入诊断日志，让其他会话继续使用。损坏文件会保留，便于排查；不会自动重跑任务，也不会把未知结果当成成功。直接查看或停止这个损坏任务仍会报告错误。
 
@@ -103,13 +105,13 @@ Claude Code 兼容的用户级资源保持在原来的位置，dcl 会读取但�
 
 1. 数据目录的 `skills/bundled/<名称>/`。首次启动时安装内置技能，升级时刷新未修改的文件，保留用户编辑过的文件。
 2. 数据目录的 `skills/<名称>/`。把个人技能放在这里，默认是 `~/.deepseek-code/skills/`。原先放在 `~/.claude/skills` 或 `$CLAUDE_CONFIG_DIR/skills` 的个人技能需要自行复制过来。用户级 `commands/` 也不再扫描。
-3. 当前工作区的 `.claude/skills` 和 `.claude/commands`。项目内的同名技能优先。
+3. 当前工作区的 `.claude/skills`、`.claude/commands` 和 `.agents/skills`。同名时项目优先，`.agents/skills` 中的定义优先于 `.claude/skills`。
 
 升级时会清理旧版生成且未经修改的 `legacy-build`、`legacy-commit`、`legacy-document`、`legacy-review` 和 `legacy-test`。编辑过正文或添加了文件的副本会保留。
 
 数据目录技能的命令名沿用旧版规则：取技能名称转小写、空格换成 `-`，其他标点保留。例如 `My Skill` 是 `/my-skill`，`R&D (team)'s check` 是 `/r&d-(team)'s-check`；多层集合也只使用技能自身名称，不加集合前缀。两个数据目录技能得到同一个名字时，两者都改用按文件路径计算的 `skill_<哈希>`，不会因为文件系统顺序只保留其中一个。项目和插件技能沿用各自的命名规则。
 
-模型看到的技能列表、`Skill` 工具和斜杠命令使用同一套结果。`enabled: false` 的技能不出现；`disable-model-invocation: true` 的技能仍可用斜杠命令，但模型看不到也不能调用；`user-invocable: false` 的技能只供模型调用。格式错误或无法读取的 `SKILL.md` 会被跳过，可在运行日志或 `/plugins` 的 Errors 页查看路径。发现过程不会创建目录或文件，也不会跟随符号链接。技能说明中的 `references/setup.md` 等相对路径以 `SKILL.md` 所在目录为基准解析。
+模型看到的技能列表、`Skill` 工具和斜杠命令使用同一套结果。`enabled: false` 的技能不出现；`disable-model-invocation: true` 的技能仍可用斜杠命令，但模型看不到也不能调用；`user-invocable: false` 的技能只供模型调用。格式错误或无法读取的 `SKILL.md` 会被跳过，可在运行日志或 `/skills` 的 Errors 页查看路径。发现过程不会创建目录或文件，也不会跟随符号链接。技能说明中的 `references/setup.md` 等相对路径以 `SKILL.md` 所在目录为基准解析。
 
 用 `dcl skills list` 查看数据目录中的技能及其来源、路径和状态，包括已关闭的内置技能。用 `dcl skills help <名称>` 阅读正文，用 `dcl skills state <名称> user` 启用。默认状态与使用示例见[技能与插件面板](./skills.md)。
 

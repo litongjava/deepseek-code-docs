@@ -39,7 +39,7 @@ DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1 dcl -m deepseek-flash --api-format anth
 - **独立会话**：每个队员是一个独立的子会话，权限与队长相同。
 - **按需唤起**：给已结束的队员发消息时，队长会在自己的回合内唤起它处理这条消息。
 - **取消即全部停止**：取消队长的任务时，所有队员一起停止。
-- **团队配置位置**：保存在[数据目录](./data-directory.md)的 `teams/<团队名>/config.json`，解散时清理。
+- **团队配置位置**：保存在[数据目录](./data-directory.md)的 `data/teams/<团队名>/config.json`，解散时清理。
 
 ## 相关文档
 

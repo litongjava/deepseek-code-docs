@@ -1,6 +1,6 @@
 # 首次启动与内置提供商
 
-第一次运行 `dcl` 时，如果还没有任何可用的模型配置，dcl 会引导你接入一个提供商，默认推荐 DeepSeek。
+第一次运行 `dcl` 时，如果还没有任何可用的模型配置，dcl 会引导你接入一个提供商，默认推荐使用 Responses 协议的 OpenCode。
 
 ## 已经设置了 DEEPSEEK_API_KEY
 
@@ -8,31 +8,10 @@
 
 ## 引导流程
 
-```text
-Welcome to DeepSeek Code! Connect a model provider to get started.
-
-Choose a provider:
-   1. DeepSeek (recommended)
-   2. Anthropic Claude
-   3. OpenAI
-   4. Moonshot Kimi (China)
-   5. Zhipu GLM Coding Plan (China)
-   6. MiniMax (China)
-   7. Alibaba Qwen Token Plan (China)
-   8. OpenCode Go
-   9. OpenRouter
-  10. Another OpenAI- or Anthropic-compatible endpoint
-Number or saved provider ID [1]:
-Get an API key at https://platform.deepseek.com/api_keys
-Paste the API key (hidden), or press Enter to set DEEPSEEK_API_KEY yourself: ••••••••••••
-Checking the connection with deepseek-flash…
-Connected. DeepSeek is saved as the default provider (key stored in config.json, readable only by you).
-```
-
-1. **选择提供商**：直接回车选择 DeepSeek；输入编号选择其他提供商。已经保存过的提供商会列在下方，输入它的 ID 即可使用。
+1. **选择提供商**：在 `Number or saved provider ID [1]` 处直接回车会选择 OpenCode，输入对应编号也可选择 DeepSeek 等其他提供商。已保存的提供商可按 ID 选择。
 2. **提供 API Key**：
    - 如果对应的环境变量已经设置（例如 `MOONSHOT_API_KEY`），直接使用，不需要粘贴；
-   - 否则可以把 Key 粘贴进来。输入时只显示圆点，Key 不会出现在终端记录里。它保存在[数据目录](./data-directory.md)的 `config.json` 中，该文件只有你自己可读写；
+   - 否则可以把 Key 粘贴进来。输入时只显示圆点，Key 不会出现在终端记录里。它保存在[数据目录](./data-directory.md)的 `config/config.json` 中，该文件只有你自己可读写；
    - 也可以直接回车，按提示自行设置环境变量后重新启动。
 3. **检查连接**：保存后，dcl 用所选模型发一个很小的请求验证 Key。失败时会显示原因，可以重新粘贴。
 4. **选择默认模型**：提供商有多个模型时显示 `Choose the model to use` 列表，`Enter` 确认，`Esc` 选第一个；模型较多时（例如 OpenCode Go 的数十个）可以直接输入关键字筛选。之后新会话默认用这个模型，可以随时用 `/model` 修改。
@@ -42,6 +21,7 @@ Connected. DeepSeek is saved as the default provider (key stored in config.json,
 
 | 提供商 | 默认模型 | API Key 环境变量 |
 |---|---|---|
+| OpenCode（推荐） | deepseek-v4.1-flash 等，使用 OpenAI Responses | `OPENCODE_API_KEY` |
 | DeepSeek | deepseek-flash、deepseek-v4-pro | `DEEPSEEK_API_KEY` |
 | Anthropic Claude | claude-sonnet-4-5、claude-opus-4-6、claude-haiku-4-5 | `ANTHROPIC_API_KEY` |
 | OpenAI | gpt-5.1、gpt-5-mini、gpt-4.1 | `OPENAI_API_KEY` |

@@ -91,7 +91,7 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 
 `ListMcpResources` 和 `ReadMcpResource` 不受状态影响。
 
-状态保存在数据目录的 `mcp-states.json`，按服务 ID 记录；没有记录的服务是 `user`。设为 `off` 只会停用服务，不改动保存的状态，所以重新启用后会回到原来的状态。修改后不需要重启，模型在下一轮请求中使用新状态。
+状态保存在数据目录的 `config/mcp-states.json`，按服务 ID 记录；没有记录的服务是 `user`。设为 `off` 只会停用服务，不改动保存的状态，所以重新启用后会回到原来的状态。修改后不需要重启，模型在下一轮请求中使用新状态。
 
 查看和设置：
 
@@ -101,7 +101,11 @@ dcl mcp add --transport ws live wss://mcp.example.com/ws
 /mcp state <服务> <状态>         # 设置状态
 ```
 
-服务可以写 ID，也可以写显示名称。会话外使用 `dcl mcp state`，参数相同。`/mcp` 菜单在每个服务后面显示状态，进入服务后选择 `Set state` 修改。`/plugins` 面板的 Installed 页也列出 MCP 服务的状态和上下文开销，见[技能与插件面板](./skills.md#plugins-面板)。
+服务可以写 ID，也可以写显示名称。会话外使用 `dcl mcp state`，参数相同。`/mcp` 菜单在每个服务后面显示状态，进入服务后选择 `Set state` 修改。`/tools` 面板的 Mcp 页也列出 MCP 服务的状态和上下文开销，见[技能与插件面板](./skills.md#plugins-面板)。
+
+交互终端中的 MCP 服务统一由该会话的 worker 启动和管理。安装或修改服务、插件或技能后，继续在同一会话发送下一轮消息即可使用更新后的清单。通过 `/mcp` 选择 **Enable** 或 **Disable** 来启停服务，或用 `/mcp state <服务> <状态>` 更改工具的可见性。
+
+回合执行期间变更 MCP 状态、重连或切换插件时，终端会提示 `MCP is busy, try after this turn`，本次变更不会写入。请等回合结束后再操作。停用或重启 stdio 服务时会停止它的整个进程树；会话 worker 退出时也会清理其托管的服务。服务初始化失败时，错误信息附上该进程最近的标准错误输出（如有），可据此检查启动命令和依赖。若编辑后的服务配置无法解析，当前会话保留上一次成功加载的定义；修正配置后再发起下一轮请求。
 
 ## 服务的提示词
 

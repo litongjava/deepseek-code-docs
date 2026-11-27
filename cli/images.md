@@ -6,7 +6,7 @@
 
 1. **拖入终端**：把图片文件拖进终端窗口，或粘贴一个图片文件的绝对路径。和 Claude Code 一样，输入框里显示为 `[Image #1]`。
 2. **写路径**：直接写图片路径，或写 `@图片.png`。路径可以带引号，也可以是绝对路径。
-3. **粘贴剪贴板图片**：截图后在输入框按 `Ctrl+V`，dcl 会把图片保存到[数据目录](./data-directory.md)的 `pasted-images/` 下，并插入 `[Image #1]`。
+3. **粘贴剪贴板图片**：截图后在输入框按 `Ctrl+V`，dcl 会把图片保存到[数据目录](./data-directory.md)的 `data/pasted-images/` 下，并插入 `[Image #1]`。
 
 ```text
 ❯ 这个页面哪里对不齐？ [Image #1]

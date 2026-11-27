@@ -229,7 +229,7 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 普通失败诊断输出会先经过脱敏：密钥、`Authorization`、`Proxy-Authorization`、`Cookie` 与 `Set-Cookie`、代理认证信息和 URL 查询参数都不会写入诊断摘要、日志、诊断请求快照或会话中的失败诊断记录。
 
-开启[请求记录](./request-recording.md)后，`request-records` 中另行保存实际请求体和原始响应正文，**这些正文不脱敏**。排查请求、压缩或工具调用问题时，可用 `dcl requests <会话ID>` 找到文件；以下诊断脱敏规则不适用于这些原始正文，分享前需要逐份检查。
+开启[请求记录](./request-recording.md)后，`diagnostics/request-records` 中另行保存实际请求体和原始响应正文，**这些正文不脱敏**。排查请求、压缩或工具调用问题时，可用 `dcl requests <会话ID>` 找到文件；以下诊断脱敏规则不适用于这些原始正文，分享前需要逐份检查。
 
 几个容易漏掉的情况也一并处理：
 

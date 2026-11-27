@@ -12,28 +12,14 @@
 
 ## 记忆管理
 
-从侧边栏打开**长期记忆**，可以：
+在**长期记忆**中选择受信任的项目，或打开已有会话。**Project memories** 显示该项目或私有工作区的记忆，可搜索条目、编辑 Markdown、新建文件或确认删除。若另一端已修改同一文件，先刷新并核对新版本，再保存。
 
-- 浏览最近的记忆，或按关键词搜索，支持中英文。
-- 手动添加重要的事实，并设置重要性。
-- 编辑或删除单条记忆。删除前会请求确认。
-- 导入、导出 JSON，导入前可以先预览。
-- 调整启用状态、存储方式、默认检索条数（1–50）和最低重要性（0–1）。
+会话首先读取各作用域的 `MEMORY.md` 索引，需要时打开正文。CLI 与 Desktop 共用文件；目录、可见范围与索引上限见[长期记忆](/cli/memory)。
 
-对话不会自动检索记忆或在回复后自动保存。需要时可在面板操作，也可以让模型调用 `memory_search` 或 `memory_ingest`。原有条目仍可在“记忆整理与自动整理”中整理。
-
-![长期记忆面板](/desktop-memory-list.png)
-
-点击条目右上角的铅笔编辑，垃圾桶删除：
-
-![编辑一条记忆](/desktop-memory-edit.png)
-
-默认把记忆保存在本机，Desktop 和 [dcl](/cli/memory) 共用同一份数据，任一端的修改另一端都能看到。
-
-单条编辑和删除使用本机存储。连接外部记忆服务时，可以搜索、添加和清空，单条管理由该服务负责。
+打开 **Legacy archive / remote settings** 可查看旧版本保存在本机的个人条目，或预览、导入和导出其 JSON 归档。旧条目不会自动出现在项目记忆中。
 
 ## 数据处理
 
-删除条目或清空记忆前确认保留需求。备份时分别保存知识库和实际使用的记忆后端。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
+删除条目或清空记忆前确认保留需求。备份时保存知识库、数据目录及另行配置的团队记忆目录。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
 
-源码参考：`KnowledgePanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。
+源码参考：`KnowledgePanel.tsx`、`FileMemoryPanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。

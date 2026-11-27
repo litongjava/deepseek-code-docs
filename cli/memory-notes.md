@@ -52,4 +52,6 @@ Saved to /home/you/project/AGENTS.md: - 提交前先运行 cargo test
 
 项目目录之上的上级目录仍然生效，例如同一仓库中的多个子项目共用仓库根目录的说明文件。
 
-请求记录中，第一条用户消息先放用户级说明和工作环境，再放项目说明（含本地项目规则）。技能清单、Git 快照等提醒也在本次输入之前。非空的两组说明各有一个 `<system-reminder>`，导语只在第一组出现。Anthropic 和 Responses 保留独立的文本块；为兼容 Chat Completions 服务，同样的内容按顺序合并为一个字符串。
+在 `.agents/experience/` 中可保存可复用的项目经验，每个 Markdown 文件通过 YAML 文件头中的 `name` 和 `description` 进入项目经验索引。dcl 会检查工作区根目录及非隐藏直接子目录中的经验目录。用 `dcl config set experience.enabled false` 可关闭这份索引。
+
+请求记录中，第一条用户消息先放用户级说明、独立 CLI 的前端说明（如适用），再放项目说明（含本地项目规则）。已启用的[文件记忆索引](./memory.md)紧跟项目说明。技能清单、工作环境和 Git 快照等提醒也在本次输入之前。非空的两组说明各有一个 `<system-reminder>`，导语只在第一组出现。Anthropic 和 Responses 保留独立的文本块；为兼容 Chat Completions 服务，同样的内容按顺序合并为一个字符串。

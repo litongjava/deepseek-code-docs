@@ -4,6 +4,8 @@
 
 ## 配置 DeepSeek 联网搜索
 
+在交互终端运行 `/search-config`，依次选择搜索提供商（DeepSeek、OpenAI、Anthropic 或自定义地址）、配置密钥并选择模型。搜索配置缺失时，启动提醒会给出配置入口。
+
 使用 DeepSeek 模型时，`WebSearch` 走一个**独立的搜索服务**，需要单独配置密钥，和 Desktop 的"系统设置 → 联网搜索"是同一份配置：
 
 ```bash
@@ -13,7 +15,7 @@ dcl config set search.base_url https://api.deepseek.com/anthropic/v1
 dcl config set search.model deepseek-flash
 ```
 
-- 配置保存在[数据目录](./data-directory.md)的 `config.json` 中（`deepseek_search`），`dcl config show` 显示时密钥会被隐藏。
+- 配置保存在[数据目录](./data-directory.md)的 `config/config.json` 中（`deepseek_search`），`dcl config show` 显示时密钥会被隐藏。
 - 对话用的 API Key 不会被拿来代替搜索密钥。没有配置时，`WebSearch` 返回配置说明，模型会转告你，而不会假装搜索成功。
 - 每次搜索时读取配置，修改后不需要重启。搜索请求只包含查询词，不包含对话内容。
 - 其他提供商（OpenAI、Anthropic）使用它们接口自带的搜索，不需要这一步；兼容代理也需要完整支持相应的原生搜索请求与结果。
@@ -38,15 +40,19 @@ Responses 搜索使用消息数组形式的 `input`，携带 `web_search` 工具
 
 ## WebFetch
 
-参数：`url`、`prompt`，可选 `offset`。和 Claude Code 一样，WebFetch 不把整页内容交给模型，而是把网页转成文本后，用当前会话的模型按 `prompt` 回答，再把回答返回。终端里显示为 `Fetch(https://...)`。网页文本中的长 Base64 数据会先折叠为一行占位符。需要原始响应正文时，可通过 `Bash` 运行 `curl -o page.html https://example.com/`。
+参数为 `url`、`prompt` 和可选的 `offset`，终端显示 `Fetch(https://...)`。直接抓取网页时，默认发送 `Accept: text/markdown, text/html, */*`。收到 `text/markdown` 时保留 Markdown 正文，含 `charset` 的响应也按 Markdown 处理；HTML 则提取可读文本。
+
+本段提取的文本不超过 20,000 个字符时直接返回，无需额外的模型请求。更长的文本交给会话模型按 `prompt` 回答，摘要输出预算最多为 8,192 tokens；上下文较小时按输入和协议开销扣减。若摘要失败且可以回退，结果会附上 `note`、清理后的正文开头和 `next_offset`，可继续分页。网页文本中的长 Base64 会折叠。需要原始响应正文时，可通过 `Bash` 运行 `curl -o page.html https://example.com/`。
+
+直接抓取的连接超时为 10 秒，请求超时为 30 秒。用 `dcl config set fetch.proxy http://127.0.0.1:10808` 设置 HTTP(S) 代理，`dcl config set fetch.proxy off` 清除。本地地址直连；公网网页在特定网络或 HTTP 错误、HTML 缺少可读正文时可能回退到 Jina Reader，结果的 `via` 会标明来源。
 
 - 同一个 URL 15 分钟内重复读取时直接使用缓存。
 - 公网 `http://` 自动升级为 `https://`。
 - `localhost`、回环、内网、链路本地地址和不带点的主机名在 ask、Plan 和 Auto 等模式下会在访问前请求本次审批；需要审批而未获授权时不会发送请求。bypass 模式允许直接访问这些地址，显式 deny 规则仍适用。访问本机服务时保留原始 HTTP/HTTPS 协议。一次批准不授权下一次请求，跨主机重定向仍返回新地址供重新调用。
 - 仅支持 HTTP/HTTPS；`file://`、`ftp://` 等协议继续拒绝。
 - 跳转到其他主机时不自动跟随，而是把跳转地址返回给模型，由它决定是否再次读取；同一主机内的跳转照常跟随。
-- 页面较长时分段读取：结果带有 `next_offset` 时，用它作为 `offset` 继续读。
-- 需要登录的私有页面会失败，请改用有认证的 MCP 工具或 `gh` 等命令。
+- 页面较长时分段读取：结果带有 `next_offset` 时，用它作为以字符计的 `offset` 继续读。非空页面读到末尾或越界时直接返回 `Nothing left to read from offset N: this page's text is M characters long.`，不再调用模型。
+- 读取需要登录的私有页面时，请使用有认证的 MCP 工具或 `gh` 等命令。
 
 新域名的审批还取决于权限模式和域名规则，见[访问新网站](./permissions.md#访问新网站)。
 

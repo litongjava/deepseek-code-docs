@@ -63,7 +63,8 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 - `system`（`subtype: init`）：每个进程一次，含 `session_id`、`cwd`、`model`、`tools`（含 MCP 与宿主 MCP 工具）、`mcp_servers`、`permissionMode`、`slash_commands`、`agents`。
 - `assistant`：每个内容块一条，`message.content` 为 `text`、`thinking` 或 `tool_use`；同一轮模型请求的块共享 `message.id`。
 - `user`：工具结果，`content` 为 `tool_result` 块；MCP 工具的结果保留为内容块数组。
-  dcl 的前台 `Bash` 事件保留原始结果文本，成功时通常是包含 `stdout`、`stderr`、`exit_code` 的 JSON 字符串；工具失败时也可能是带 `Error: ` 前缀的文本。用 `tool_use_id` 关联调用，用 `is_error` 判断调用是否报错。普通后台 Shell 的 `TaskGet` 返回快照，其中的 `output` 和 `result` 是精简文本；控制台任务的终态仍是 JSON 字符串。见 [Java 读取示例](/sdk/java/sessions#读取-shell-任务结果)。
+  dcl 的前台 `Bash` 事件保留原始结果文本，成功时通常是包含 `stdout`、`stderr`、`exit_code` 的 JSON 字符串；工具失败时也可能是带 `Error: ` 前缀的文本。长 Base64 在模型预览中折叠，stream-json 结果仍保留原始内容。用 `tool_use_id` 关联调用，用 `is_error` 判断调用是否报错。普通后台 Shell 的 `TaskGet` 返回快照，其中的 `output` 和 `result` 是精简文本；控制台任务的终态仍是 JSON 字符串。见 [Java 读取示例](/sdk/java/sessions#读取-shell-任务结果)。
+- `resource_alert`：系统资源持续紧张时发出，`kind` 指明 CPU、内存或磁盘指标，`summary` 是简短说明，`details` 是更详细的处理建议。长工具循环自动压缩时，也可能出现 `compaction_notice`（`message`）和 `context_reset`（`session_id`、`boundary_id`、`reason`）。
 - `stream_event`：仅在 `--include-partial-messages` 时输出，`event` 为 `message_start`、`content_block_start`、`content_block_delta`（`text_delta`、`thinking_delta`、`input_json_delta`）、`content_block_stop`、`message_delta`、`message_stop`。
 - `result`：每轮一条，含 `subtype`（`success`、`error_max_turns`、`error_during_execution`）、`is_error`、`result`、`num_turns`、`duration_ms`、`total_cost_usd`（会话累计）、`usage`、`structured_output`，以及 `permission_denials`（本轮被规则、模式、Hook 或宿主拒绝的工具调用）。
 - `prompt_suggestion`：`initialize` 打开 `promptSuggestions` 后，符合缓存条件时可在回合结束后发出。恢复会话时也可收到仍有效的建议，`suggestion` 是文本，`session_id` 是所属会话。
@@ -140,7 +141,7 @@ printf '%s\n' \
 {"type": "result", "subtype": "success", "is_error": false, "result": "Tool said: Permission denied: Plan mode: write operations are not allowed", "num_turns": 2, "duration_ms": 108, "total_cost_usd": 0.0, "permission_denials": [{"tool_input": {}, "tool_name": "mcp__app__server_time", "tool_use_id": "time-1"}], "session_id": "4472dafa-acf8-4c0a-a281-2f9f0f03398c"}
 ```
 
-`system/init.tools` 列出工具名，其中包括 `ToolLoad`。每次模型请求实际收到的定义取决于加载设置和当前代理。加载调用按普通 `tool_use` 块发送，例如 `"name":"ToolLoad","input":{"names":["ListDir","WebFetch"]}`；宿主可以用调用 ID 关联对应的 `tool_result`。SDK 收到结构化 JSON 文本，其中的 `content` 是模型所见的一行结果，`tools` 保留已加载的定义。
+`system/init.tools` 列出工具名，其中包括 `ToolLoad`。`TodoRead` 和 `TodoWrite` 默认常驻，无需先加载。每次模型请求实际收到的定义取决于加载设置和当前代理。加载调用按普通 `tool_use` 块发送，例如 `"name":"ToolLoad","input":{"names":["ListDir","LSP"]}`；宿主可以用调用 ID 关联对应的 `tool_result`。SDK 收到结构化 JSON 文本，其中的 `content` 是模型所见的一行结果，`tools` 保留已加载的定义。
 
 ## Java SDK
 

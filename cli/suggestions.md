@@ -31,7 +31,7 @@
 
 ## 关闭
 
-在[数据目录](./data-directory.md)的 `settings.json` 中设置：
+在[数据目录](./data-directory.md)的 `config/settings.json` 中设置：
 
 ```json
 { "promptSuggestionEnabled": false }

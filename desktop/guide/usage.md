@@ -30,7 +30,7 @@ MCP 连接外部工具服务，需要配置启动命令或服务连接信息。�
 
 ## 本地数据与日志
 
-Desktop 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）用 `global.db` 保存会话目录，用 `sessions/<storage_key>/session.db` 分别保存会话历史，知识库放在该目录下的 `knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
+Desktop 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）用 `global.db` 保存会话目录，用 `data/sessions/<storage_key>/session.db` 分别保存会话历史，知识库放在该目录下的 `data/knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
 
 日志初始化逻辑将滚动日志写入进程工作目录下的 `logs`。不同启动方式可能改变工作目录。
 

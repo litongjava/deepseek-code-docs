@@ -26,7 +26,7 @@
 ```
 
 - 输入框上下各有一条分隔线。
-- 下面一行和 Claude Code 一样：默认的 ask 模式显示 `? for shortcuts`，其他[权限模式](./permissions.md)显示带颜色的标签，例如 `⏵⏵ accept edits on (shift+tab to cycle)`、`⏸ plan mode on (shift+tab to cycle)`、`⏵⏵ bypass permissions on (shift+tab to cycle)`（红色）。右侧显示当前模型和 effort，例如 `deepseek-flash · ● high`。
+- 下面一行和 Claude Code 一样：ask 模式显示 `? for shortcuts`，其他[权限模式](./permissions.md)显示带颜色的标签，例如 `⏵⏵ accept edits on (shift+tab to cycle)`、`⏸ plan mode on (shift+tab to cycle)`、`⏵⏵ bypass permissions on (shift+tab to cycle)`（红色）。右侧显示当前模型和 effort，例如 `deepseek-flash · ● high`。
 - 在空输入框里按 `?`，和 Claude Code 一样在输入框下方分三列显示快捷键，代替提示行；再按 `?` 或按其他键关闭。
 - 提交后，提示词连同上下两条分隔线一起保留在对话记录里，方便回看自己问过什么。
 - 输入 `/` 会在输入框上方弹出斜杠命令列表，下方仍显示模式提示行：按名称字母顺序，一次显示 5 条，每条一行（过长的说明以 `…` 截断）；继续输入时和 Claude Code 一样排序：名称以输入开头的在前（名称短的优先，例如 `/co` 依次是 `/copy`、`/color`、`/config`），然后是名称中某个单词以输入开头的（`/mo` 匹配 `/auto-mode-setup`）、名称包含输入的、按顺序包含这些字母的，最后是说明包含输入的；都不匹配时显示 `No commands match "/xx"`。`↑` `↓` 选择，`Tab` 补全。
@@ -91,7 +91,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 - 主回合结束时显示后台 Agent 数量与 `ready for input; completion will notify`，可以立即继续输入；
 - 输入框下方列出 `● main` 和每个运行中的子代理（类型、说明、已用时间、输出 token 数），提示 `↓ to manage`；
-- 子代理面板与 `/agents` 根据当前执行状态展示活跃项；后台任务心跳失联后退出活跃列表，完成、失败或取消后也不再累计计时。失联记录仍可在 `/tasks` 查看，时长停在最后心跳并标注结果未知；心跳恢复后重新显示为活跃任务。
+- 子代理面板按运行中的子代理逐个列出，前台和后台各自占一行；终端标题的后台计数只统计后台任务；后台任务心跳失联后退出活跃列表，完成、失败或取消后也不再累计计时。失联记录仍可在 `/tasks` 查看，时长停在最后心跳并标注结果未知；心跳恢复后重新显示为活跃任务。
 - 耗时不足一分钟显示 `8s`，不足一小时显示 `2m 8s`，一小时及以上显示 `1h 2m 8s`，主任务状态行、子代理行与任务详情使用同一格式。
 - 运行期间或等待输入时双击 Agent 行，在右侧查看该子代理的执行记录，内容定期刷新；侧栏保留最近 20 条消息及每条消息最近 30 次工具调用，长正文取末尾片段，便于快速查看最近进展；按 `Esc` 关闭，方向键可滚动。
 - 前台子代理执行时，状态行显示 `Waiting for foreground agent`；后台子代理允许主任务继续。面板累计子代理各次请求的输出 token，实时记录与已保存记录按请求 ID 去重。前台流式输出尚未收到精确统计时显示带 `~` 的估算值，精确统计到达后替换；没有输出与统计时显示 `pending`。子代理统计独立于主会话。
@@ -104,6 +104,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 **`/memory` 和 `/agents`**：`/memory` 列出用户、项目、本地三份说明文件（位置和大小），选中后打开编辑，也可以查看当前加载的项目说明。`/agents` 显示当前会话家族中正在执行的 Agent（包含父级、同级和子级），逐项列出会话 ID、运行状态、任务及可用的当前工具信息；等待审批时给出提示。空闲和模型执行期间均可使用，不会启动模型。仅有保存记录或打开终端的空闲会话不算活跃；没有活跃项时明确显示空状态。`/agents definitions` 查看可委派的代理类型，原有 `/list-agents definitions` 也可使用；`/agents model` 查看或设置各代理类型的默认模型，见[内置工具](./tools.md)中的 Agent 一节。
 
 **需要你回答时**：工具审批在输入框的位置显示选项菜单，用 `↑`/`↓` 和 `Enter` 或数字键选择，见[审批提示](./permissions.md#审批提示)。计划审批等需要输入文字的问题，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
+
+终端中拖选文本后可按 `c` 或右键复制选区，复制提示显示在输入框上方。
 
 ## 快捷键
 
@@ -144,7 +146,7 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 `/vim` 可以切换到 vim 风格的编辑，见[vim 模式](./vim-mode.md)。
 
-快捷键可以在数据目录的 `keybindings.json` 中自定义。
+快捷键可以在数据目录的 `config/keybindings.json` 中自定义。
 
 ## 常用斜杠命令
 
@@ -169,13 +171,15 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 | `/vim` | 切换 [vim 模式](./vim-mode.md) |
 | `/rename 名称` | 给会话命名 |
 | `/clear` | 开始新的对话；别名 `/new`、`/reset` |
-| `/restart` | 重启 dcl：替换当前进程并在当前对话里继续，启动参数保留，改过的 `config.json` 和更新后的二进制会重新加载 |
+| `/restart` | 重启 dcl：替换当前进程并在当前对话里继续，启动参数保留，改过的 `config/config.json` 和更新后的二进制会重新加载 |
 | `/config` | 设置对话框；别名 `/settings` |
 | `/exit` | 退出，并提示用 `dcl --resume 会话ID` 恢复 |
 
 旧版的 `/radio`、`/stickers`、`/mobile` 和 `/release-notes` 已移除。
 
 `/resume [ID]` 恢复历史并等待输入；`/continue` 显式继续当前会话。任务还在后台运行时，`/continue` 直接接回这个任务，不会重新执行。
+
+普通内联记录和 Compact 记录都把 `Running…` 放在对应工具调用的标题下。多个工具同时运行时，可以按编号分辨每条状态，思考段单独显示。Compact 视图会跟随新调用，手动向上滚动可停在当前位置，按 Ctrl+End 回到末尾继续跟随。
 
 ## 思考等级、状态与粘贴
 

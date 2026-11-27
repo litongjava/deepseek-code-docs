@@ -1,6 +1,6 @@
 # 请求记录
 
-Desktop 可以把会话中发给模型的 HTTP 请求与原始响应保存到本机，用于排查模型请求、上下文压缩和工具调用问题。默认关闭；与 CLI 使用同一数据目录时，两者读取同一份 `settings.json`。
+Desktop 可以把会话中发给模型的 HTTP 请求与原始响应保存到本机，用于排查模型请求、上下文压缩和工具调用问题。默认关闭；与 CLI 使用同一数据目录时，两者读取同一份 `config/settings.json`。
 
 ::: warning 隐私与分享
 请求体和响应正文不脱敏，可能包含完整对话、发给模型的文件内容、工具参数与结果。认证请求头会被移除，但正文中的密钥和个人信息仍可能保留。分享前请检查所有文件，只提供必要内容。
@@ -9,8 +9,8 @@ Desktop 可以把会话中发给模型的 HTTP 请求与原始响应保存到本
 ## 在 Desktop 中开启
 
 1. 找到 Desktop 实际使用的[数据目录](../maintenance/data.md#数据位置)。默认是 Linux / macOS 的 `~/.deepseek-code`、Windows 的 `%USERPROFILE%\.deepseek-code`；设置过 `DEEPSEEK_CODE_DATA_DIR` 时使用该目录。
-2. 编辑其中的 `settings.json`，合并以下字段。文件不存在时可新建，已有其他设置时不要覆盖整份文件。
-3. 保存后发送一条新消息，在数据目录的 `request-records` 中检查对应会话目录。
+2. 编辑其中的 `config/settings.json`，合并以下字段。文件不存在时可新建，已有其他设置时不要覆盖整份文件。
+3. 保存后发送一条新消息，在数据目录的 `diagnostics/request-records` 中检查对应会话目录。
 
 ```json
 {
@@ -41,7 +41,7 @@ dcd
 
 ## 查看与保留
 
-记录保存在 `<数据目录>/request-records/<会话ID>/`，每次 HTTP 尝试独立编号。请求体、过滤后的请求头、原始响应及元数据分别存放；上下文压缩还会保存摘要请求与 `compaction-*.json` 压缩记录。
+记录保存在 `<数据目录>/diagnostics/request-records/<会话ID>/`，每次 HTTP 尝试独立编号。请求体、过滤后的请求头、原始响应及元数据分别存放；上下文压缩还会保存摘要请求与 `compaction-*.json` 压缩记录。
 
 安装了 CLI 时，在终端运行 `dcl sessions list` 查找会话 ID，再用 `dcl requests <会话ID>` 列出请求及文件路径。CLI 必须指向 Desktop 使用的同一个数据目录。也可以直接打开记录目录中的文件；文件命名、完成状态和排查步骤见 [CLI 请求记录](../../cli/request-recording.md#保存位置与文件)。
 

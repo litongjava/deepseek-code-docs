@@ -6,10 +6,10 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 | 模式 | 行为 |
 |---|---|
-| `ask`（默认） | 读文件、搜索等只读操作直接执行，只读的 shell 命令也直接执行；改文件、运行其他命令前询问 |
+| `ask` | 读文件、搜索等只读操作直接执行，只读的 shell 命令也直接执行；改文件、运行其他命令前询问 |
 | `accept-edits` | 文件编辑自动放行，只读的 shell 命令直接执行，其他命令仍然询问 |
 | `plan` | 允许非危险 Shell 命令和查询工具，直接编辑仅限计划文件，见[计划模式](./plan-mode.md) |
-| `auto` | 普通文件编辑和未命中危险规则的 Bash 直接放行；危险 Bash 逐次询问，其他未明确放行的工具由分类器判断，见[自动权限模式](./auto-mode.md) |
+| `auto`（默认） | 普通文件编辑和未命中危险规则的 Bash 直接放行；危险 Bash 逐次询问，其他未明确放行的工具由分类器判断，见[自动权限模式](./auto-mode.md) |
 | `dont-ask` | 不询问：需要审批的调用一律拒绝，已放行的规则照常生效 |
 | `bypass` | 自动批准工具调用，允许访问工作目录之外的路径；跳过 ask，显式 deny 规则仍生效 |
 
@@ -18,13 +18,13 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 - 启动时指定：`dcl --permission-mode accept-edits`。
 - 运行中切换：`Shift+Tab` 按 ask → accept-edits → plan → bypass → auto → ask 循环；也可以用 `/permissions <模式>`。普通 `dcl` 启动即可切换到 bypass，无需额外参数；auto 没有配置分类模型时跳过，直接回到 ask。
 - 不带参数的 `/permissions` 和 Claude Code 一样打开分页管理：Recently denied（本会话被拒绝的调用）、Allow、Ask、Deny（`Add a new rule…` 添加规则，选中规则可以删除；命令行和设置文件里的规则只读）、Auto mode（自动模式配置）、Workspace（工作目录和 `Add directory…`），`←`/`→` 切换。
-- `--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 保留兼容，普通启动已经允许切换。默认仍以 ask 开始，切换为 bypass 后才按该模式执行。首次以 bypass 启动时会先确认一次。
+- `--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 保留兼容，普通启动已经允许切换。未指定模式时以 auto 开始，切换为 bypass 后才按该模式执行。首次以 bypass 启动时会先确认一次。
 
 ### 完全访问
 
 `dcl --yolo`（等同于 `--full-access`）是更彻底的 bypass：除了不询问，还**忽略 deny 规则**，并且命令在[沙箱](./sandbox.md)之外运行。首次使用时显示一次单独的警告。只在可以随时丢弃的机器上使用。
 
-完全访问启动还会自动开启[请求记录](./request-recording.md)，保存未脱敏的模型请求体和原始响应。可用 `DEEPSEEK_CODE_RECORD_REQUESTS=0` 或数据目录 `settings.json` 中的 `"requestRecording": { "enabled": false }` 显式关闭；环境变量优先于配置，`--record-requests` 则始终强制开启。
+完全访问启动还会自动开启[请求记录](./request-recording.md)，保存未脱敏的模型请求体和原始响应。可用 `DEEPSEEK_CODE_RECORD_REQUESTS=0` 或数据目录 `config/settings.json` 中的 `"requestRecording": { "enabled": false }` 显式关闭；环境变量优先于配置，`--record-requests` 则始终强制开启。
 
 `--dangerously-skip-permissions` 和 `--yolo` 在 bypass 模式下都跳过 Bash 工具内部的危险命令关键字过滤，例如 `shutdown`、`diskpart`。前者仍遵守显式 deny 规则和配置的沙箱；`--yolo` 同时关闭这些限制。切回 ask、plan 等模式后重新按当前权限模式检查。操作系统权限和命令本身的错误仍可能导致执行失败。
 
@@ -184,7 +184,7 @@ dcl --allowed-tools "Bash(npm test)" --allowed-tools Edit
 
 以下路径即使在 `accept-edits` 模式下，修改也要你确认：
 
-- [数据目录](./data-directory.md)：其中的 `settings.json` 可以配置会执行命令的 hooks（`workspaces/` 子目录除外）；
+- [数据目录](./data-directory.md)：其中的 `config/settings.json` 可以配置会执行命令的 hooks（`data/workspaces/` 子目录除外）；
 - `.git`、`.vscode`、`.idea`、`.claude` 目录（`.claude/worktrees` 除外）；
 - `.gitconfig`、`.gitmodules`、`.bashrc`、`.bash_profile`、`.zshrc`、`.zprofile`、`.profile`、`.ripgreprc`、`.mcp.json`、`.claude.json` 等配置文件。
 

@@ -14,18 +14,21 @@
 - 定时与循环：`CronCreate`、`CronDelete`、`CronList`、`ScheduleWakeup`，见[定时任务与循环](./scheduling.md)。
 - 编排：`Workflow`，见[工作流](./workflows.md)。
 - 技能：`Skill`。
-- 待办与任务：`TodoWrite`、`TaskCreate`、`TaskGet`、`TaskList`、`TaskUpdate`。
+- 待办与任务：`TodoRead`、`TodoWrite`、`TaskCreate`、`TaskGet`、`TaskList`、`TaskUpdate`。
 
 MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服务](./mcp.md)。
 
-读取文本时，`Read` 会把识别出的连续 Base64 数据折叠成一行（普通数据至少 1024 个字符，`data:` URI 载荷至少 256 个字符），例如 `[base64 data omitted: about 2048 bytes decoded, looks like PNG]`。需要核对原文时，传入 `{"file_path":"page.html","raw":true}`；也可加 `offset` 和 `limit` 只读相关行。原文件不受影响。
+`Python` 可按需加载以执行传入的 Python 代码；用 `interpreter` 或 `conda` 选择解释器。设置 `run_in_background: true` 时返回任务 ID，可用 `TaskGet` 读取输出、`TaskStop` 停止。
+
+读取文本时，`Read` 会把识别出的连续 Base64 数据折叠成一行（普通数据至少 1024 个字符，`data:` URI 载荷至少 256 个字符），例如 `[base64 data omitted: about 2048 bytes decoded, looks like PNG]`。需要核对原文时，传入 `{"file_path":"page.html","raw":true}`；也可加 `offset` 和 `limit` 只读相关行。原文件不受影响。Shell 和 Monitor 输出的占位符另带原文路径与行号，见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
+
+启用[文件记忆](./memory.md)后，可按常驻索引使用普通文件工具读取和维护条目。
 
 ## dcl 自己的工具
 
 - `ToolLoad`：按目录中的完整名称加载工具定义，见[工具目录与加载](#工具目录与加载)。
 
 - [`ContextSearch`](#contextsearch)：在当前会话已保存的历史中检索原文。
-- `memory_search`、`memory_ingest`：检索和写入长期记忆，和 Desktop 共用。
 - `ListDir`、`MultiEdit`：列目录、一次多处编辑。
 - `DeepSeekCode`、`ClaudeCode`、`Codex`：把子任务交给本机的另一个 dcl、Claude Code 或 Codex，见[外部代理](./external-agents.md)。
 - `computer_use`：鼠标、键盘、滚动、等待与截图，见[桌面操作](./computer-use.md)。
@@ -86,7 +89,7 @@ Agent 工具的说明里会列出当前可用的代理类型，每种一行，�
 - `guide`：结合现有资料解释应用和项目的工作流程。
 - `verify`：按要求运行相关测试、收集证据并如实报告结果。
 
-`explore` 和 `plan` 只能用 `Read`、`Glob`、`Grep`、`ListDir`、`Bash`、`WebFetch`、`WebSearch` 和长期记忆检索，不能修改文件。它们的 `Bash` 只放行只读命令，例如 `git log`、`git blame`、`ls`、`find`、`cat`；其他命令、后台运行和脱离运行都会被拒绝。你自己定义的代理类型也会出现在列表里，`/agents definitions` 可以查看全部类型。
+`explore` 和 `plan` 只能用 `Read`、`Glob`、`Grep`、`ListDir`、`Bash`、`WebFetch` 和 `WebSearch`，不能修改文件。它们的 `Bash` 只放行只读命令，例如 `git log`、`git blame`、`ls`、`find`、`cat`；其他命令、后台运行和脱离运行都会被拒绝。你自己定义的代理类型也会出现在列表里，`/agents definitions` 可以查看全部类型。
 
 每种代理类型可以设置默认模型，例如让搜索类的 `explore` 使用更快、更便宜的模型：
 
@@ -156,7 +159,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 - 只开按需：默认不加载；模型用 `ToolLoad` 加载后，从下一次请求开始可以调用。
 - 两个都关：目录中不列出，加载和直接调用都会被拒绝。
 
-默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `TaskGet`、`ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
+默认常驻的工具有 `Bash`、`Read`、`Write`、`Edit`、`MultiEdit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskGet`、`TaskStop`、`TodoRead`、`TodoWrite`、`WebFetch` 和 `WebSearch`。模型从第一次请求起即可读写待办，默认的按需目录不列出这两个工具。其他工具（例如 `ListDir`、`LSP` 和 `Agent`）按设置加载。
 
 “启用”不是总开关：关掉它只表示不再默认加载，模型仍然可以按需发现这个工具。核心名单只决定默认值，任何一个工具的开关都可以修改。
 
@@ -181,10 +184,10 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 模型调用 `ToolLoad` 时只传一个 `names` 数组，包含 1 至 64 个非空字符串。每项都必须是完整名称，区分大小写。例如，同时加载目录中的两个工具：
 
 ```json
-{"names":["ListDir","WebFetch"]}
+{"names":["ListDir","LSP"]}
 ```
 
-重复名称按首次出现的顺序去重。成功时，模型收到一行确认，例如 `Loaded ListDir, WebFetch. Available from the next request.`，下一次请求按加载顺序把新定义追加到常驻工具之后。SDK 和工具记录保留结构化结果，其中`loaded_tools` 列出新加载的工具，`already_available` 列出已经可用的工具。只要有一个名称未知或不可用，整批就不新增任何工具；结果中的 `unknown` 列出未知名称，`unavailable` 给出不可用的名称和原因。例如，把上例中的 `WebFetch` 写成 `webfetch` 会使整批失败。
+重复名称按首次出现的顺序去重。成功时，模型收到一行确认，例如 `Loaded ListDir, LSP. Available from the next request.`，下一次请求按加载顺序把新定义追加到常驻工具之后。SDK 和工具记录保留结构化结果，其中`loaded_tools` 列出新加载的工具，`already_available` 列出已经可用的工具。只要有一个名称未知或不可用，整批就不新增任何工具；结果中的 `unknown` 列出未知名称，`unavailable` 给出不可用的名称和原因。例如，把上例中的 `LSP` 写成 `lsp` 会使整批失败。
 
 旧工具 `ToolSearch` 已移除，无兼容别名。升级时，调用方应把工具名、权限规则和 Hook 匹配器中的旧名改为 `ToolLoad`，把查询参数改为完整名称数组。旧调用记录保留原名；恢复旧会话时需要重新按名加载。
 

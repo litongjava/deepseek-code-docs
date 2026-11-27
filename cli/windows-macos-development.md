@@ -341,7 +341,7 @@ Mac 上的 dcl 前端必须持续运行；退出 dcl 会断开、归档远程会
 /remote-control disconnect
 ```
 
-如果希望以后自动连接，在 Mac 数据目录 `settings.json` 中合并：
+如果希望以后自动连接，在 Mac 数据目录 `config/settings.json` 中合并：
 
 ```json
 {"remoteControlAtStartup":true}

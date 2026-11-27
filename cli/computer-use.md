@@ -54,7 +54,7 @@
 
 ## 截图保存位置与返回值
 
-新版工具将截图保存到数据目录的 `screenshots` 子目录，默认是 `~/.deepseek-code/screenshots/`。指定 `DEEPSEEK_CODE_DATA_DIR` 或通过 CLI `--data-dir` 使用其他数据目录时，截图随数据目录保存。每张图片使用唯一文件名，不覆盖旧截图。
+新版工具将截图保存到数据目录的 `cache/screenshots/` 子目录，默认是 `~/.deepseek-code/cache/screenshots/`。指定 `DEEPSEEK_CODE_DATA_DIR` 或通过 CLI `--data-dir` 使用其他数据目录时，截图随数据目录保存。每张图片使用唯一文件名，不覆盖旧截图。
 
 Windows 本地截图为主显示器的 JPEG。返回示例：
 
@@ -62,7 +62,7 @@ Windows 本地截图为主显示器的 JPEG。返回示例：
 {
   "action":"Screenshot",
   "success":true,
-  "screenshot_path":"C:/Users/Alice/.deepseek-code/screenshots/screenshot-<uuid>.jpg",
+  "screenshot_path":"C:/Users/Alice/.deepseek-code/cache/screenshots/screenshot-<uuid>.jpg",
   "mime_type":"image/jpeg",
   "error":null,
   "duration_ms":0
@@ -76,7 +76,7 @@ Windows 本地截图为主显示器的 JPEG。返回示例：
 - `duration_ms` 是动作执行计时，不包含后续截图与文件保存耗时，截图动作可能显示为 0。
 - 截图为空、解码失败或无法写入文件时，工具返回错误，不会给出虚假的成功路径。
 
-可直接用图片查看器打开文件。让模型看图，需要通过 `Read` 等图片读取工具将文件作为图片交给支持视觉的模型，并满足文件访问权限。仅返回路径不会让纯文本模型获得视觉能力；纯文本模型可借助另行提供的 OCR 工具读取文字。
+可以直接用图片查看器打开保存的文件。成功取得截图时，工具结果会把图像随动作信息一起交给支持视觉输入的模型，无需再调用一次 `Read`。
 
 截图会保留在磁盘中，目前没有自动清理策略，可按需手动删除。
 

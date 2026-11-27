@@ -14,8 +14,10 @@
 - `rewindFiles(uuid, dryRun)`：回退某条用户消息之后的文件改动，`query` 的返回值就是该消息的 uuid。
 - `cancelQueuedMessage(uuid)`：取消尚未开始的排队消息。
 - `stopTask(id)`：停止后台任务。
-- `reloadPlugins()`：重新加载插件。
+- `reloadPlugins()`：在空闲时刷新当前连接的插件，返回 `commands`、`agents`、`plugins` 和 `mcpServers` 等字段。
 - `control(request)`：发送任意控制请求。
+
+安装或修改 dcl 的 MCP 服务、插件和技能后，可以在同一连接上发起下一轮请求。等当前回合返回 `ResultMessage` 后再调用 `mcpToggle()`、`mcpReconnect()` 或 `reloadPlugins()`；执行中请求变更会收到控制错误，Java 端抛出 `AgentException`。
 
 使用 `interrupt()` 取消 dcl 回合后，可继续读取该轮的 `ResultMessage`，再发送下一轮。直接发送 `SIGINT` 时，空闲的 dcl 进程也可能退出，见 [stream-json 控制请求](/cli/sdk#宿主可以发送的控制请求)。
 
