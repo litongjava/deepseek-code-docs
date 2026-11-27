@@ -167,7 +167,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 - 只开按需：默认不加载；模型用 `ToolLoad` 加载后，从下一次请求开始可以调用。
 - 两个都关：目录中不列出，加载和直接调用都会被拒绝。
 
-默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskStop`。其他内置工具默认只开“按需加载”，例如 `TaskGet`、`Python`、`ListDir`、`MultiEdit`、`WebFetch`、`WebSearch`、`LSP`、`Agent`、`Workflow`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
+默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`MultiEdit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskGet`、`TaskStop`、`TodoRead`、`TodoWrite`、`WebFetch`、`WebSearch`。其他内置工具默认只开“按需加载”，例如 `Python`、`ListDir`、`Monitor`、`LSP`、`Agent`、`Workflow`、`ContextSearch`、长期记忆、定时任务和桌面操作。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
 
 “启用”不是总开关：关掉它只表示不再默认加载，模型仍然可以按需发现这个工具。核心名单只决定默认值，任何一个工具的开关都可以修改。
 

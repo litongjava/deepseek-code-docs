@@ -4,7 +4,7 @@
 
 ## 配置联网搜索
 
-`WebSearch` 支持独立配置搜索服务（支持 **DeepSeek**、**OpenAI** 和 **Anthropic**，也支持自定义 HTTP(S) 网关），和 Desktop 的"系统设置 → 联网搜索"共用同一份配置。
+`WebSearch` 支持独立配置搜索服务（支持 **DeepSeek**、**OpenAI** 和 **Anthropic**，也支持自定义 HTTP(S) 网关），和 Desktop 的"系统设置 → 联网搜索"共用同一份配置。若 `base_url`、`model` 或 `api_key` 任一缺失，交互式 `dcl` 启动横幅下方会显示一条 `System Reminder` 提示运行 `/search-config`，Desktop 顶部也会显示可关闭的 `System Reminder` 横幅并提供直达设置页的 `Configure` 按钮。
 
 ### 交互式向导（推荐）
 
