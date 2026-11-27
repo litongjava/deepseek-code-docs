@@ -49,3 +49,11 @@ MCP 的"运行中"来自管理器的记录，dcl 不会为此向服务发送协�
 ## 验证模型真的可用
 
 `/status` 不会调用模型。要确认 API Key 有效、模型能正常回复，用 `/test`，它会发送一个很小的真实请求。
+
+## 缺失目录的只读会话
+
+当会话的项目目录或绑定的 worktree 已不存在而以只读模式打开时，`/status` 只读取已保存的会话元数据，不探测 Worker、MCP 服务或语言服务器：
+
+- `Workspace` 标明实际缺失的目录与 `(missing · read-only)`，并附 `Reason` 说明原因；
+- `Model` 标注 `(display only)`（即使原提供商或模型已从配置中删除/禁用仍可显示）；
+- `Messages` 显示已保存消息数，`Permissions` 与 `History` 提示当前为只读模式及可用的历史查看命令（`Ctrl+O`、`/history`、`/export`、`/copy`）。

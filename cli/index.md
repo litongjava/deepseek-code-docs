@@ -93,6 +93,16 @@ dcl -p "总结 README" < /dev/null           # 一次性任务
 
 如果恢复时另一个进程仍在执行这个会话（例如 `dcl --print`，或另一个终端里的前台任务），dcl 进入只读观察，并保持与正常会话一致的富文本界面：已完成工具以带 `#编号`、`⎿` 摘要、diff 预览与点击展开的工具块渲染（兼容 `Alt+M` 紧凑模式），流式 Markdown 代码块与表格完整渲染，且不会重复重放恢复时已显示的记录；进行中的工具实时显示在状态行中并在完成后提交。输入框正上方会**常驻**一条只读占用提示（如 `● Read-only · occupied by another worker (partial features: observe, /status, /tasks, /resume, /clear, /exit; prompts disabled)`），明确说明当前会话被其他 worker 占用、仅可使用部分本地/只读功能，普通消息和启动回合的命令不会被提交。当前会话的后台任务可以用 `/continue` 接回，或用 `/tasks attach 任务ID` 打开完整视图；直接执行的 `--print`/JSON 进程只能观察，交互需要回到它自己的进程。在观察终端执行 `/exit` 或按 `Ctrl+C` 只会安全离开只读视图，**不会**停止或打断对端 worker 正在执行的会话。占用结束、输入恢复后，常驻只读提示自动消失，观察期间排队的内容不会自动提交。
 
+如果恢复的会话所绑定的项目目录或 Git worktree 已经被删除，交互式 `dcl --resume <ID>` 与 `/resume` 同样以**只读查看模式**打开历史记录，而不修改工作区、不触发 Hook 或写入会话数据库：页脚与 `/status` 会标明只读状态及缺失路径，`/resume` 列表默认切到全部项目并用 `[missing]` 标注缺失目录；允许浏览历史和执行 `/status`、`/copy`、`/export`、`/resume`、`/clear`、`/exit` 等只读/本地命令，发送消息、`!`/`#` 快捷输入和修改会话的命令会被拒绝。重新创建原目录或切换到存在有效目录的会话后恢复可写模式。
+
+如果保存的项目目录或绑定的 Git worktree 已从磁盘删除，但会话历史仍在，交互式 `/resume`（选择器或 `/resume <ID>`）和交互式 `dcl --resume <ID>` 会以**只读历史模式**打开，不再直接报目录不存在错误：
+
+- 恢复后展示完整对话历史与只读提示（`✻ Read-only mode: directory no longer exists (...)`；多目录项目中会明确指出实际缺失的目录），页脚显示 `■ read-only · directory missing`。即使原会话保存的提供商或模型已从 `config.json` 中删除或禁用，也能以仅展示的绑定打开查看历史。
+- 只读模式下不切换工作目录、不执行 Hook、不写权限模式或 `session.db`、不注册本地协调与在线状态。可用 `Ctrl+O`、`/history`、`/export`、`/copy`、`/copy-session-id`、`/context`、`/cost`、`/usage`、`/status`、`/sessions`、`/tasks`（仅只读列表与 `show`/`sessions`/`records`）、`/theme`/`/color`/`/output-style`（无参查看）、`/help`、`/vim`、`/scroll-speed`、`/resume` 和 `/exit`。
+- 普通消息（含启动位置参数提示词）、多行输入（`/multiline` 与行尾 `\`）、`!` Shell、 `# ` 记忆笔记、远程提示、`Shift+Tab`、思考等级调整以及所有发起回合或修改状态的斜杠命令（如 `/continue`、`/clear`、`/branch`、`/compact`、`/model`、`/permissions`、`/rename`、`/config`、`/tasks cancel|answer|attach|records legacy` 等）都会被拒绝，且被拒输入不会塞回输入框。
+- 在缺失目录的只读会话里运行无参 `/resume` 时，选择器默认展开全部项目（`[all]`）以便一步切回有效会话，同时禁用 `Ctrl+R` 重命名。切换到有效会话，或重新创建原目录后再次恢复，都会恢复完整可写模式、生命周期 Hook 与当前配置下的提供商/模型校验。
+- 非交互与严格执行入口（`dcl --print --resume <ID>`、`--input-format stream-json`、`--fork-session`、`--init-only`、SDK、Worker）仍严格报错；未信任目录、已归档会话/项目、非 Code 会话以及现有目录 canonical 路径变更不会被降级为只读。
+
 准备继续时，发送 `/continue`：有待处理的后台完成通知时先让模型读取通知；没有通知时根据已有上下文继续未完成的任务。也可以直接发送新的任务消息。开始执行后，自动通知与定时唤醒恢复正常。每次重新恢复会话都会再次等待输入，退出等待状态不会丢弃已保存的通知。`/continue` 不接受参数，启动参数 `--continue` 则表示选择最近的会话，两者作用不同。
 
 带明确任务的启动方式（例如 `dcl --resume ID "继续检查测试结果"` 或 `dcl --resume ID -p "继续检查测试结果"`）仍直接执行。已在其他进程运行的任务继续由原进程管理；恢复历史不会停止这些任务，可通过 `/tasks` 查看或连接。

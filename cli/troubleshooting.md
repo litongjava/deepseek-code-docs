@@ -206,6 +206,21 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出；右击或按 `c` 会复制并取消选中，输入框上方内容区右下角显示复制结果。在 tmux 中需要先执行 `tmux set -g mouse on`，否则 dcl 收不到拖动和右击事件。通过 SSH 使用时，如果外层终端不支持 OSC 52，文字仍会写入 tmux buffer，可用 tmux 的粘贴快捷键（默认先按 `Ctrl+B`，再按 `]`）取回。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
 
+## 恢复会话时原项目目录或 worktree 已被删除
+
+**现象**：在旧版本中，运行 `/resume`（`Ctrl+A` 查看全部项目）或 `dcl --resume <ID>` 选择一个目录或 worktree 已被删除的历史会话，会直接报错：
+
+```text
+Error: Folder must be an existing absolute directory: /path/to/deleted-workspace
+```
+
+或 `Conversation worktree is unavailable; restore it before continuing`。
+
+**处理**：升级到当前版本后，交互式 `/resume` 和 `dcl --resume <ID>` 会自动以**只读历史模式**打开该会话（`/resume` 全部项目列表中该条目带 `[missing]` 标注），无需恢复目录即可通过 `Ctrl+O`、`/history`、`/export`、`/copy`、`/status` 浏览和导出完整历史，且不会修改 `session.db`、运行 Hook 或发起模型请求。
+
+- 若仍需继续对话：重新创建原目录（或恢复对应的 Git worktree）后再次 `/resume <ID>`，或直接用 `/resume` 切换到其他有效会话，即可恢复可写模式。
+- 非交互与严格执行入口（如 `dcl --print --resume <ID>`、`--fork-session`、`--init-only`、`--input-format stream-json`）仍会严格报错；未信任目录或现有目录路径变更也不会降级为只读。
+
 ## 计划模式下 Bash 被禁用
 
 **处理**：当前版本在计划模式下直接执行只读命令，其他命令会先询问，见[交互模式 · 计划模式](./plan-mode.md)。

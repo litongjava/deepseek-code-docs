@@ -124,6 +124,8 @@ esc to interrupt                deepseek-flash · ● high · ~/code/app
 
 如果另一个进程正在执行当前会话，恢复后进入只读观察并沿用正常会话的富文本渲染（带 `#编号`、`⎿` 摘要、diff 预览、点击展开与 Markdown 块，不重放已渲染历史），输入框保持正常 `❯ ` 提示符并在正上方常驻 `● Read-only · occupied by another worker (...)` 状态行（含当前进行中工具活动；仅状态行或 `Ctrl+O` 记录刷新时原地更新，不关闭已打开的 `/` 补全菜单或历史视图）。普通消息提示“未提交”并保留草稿，`/plan`、`/goal`、`/loop`、`/btw`、`/compact`、MCP 提示和技能也不会发起模型请求；`/status`、`/tasks`、`/resume`、`/clear`、`Ctrl+O` 等本地只读功能照常可用。当前会话的后台任务可用 `/continue` 接回或 `/tasks attach 任务ID` 打开完整视图；执行 `/exit` 或按 `Ctrl+C` 只会离开当前只读视图，不会停止或打断对端 worker 的会话与异步 Hook。占用结束后常驻只读提示消失、输入恢复，观察期间排队的内容不会自动提交。`/resume`、`/branch` 或 `/clear` 切换会话时，已连接的 Remote Control 会断开，旧会话的 `/loop`、草稿和排队提示被丢弃。
 
+如果恢复的会话所绑定的项目目录或 worktree 已从磁盘删除，交互模式会进入**缺失目录只读模式**：提示符变为 `… `，页脚状态显示 `■ read-only · directory missing`（无 `shift+tab to cycle`），模型标签附带 `read-only (directory missing)`，并且不会运行外部状态行脚本或自动刷新工作区 diff。普通消息、`/multiline`、行尾 `\`、`!` 命令、`# ` 笔记及修改类斜杠命令都会被直接拒绝（不进入多行拼接，也不把被拒文本塞回输入框）；`Ctrl+O`、`/history`、`/export`、`/copy`、`/status` 和 `/resume`（默认展开 `[all]` 视图，缺失目录条目带 `[missing]` 标注）照常可用。详见[恢复会话](./index.md#常用命令)。
+
 **`/memory` 和 `/agents`**：`/memory` 列出用户、项目、本地三份说明文件（位置和大小），选中后打开编辑，也可以查看当前加载的项目说明。`/agents` 显示当前会话家族中正在执行的 Agent（包含父级、同级和子级），逐项列出会话 ID、运行状态、任务及可用的当前工具信息；等待审批时给出提示。空闲和模型执行期间均可使用，不会启动模型。仅有保存记录或打开终端的空闲会话不算活跃；没有活跃项时明确显示空状态。`/agents definitions` 查看可委派的代理类型，原有 `/list-agents definitions` 也可使用；`/agents model` 查看或设置各代理类型的默认模型，见[内置工具](./tools.md)中的 Agent 一节。
 
 **需要你回答时**：工具审批在输入框的位置显示选项菜单，用 `↑`/`↓` 和 `Enter` 或数字键选择，见[审批提示](./permissions.md#审批提示)。计划审批等需要输入文字的问题，提示行会高亮显示"↑ Answer the question above"，输入框前缀变成 `Answer ›`。
