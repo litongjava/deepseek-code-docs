@@ -60,7 +60,7 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 - **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，原始结果里 `pipeline_sigpipe` 和 `success` 均为 `true`。模型会看到退出码和下游提前关闭管道的说明。其他输出规则见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
 - **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
-- 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。当命令包含冗余的前置 `cd <当前目录>` 或仅用 `cat`/`sed`/`grep` 读搜文件时，前台 `Bash` 结果还会限频附带简短提示，引导模型省略冗余 `cd` 或改用并行 `Read`/`Grep`/`Glob`。
+- 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。当命令包含冗余的前置 `cd <当前目录>`、仅用 `cat`/`sed`/`grep`/`ls`/`wc` 读搜文件、同一轮拆分多个前台 `Bash` 调用，或连续多轮每次只发单个前台 `Bash` 调用时，前台 `Bash` 结果还会限频附带简短提示，引导模型省略冗余 `cd`、用 `&&`/`;` 合并相关命令，或改用并行 `Read`/`Grep`/`Glob`。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
 
 **Monitor**：在后台运行一段 shell 脚本，把输出的每一行变成通知来唤醒模型，适合盯日志、构建或 CI。脚本应只在需要处理的事情发生时才输出一行，例如 `tail -f app.log | grep --line-buffered ERROR`，每一级管道都要逐行刷新。200 毫秒内到达的多行合并成一条通知；stderr 只写入日志，不通知。它和 Bash 的 `run_in_background` 不同：后者只在命令结束时通知一次，Monitor 每有输出就通知。

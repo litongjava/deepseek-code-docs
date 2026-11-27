@@ -68,6 +68,7 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 - `result`：每轮一条，含 `subtype`（`success`、`error_max_turns`、`error_during_execution`）、`is_error`、`result`、`num_turns`、`duration_ms`、`total_cost_usd`（会话累计）、`usage`、`structured_output`，以及 `permission_denials`（本轮被规则、模式、Hook 或宿主拒绝的工具调用）。
 - `prompt_suggestion`：`initialize` 打开 `promptSuggestions` 后，符合缓存条件时可在回合结束后发出。恢复会话时也可收到仍有效的建议，`suggestion` 是文本，`session_id` 是所属会话。
 - `request_attempt`：请求尝试诊断，包含 `requestId` 和 `outcome`。`retry_wait` 表示正在等待常规重试，例如收到 HTTP 503 后等待重连，`requestId` 是同一请求各次常规尝试共用的 ID。`post_content_retry` 仅在[开启内容后超时恢复](./providers.md#流式请求超时与重试)时出现，表示即将重新请求当前尚未提交的模型步骤，`requestId` 是将被替换的原超时请求的 ID。两种通知都无需开启 `--include-partial-messages`，此时回合仍在进行。
+- `resource_alert`：内置宿主机资源监控在活动回合触发告警时发出，包含 `kind`（`cpu`、`memory` 或 `disk`）、`summary`（单行摘要）和 `details`（详细指标），同时会在下一个模型安全边界以 `<task-notification>` 告知模型。空闲会话不会发送该事件；配置与开关见[系统资源监控](./settings.md#系统资源监控)。
 
 以 Chat Completions 为例，如果超时最终导致本轮失败，`result` 帧包含 `is_error: true` 和 `subtype: "error_during_execution"`。等待响应头超时时，dcl 返回 `stop_reason: "error"`。如果在收到内容后因正文读取超时而失败，dcl 可返回 `stop_reason: "stream_error"`，`result` 可包含保留的部分文本。SDK 输入保持可用，宿主仍可发送下一轮。`stop_reason` 由 CLI 提供，可以为 `null` 或省略，例如宿主发起的取消可能只在 `turn.status` 中标记为 `cancelled`。
 

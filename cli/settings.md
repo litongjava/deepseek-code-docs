@@ -29,6 +29,7 @@
 | `remoteControlAtStartup` | `false` | 交互会话启动时自动连接远程控制，见[远程控制](./remote-control.md#启动时自动连接) |
 | `localCoordination.enabled` | `false` | 开启 Linux CLI 的本地协调，见[本地协调](./local-coordination.md) |
 | `localCoordination.registry` | `true` | 开启本地协调后，自动登记 CLI 会话与常驻 Worker |
+| `resourceMonitor` | 默认启用 | 内置宿主机 CPU、内存与磁盘压力监控，见[系统资源监控](#系统资源监控) |
 
 `localCoordination.enabled` 和 `localCoordination.registry` 是 `localCoordination` 对象中的字段。嵌套写法见[启用登记](./local-coordination.md#启用登记)。
 
@@ -59,6 +60,34 @@ dcl config set fetch.proxy http://127.0.0.1:10808   # 设为空字符串 "" 可�
 ```
 
 在交互会话中也可通过 `/search-config`、`/config search`、`/config fetch-proxy`，或在 `/config` 面板的 `Config` 页（`Web search` / `Web fetch proxy`）直接配置。详见[联网搜索与深度研究](./web-search.md)。
+
+## 系统资源监控
+
+dcl 与 Desktop 共用内置宿主机资源监控器，通过原生系统调用周期性采样 CPU、内存以及当前工作区所在磁盘的可用空间（不额外启动子进程）。持续超限时仅在**活动回合**（回合开始或工具结果边界）向模型注入一条 `<task-notification>`（`task-id` 为 `builtin-resource-monitor`）并向界面推送 `resource_alert` 警告；**会话空闲时不会唤醒模型或向队列写入输入**，回合开始前已恢复的短暂峰值会自动丢弃。
+
+在 `config/settings.json` 中可通过 `resourceMonitor` 调整全部阈值（字段均为可选，缺失或格式非法时回退默认值）：
+
+```json
+{
+  "resourceMonitor": {
+    "enabled": true,
+    "intervalSecs": 10,
+    "cpuPercentThreshold": 95.0,
+    "cpuConsecutive": 3,
+    "memoryAvailablePercentThreshold": 10.0,
+    "memoryAvailableMinBytes": 2147483648,
+    "memoryConsecutive": 2,
+    "diskAvailablePercentThreshold": 5.0,
+    "diskAvailableMinBytes": 2147483648,
+    "diskConsecutive": 2,
+    "cooldownSecs": 300
+  }
+}
+```
+
+- **采样与冷却**：`intervalSecs` 限制在 `2`–`300` 秒；`cpuConsecutive`、`memoryConsecutive`、`diskConsecutive` 至少为 `1`；同类告警在 `cooldownSecs`（默认 `300` 秒）内不重复触发，且恢复需越过回差区间以防阈值抖动。
+- **触发条件**：CPU 使用率达到 `cpuPercentThreshold`（有效范围 `0`–`100`，超出或非有限数时回退 `95.0`）；内存需**同时**低于可用百分比阈值与最小可用字节数（默认 `10%` 且 `< 2 GiB`）；磁盘在可用百分比或可用字节数**任一**低于阈值（默认 `5%` 或 `< 2 GiB`）时触发。
+- **环境变量覆盖**：设置 `DEEPSEEK_CODE_RESOURCE_MONITOR=0`（或 `false`）可强制关闭，`1`（或 `true`）可强制开启，优先级高于 `settings.json`；非法值忽略并沿用文件配置。
 
 ## Shell 配置
 
@@ -145,6 +174,7 @@ dcl config show                      # 查看保存值
 | `DEEPSEEK_CODE_DATA_DIR` | 数据目录 | [数据目录](./data-directory.md) |
 | `DEEPSEEK_CODE_COORDINATION_DIR` | 本地协调目录 | [本地协调](./local-coordination.md) |
 | `DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | 启用代理团队工具 | [代理团队](./agent-teams.md) |
+| `DEEPSEEK_CODE_RESOURCE_MONITOR` | 覆盖内置系统资源监控开关（`0`/`1`/`true`/`false`） | [系统资源监控](#系统资源监控) |
 | `CLAUDE_BRIDGE_OAUTH_TOKEN` | 远程控制服务的 token | [远程控制](./remote-control.md) |
 | `TEAM_SYNC_TOKEN` | 团队同步客户端 token | [团队同步](./team-sync.md) |
 | `TEAM_SERVER_TOKENS` | 团队同步服务端的 token 与团队映射 | [团队同步](./team-sync.md) |

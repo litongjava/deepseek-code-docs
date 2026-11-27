@@ -4,7 +4,7 @@
 
 ## 启用随附技能
 
-dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator`、`dc-docs`、`llm-proxy-data-troubleshooting` 和 `project-docs` 默认启用（`user`）；`codegraph` 在 `PATH` 中能找到其可执行文件时默认为 **`always`**（首轮直接注入完整 CLI 使用说明，允许无索引时执行 `codegraph init` 建索引，未安装时默认为 `off`、0 token 开销）；其他随附技能默认是 `off`。可先查看说明，再按需要启用：
+dcl 首次启动时把随附技能安装到数据目录的 `skills/bundled/<名称>/`。`skill-creator`、`dc-docs`、`llm-proxy-data-troubleshooting` 和 `project-docs` 默认启用（`user`）；`codegraph` 在 `PATH` 中能找到其可执行文件时默认为 **`always`**（首轮直接注入完整 CLI 使用说明并自动检测当前工作区或 Git worktree 主仓库是否已有 `.codegraph/codegraph.db`：未初始化且为 Git 目录时提示模型执行非交互的 `codegraph init -y`，不在后台自动建库；非 Git 目录提示跳过 `codegraph init`；未安装 `codegraph` 时默认为 `off`、0 token 开销）；其他随附技能默认是 `off`。可先查看说明，再按需要启用：
 
 ```bash
 dcl skills list
@@ -20,7 +20,7 @@ dcl skills state verify user
 
 | 技能 | 用途 |
 | --- | --- |
-| `test-dcl` | 按层验证 dcl 改动：核心单测、CLI 二进制、真实进程与 PTY 面板；附带 `scripts/drive_dcl.py`。 |
+| `dc-docs` | DeepSeek Code（`dcl` / `dcd`）使用、测试分层与排障指南；附带 `scripts/inspect_dcl.py` 等脚本。 |
 | `llm-proxy-data-troubleshooting` | 从 `proxy.db` 还原一次请求：会话、四类 body、SSE、思考回放与路由问题；附带 `scripts/peek_session.py`。 |
 | `project-docs` | 按书/部/章/篇/节约定维护 VitePress 文档站，生成四级侧边栏并校验锚点与链接。 |
 
