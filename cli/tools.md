@@ -62,8 +62,12 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，原始结果里 `pipeline_sigpipe` 和 `success` 均为 `true`。模型会看到退出码和下游提前关闭管道的说明。其他输出规则见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
 - **工作目录在调用之间保留（批内快照隔离）**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持；shell 变量不保留。同一轮模型输出多个前台 `Bash` 调用时，会在批前冻结 `batch_start_cwd`，批内每条命令均以同一批前目录启动，不读取同批前序调用刚写入的目录变更，仅在整批结束后提交最终有效目录变更，避免同批多条 `cd <子目录>` 互相踩踏报错。
 - 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。当 `shell-cwd` 位于子目录（不同于工作区根目录）且命令重复前置 `cd <当前目录>`（含 Git Bash `/d/...` 与 Windows `D:/...` 路径写法）时，结果 metadata 会直接提示 `Bash already runs in <目录>; omit redundant leading 'cd'.`。
-- **运行中纠偏与首条提示（`SESSION_TIPS`）**：首条用户消息末尾附带静态 `<system-reminder>` 提示，覆盖多行短脚本合并、优先使用 `codegraph` CLI、项目相关文件落盘规范（临时文件写 `./temp/`、非临时文件写 `./permanent/`、文档写 `./docs/`，避免写入系统临时目录）以及 `detach: true` 规范。执行过程中，引擎还会对 5 类高置信度反模式向模型注入**非落库、每类独立 4 轮冷却**的临时 `<system-reminder>` 纠偏（同轮多命中合并为一条）：① 冗余前置 `cd`；② 前台 `sleep` / `for` 轮询等待；③ 高频独立内联 `python -c` / heredoc（≥ 2 次且 `Python` 工具可用）；④ Git Bash 内多次嵌套 `powershell`/`pwsh -Command`（≥ 2 次）；⑤ 高频纯独立单条 `grep`/`rg`（≥ 2 次且 `Grep` 工具完全支持）。
+- **运行中纠偏与首条提示（`SESSION_TIPS`）**：系统提示词中包含固定的 Shell 与工具使用说明，覆盖多行短脚本合并、优先使用 `codegraph` CLI、项目相关文件落盘规范（临时文件写 `./temp/`、非临时文件写 `./permanent/`、文档写 `./docs/`，避免写入系统临时目录）以及 `detach: true` 规范。执行过程中，引擎还会对 5 类高置信度反模式向模型注入**非落库、每类独立 4 轮冷却**的临时 `<system-reminder>` 纠偏（同轮多命中合并为一条）：① 冗余前置 `cd`；② 前台 `sleep` / `for` 轮询等待；③ 高频独立内联 `python -c` / heredoc（≥ 2 次且 `Python` 工具可用）；④ Git Bash 内多次嵌套 `powershell`/`pwsh -Command`（≥ 2 次）；⑤ 高频纯独立单条 `grep`/`rg`（≥ 2 次且 `Grep` 工具完全支持）。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
+
+**后台 Agent 与空闲回收**：交互会话的 worker（执行任务的进程）空闲满 10 分钟才会回收。只要它启动的后台 Agent 仍在运行，就不会因主会话没有新消息而回收；最后一个 Agent 的监督进程结束后，重新计算完整的 10 分钟。无需定时发消息或调用 `TaskGet` 保活。这不阻止显式关闭或致命错误退出。
+
+如果后台任务显示 `unresponsive`，可在数据目录的 `tasks/background/<任务 ID>/` 对照 `state.json`、子 Agent 的 `stderr.log` 和监督进程的 `supervisor.stderr.log`。`supervisor.exit.json` 记录启动方观察到的监督进程退出状态；若启动方先退出，这个文件可能不存在。`running` 旧记录本身不证明进程还在运行。
 
 **Monitor**：在后台运行一段 shell 脚本，把输出的每一行变成通知来唤醒模型，适合盯日志、构建或 CI。脚本应只在需要处理的事情发生时才输出一行，例如 `tail -f app.log | grep --line-buffered ERROR`，每一级管道都要逐行刷新。200 毫秒内到达的多行合并成一条通知；stderr 只写入日志，不通知。它和 Bash 的 `run_in_background` 不同：后者只在命令结束时通知一次，Monitor 每有输出就通知。
 
