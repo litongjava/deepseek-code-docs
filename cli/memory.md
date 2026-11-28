@@ -1,31 +1,35 @@
 # 长期记忆
 
-长期记忆跨对话保存重要的事实。当前运行时按项目或会话隔离保存 Markdown 记忆文件，各级 `MEMORY.md` 索引在会话开始时加载；模型用普通的 Read、Write、Edit 维护条目，由引擎校验路径和版本。Desktop 的“记忆”页可以浏览、搜索和编辑，旧版本留在 `data/memory.sqlite3` 中的条目作为归档保留，可在面板的“Legacy archive / remote settings”中查看和管理。
+长期记忆跨对话保存重要的事实。运行时将记忆保存为 Markdown 文件。模型先按索引找到条目，再用 `Read` 读取正文；新增条目用 `Write`，更新已有条目先 `Read` 再 `Edit`。保存成功时引擎同时维护索引行，无需手动向 `MEMORY.md` 追加链接。Desktop 的“记忆”页可以浏览、搜索和编辑，旧版本留在 `data/memory.sqlite3` 中的条目作为归档保留，可在面板的“Legacy archive / remote settings”中查看和管理。
 
 远程 MemEx 后端和模型工具 `memory_search`、`memory_ingest` 已移除。新消息不会自动检索记忆正文，回复结束也不会把本轮对话写成记忆。续接旧会话时，过去自动附加的记忆片段会被跳过。要找回当前会话压缩前的原文，见 [ContextSearch](./tools.md#contextsearch)。
 
 ## 索引位置与可见范围
 
-首条用户消息在项目说明之后附上各可见作用域中已有且非空的索引。以下路径相对于[数据目录](./data-directory.md)；每个目录中的索引都叫 `MEMORY.md`。
+在 `/config` 里可独立切换四类记忆。以下目录相对于[数据目录](./data-directory.md)；每个目录里的 `MEMORY.md` 是索引，同目录下的其他 `.md` 文件是正文。
 
 - 全局：`data/memory/global/`，各项目共享。
-- 团队：在用户级 `config/settings.json` 中设置 `memory.team_dir` 为绝对路径，例如 `{"memory":{"team_dir":"/srv/team/memory"}}`。未配置时跳过。
+- 团队：`data/memory/teams/<团队名>/`，仅供绑定该 agent team 的会话使用。即使开启 Team memory，未绑定团队也不注入团队索引。
 - 项目：`data/memory/projects/<项目键>/memory/`。同一 Git 仓库的工作树共用项目键。
-- 子代理：`data/memory/projects/<项目键>/agents/<代理定义名>/`，供该定义的子代理使用。
-- 会话：`data/sessions/<会话存储键>/memory/`。子代理读取全局、已配置的团队、项目、自身代理和自身会话的索引；父会话的私有索引不会传入。
+- 会话：`data/sessions/<会话存储键>/memory/`，只保存这场会话的进度、事实和待办，不与其他会话共享。
 
-每份索引独立限制为 **200 行、25 KiB**，先到的上限生效；截断提示给出完整索引的位置。会话中索引发生变化时，下一次输入用一条变更提醒合并列出变化的作用域。压缩后，可见索引在新窗口各发送一次。
+启动可写会话时，dcl 为已开启的 Global、Project、Session 准备目录和空索引，不覆盖已有内容。Project 和 Session 的实际路径由宿主确定，模型不需要从工作目录推算。
+
+新会话的首条用户消息在工作环境之后、当天日期之前，依次附上 **Global 索引 → 已绑定的 Team 索引 → Project 索引 → Session 索引路径**，跳过未开启的项。前三项包含索引路径和内容；Session 此时只给路径，不提前加载索引行。上下文压缩时才在压缩内容前提供会话索引。索引不是记忆正文。
+
+每份索引独立限制为 **200 行、25 KiB**，先到的上限生效。后续索引变更可在消息末尾提醒新增或修订的行，不回写首条消息。
 
 ## 关闭记忆
 
 ```bash
-dcl config memory off    # 全局关闭，输出当前配置
-dcl config memory on     # 重新开启
-dcl config memory        # 只查看开关和检索设置
-dcl config set memory.enabled false
+dcl config memory               # 查看四项当前配置
+dcl config memory global off    # 仅关闭跨项目的全局记忆提醒
+dcl config memory project on    # 开启项目记忆提醒
+dcl config memory team on       # 开启团队记忆提醒
+dcl config memory session off   # 关闭会话记忆提醒
 ```
 
-开关保存在数据目录的数据库里，Desktop 与 CLI 共用。关闭后新请求不再注入 `MEMORY.md` 索引，对记忆目录的写入会被拒绝，系统提示词中的记忆说明也会省略；已经保存的记忆文件不会删除，重新开启后可以继续使用。Desktop 的记忆面板里打开“记忆设置”，取消“启用长期记忆”效果相同。
+默认 Global、Project、Session 开启，Team 关闭。开关决定是否注入该类记忆的使用说明和索引提醒，不是文件权限开关，也不会删除已有文件。共有的记忆读写规则始终保留。
 
 ## 在交互界面管理
 
