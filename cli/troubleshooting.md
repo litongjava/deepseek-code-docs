@@ -289,6 +289,10 @@ Error: Folder must be an existing absolute directory: /path/to/deleted-workspace
 
 ## 长会话的执行失败与恢复
 
+在 CLI 终端或连接到会话 worker 的终端看到 `Continuing with the existing context` 时，表示自动压缩失败，但本轮仍在继续，可以等待下一步。
+
+如果提示 `Resume and run /compact`，说明下一次请求放不进窗口，或提供商已经拒绝了超长请求。错误会列出失败的压缩方式及可用的 HTTP 状态码，例如原生压缩返回 429、文字摘要返回 503。已保存的工具结果仍在原会话中。用 `dcl --resume <会话 ID>` 恢复它，在终端运行 `/compact` 后继续，也可以选择上下文窗口更大的模型。
+
 出现 `Request failed. Details: /tasks show <任务 ID>` 时，先执行提示中的命令查看真实错误。这个摘要表示本轮未完成，并不一定是供应商或网络返回了错误。`shells still running` 单独统计后台命令；开发服务器、测试服务等也会计入，不表示仍有相同数量的开发任务待完成。
 
 如果详情包含 `Engine panic` 和 `not a char boundary`，可按 UTF-8 文本边界问题排查。上下文摘要的助手消息、用户消息与系统提示截断均按完整字符边界保留字节预算，可安全处理中文和 emoji。此类修复需要运行包含修复的新构建才能生效；只重试仍使用旧代码的进程不能改变结果。
