@@ -57,11 +57,13 @@ public class Conversation {
 
 接收 dcl 的输入建议时，同时设置 `initializeField("promptSuggestions", true)` 和 `includeRawFrames(true)`。有可用建议时，`RawMessage.getType()` 为 `prompt_suggestion`，`getRaw().get("suggestion")` 是建议文本，`getSessionId()` 标识会话。建议可在本轮 `result` 之后到达；在长连接上用 `nextMessage(...)` 或 `receiveMessages()` 继续读取。恢复时 dcl 可再次发送尚有效的建议，无需发起新的模型请求。
 
+使用 `includeRawFrames(true)` 时，`RawMessage.getType()` 也可返回 `resource_alert`。从 `getRaw()` 读取 `kind`、`summary` 和 `details`。
+
+收到 `compaction_notice` 类型的 `RawMessage` 时，用 `getRaw().get("message")` 读取提示文字。自动压缩失败而本轮仍能继续时，可以把警告显示给用户，然后继续读取到 `ResultMessage`。上下文实际重置时另有 `context_reset` 帧。SDK 尚未接通手动 `/compact` 帧，需要手动压缩时请在 CLI 终端恢复该会话。
+
 ## 查询已保存的会话历史
 
 需要找回压缩前的路径、决定或报错时，dcl 的 SDK 持久会话也可使用 `ContextSearch`。模型先用 `ToolLoad` 加载 `{"names":["ContextSearch"]}`，再查询当前会话。应用可从返回的摘录中读取 `message_id` 和可用的 `tool_call_id`，定位原始记录。 完整参数见 [ContextSearch](/cli/tools#contextsearch)。
-
-使用 `includeRawFrames(true)` 时，`RawMessage.getType()` 也可返回 `resource_alert`。从 `getRaw()` 读取 `kind`、`summary` 和 `details`。同一回合的自动压缩可产生 `compaction_notice` 和 `context_reset`，继续读取到该轮的 `ResultMessage` 即可。
 
 ## 读取 Shell 任务结果
 
