@@ -15,7 +15,19 @@
 
 回复生成时，新到达的正文以短暂透明度过渡出现，代码、链接和公式保留各自的格式。历史消息不会重新播放整段逐字效果；停止生成或回复结束后，已收到的内容仍可阅读。系统开启“减少动态效果”时，正文直接显示。
 
-自动压缩因限流等原因失败、但剩余空间仍够用时，聊天区会显示压缩提示，本轮继续。重新连接正在运行的回复流时，收到的压缩提示也显示在同一位置。Desktop 尚未接通手动压缩。如果提示恢复会话并运行 `/compact`，请在 CLI 中打开原会话。见[长会话的执行失败与恢复](/cli/troubleshooting.md#长会话的执行失败与恢复)。
+自动压缩因限流等原因失败、但剩余空间仍够用时，聊天区会显示压缩提示，本轮继续。重新连接正在运行的回复流时，收到的压缩提示也显示在同一位置。见[长会话的执行失败与恢复](/cli/troubleshooting.md#长会话的执行失败与恢复)。
+
+要手动压缩已有会话，打开输入框旁的 **+ → Compact conversation**，按需填写摘要要求后点击 **Compact**。也可以直接发送 `/compact`，或加上要保留的内容，例如 `/compact 保留接口设计的决定`。两种方式都通过本机 Bridge 使用该会话绑定的供应商和模型。如果该会话正在生成回复，会显示 `Conversation is running`；等本轮结束后再试。
+
+如果压缩前出现以下提示，请在该会话中重新选择供应商和模型，再执行压缩：
+
+| 提示 | 原因 |
+|---|---|
+| `provider <id> is unavailable for model <model>. Pick a model in Desktop before compacting this conversation` | 绑定的供应商无法提供该模型，即使其他供应商有同名模型也会停止压缩 |
+| `Pick a model in Desktop before compacting this conversation` | 旧会话缺少可确认的模型或供应商，或保存的选择与最近一次已完成回合的供应商冲突 |
+| `Ambiguous legacy model selection. Pick a model in Desktop before compacting this conversation` | 旧会话保存的模型名称有两种有效解释 |
+
+成功后会话历史和上下文用量会刷新，提示中显示本次汇总的消息数和估计节省的 token 数，例如 `Compacted 8 messages, saved ~1200 tokens`。如果中途切换会话，压缩结果只属于发起压缩的会话，新打开的会话保留自己的历史、状态和用量。
 
 停留在会话底部时，新内容会继续跟随显示。向上翻阅历史后，不会因为回复继续生成而强行拉回底部；主动回到底部后恢复跟随。切换会话会重新建立该会话的滚动状态。
 

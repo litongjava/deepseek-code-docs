@@ -29,6 +29,32 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 
 `content` 可以是字符串，也可以是内容块数组（`text`、`image`）。`uuid` 可选；没有时 `dcl` 自动生成。`session_id` 省略、为空或为 `"default"` 时都视为当前会话。
 
+### 本地斜杠命令
+
+SDK 的纯文本 `user` 消息和 `dcl -p` 支持下列七个内置命令。dcl 在本地解析命令，成功结果的 `num_turns` 为 `0`。压缩本身仍会向会话的提供商发送压缩请求。
+
+| 输入 | 用途 |
+|---|---|
+| `/compact [focus]` | 压缩当前会话，可在命令后写明摘要应保留什么 |
+| `/help` | 查看命令目录 |
+| `/status` | 查看会话状态 |
+| `/context` | 查看上下文用量 |
+| `/cost`、`/cost local` | 查看本地费用统计 |
+| `/history` | 读取当前会话的历史记录 |
+| `/model`、`/model list` | 查看当前模型或列出可用模型 |
+
+例如，向已有历史的会话发送：
+
+```json
+{"type":"user","message":{"role":"user","content":"/compact 保留接口设计的决定"}}
+```
+
+手动压缩沿用 [CLI 的重试与摘要回退规则](./context-and-cost.md#responses-原生压缩)。成功时只提交一个压缩边界，SDK 收到带 `reason: "manual_compact"` 和 `boundary_id` 的 `context_reset`、完成提示 `compaction_notice`，最后收到一个 `result`。摘要生成失败时保留原历史，最后的 `result` 带有 `is_error: true`、`subtype: "error_during_execution"` 和说明原因的 `error`。
+
+这七个名称优先匹配内置命令。目录中的其他名称若与已安装、可由用户调用的技能同名，会按平常的技能流程执行；否则返回错误，例如 `/debug is not available in SDK mode`。未知的斜杠文本（如 `/foo`）以及含图片的用户帧仍进入普通模型回合。
+
+`/status`、`/context`、`/cost` 和 `/history` 使用表中形式以外的参数时返回 `Unsupported arguments for a headless inspection command`。用 `/model` 尝试切换模型会收到 `Model changes require the set_model control request or the --model option`。
+
 ### 回合进行中的用户消息
 
 上一轮还没结束时（工具正在运行、模型正在回答，或正在等待审批）再发送一条普通用户消息，`dcl` 不会打断当前工具。它把消息放进与交互式模式相同的持久队列，在下一个安全边界——当前工具批次全部结束、工具结果记录完成之后，发出下一次模型请求之前——交给模型。模型的下一轮请求同时包含工具结果和这条消息，并把它当作本轮的用户指示继续处理。
@@ -88,8 +114,6 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 
 - `interrupt`：通知当前回合取消，并等待该回合完成收尾后返回一次 `error_during_execution` 结果。结果保留中断前按请求 ID 收集的最后已知用量、模型轮数、工具拒绝和实际耗时，轮次状态为 `cancelled`，终态计时事件也只发送一次；未知用量不填成零。压缩恢复期间同样适用，已提交的摘要仍报告保存位置，取消后不继续发送重试请求。
 - `cancel_async_message`（`message_uuid`）：取消尚未开始的排队消息，返回 `cancelled`。
-
-SDK 尚未接通手动 `/compact` 帧。在 `user` 帧里发送 `/compact` 会把它作为普通消息交给模型。需要手动压缩时，请在 CLI 终端恢复同一会话并运行 `/compact`。
 
 宿主要中断回合时，使用 `interrupt`，再读取该轮的 `result`。如果直接给 dcl 发送 `SIGINT`，被当前回合处理的信号只中断这一轮。回合结束后才收到的信号仍可中断 SDK 的输入等待，空闲时收到信号可能使进程退出并报告 `SDK input interrupted`。
 

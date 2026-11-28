@@ -59,7 +59,21 @@ public class Conversation {
 
 使用 `includeRawFrames(true)` 时，`RawMessage.getType()` 也可返回 `resource_alert`。从 `getRaw()` 读取 `kind`、`summary` 和 `details`。
 
-收到 `compaction_notice` 类型的 `RawMessage` 时，用 `getRaw().get("message")` 读取提示文字。自动压缩失败而本轮仍能继续时，可以把警告显示给用户，然后继续读取到 `ResultMessage`。上下文实际重置时另有 `context_reset` 帧。SDK 尚未接通手动 `/compact` 帧，需要手动压缩时请在 CLI 终端恢复该会话。
+收到 `compaction_notice` 类型的 `RawMessage` 时，用 `getRaw().get("message")` 读取提示文字。自动压缩失败而本轮仍能继续时，可以把警告显示给用户，然后继续读取到 `ResultMessage`。上下文实际重置时另有 `context_reset` 帧。
+
+用 dcl 手动压缩已有历史的会话时，等上一轮结束，再用同一个 `AgentClient` 发送 `/compact`。命令后可以写明希望摘要保留的内容：
+
+```java
+client.query("/compact 保留接口设计的决定");
+ResultMessage compact = client.awaitResult(null);
+if (compact.isError()) {
+  System.err.println(compact.getError());
+} else {
+  System.out.println(compact.getResult());
+}
+```
+
+成功时 `getNumTurns()` 为 `0`，`getResult()` 包含压缩报告。开启 `includeRawFrames(true)` 后，回调还可在最终结果前收到 `reason` 为 `manual_compact` 的 `context_reset` 和 `compaction_notice`。摘要生成失败时，`getError()` 给出原因，原有历史仍可使用。
 
 ## 查询已保存的会话历史
 
