@@ -57,14 +57,16 @@ Permission to use <tool> was not granted: no approval host is available in this 
 
 ## 压缩会话
 
-`/compact` 在 `-p` 模式下也能用，和 Claude Code 一样直接压缩会话，不发给模型：
+`-p` 模式可以对已有会话执行 `/compact`。dcl 直接向提供商请求压缩，跳过普通对话回合：
 
 ```bash
 dcl -c -p "/compact 保留接口设计的讨论" < /dev/null
 ```
 
 - 通常配合 `-c`（继续最近的会话）或 `--resume <ID>` 使用；后面的文字是可选的压缩要求。
-- 文本输出显示压缩了多少条消息；`json`、`stream-json` 输出一个成功的 `result`。之后继续这个会话时，已调用的技能内容仍然保留，包括委派任务时用过的 [task-template](./skills.md#task-template)。
+- 成功时，文本输出显示压缩了多少条消息，`json`、`stream-json` 以 `result` 报告结果。之后继续这个会话时，已调用的技能内容仍然保留，包括委派任务时用过的 [task-template](./skills.md#task-template)。
+
+脚本也可以用 `/help`、`/status`、`/context`、`/cost`、`/history` 和 `/model` 在本地查询。支持的参数和同名技能的匹配顺序见 [SDK 与 print 模式的本地斜杠命令](./sdk.md#本地斜杠命令)。
 
 ## 记录完整过程
 
