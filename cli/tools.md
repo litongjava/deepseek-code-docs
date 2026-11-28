@@ -38,6 +38,8 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 
 `ContextSearch` 检索当前会话保存的用户消息、助手正文和工具结果，适合找回压缩摘要省略的路径、决定和报错。默认先调用 `ToolLoad` 并传入 `{"names":["ContextSearch"]}`，从下一次模型请求开始可调用。工具开关、权限和代理允许列表仍生效。已获准使用的子代理和队友各自检索自己的会话。分叉可以检索自己的记录，父会话的历史仅限已复制到该分叉的部分。
 
+看到压缩输入中的 `use ContextSearch to retrieve if needed` 时，可用占位行里的工具名作为 `tool_name`，将 `query` 设为要找的输出关键词。要查最近一次压缩前的结果，加上 `range: "before"`。
+
 - `query` 是非空、区分大小写的字面子串，最多 512 个 UTF-8 字节。`regex: true` 使用 Rust 正则，例如用 `(?i)` 忽略大小写。普通文本按有重叠的窗口匹配，正则锚点以每个窗口为界。需要跨过较长片段时，可以先检索较短的关键词。
 - 可用 `role`（`user`、`assistant`、`tool`）、`tool_name`（完整工具名，忽略大小写，可与 `role: "tool"` 配合使用）、`range`（默认 `all`，也可选 `before`、`after`）和本会话的 `boundary_id` 过滤。首次查询默认选择最近的压缩边界。
 - 结果按来源从新到旧返回。默认 5 条，最多 10 条和 12 KiB JSON。引用包括 `message_id`、时间戳、角色，以及可用的 `turn_id`、`tool_name` 和 `tool_call_id`。有 `next_cursor` 时可以保留原查询和过滤条件继续翻页，即使本页没有匹配。

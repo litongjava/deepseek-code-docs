@@ -65,6 +65,7 @@ dcl -c -p "/compact 保留接口设计的讨论" < /dev/null
 
 - 通常配合 `-c`（继续最近的会话）或 `--resume <ID>` 使用；后面的文字是可选的压缩要求。
 - 成功时，文本输出显示压缩了多少条消息，`json`、`stream-json` 以 `result` 报告结果。之后继续这个会话时，已调用的技能内容仍然保留，包括委派任务时用过的 [task-template](./skills.md#task-template)。
+- 关于摘要中的任务状态和旧工具输出，见[压缩时保留哪些内容](./context-and-cost.md#压缩时保留哪些内容)。
 
 脚本也可以用 `/help`、`/status`、`/context`、`/cost`、`/history` 和 `/model` 在本地查询。支持的参数和同名技能的匹配顺序见 [SDK 与 print 模式的本地斜杠命令](./sdk.md#本地斜杠命令)。
 
