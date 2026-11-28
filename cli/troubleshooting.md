@@ -8,6 +8,16 @@
 
 **处理**：当前版本最多等待 3 秒首个字节，详见[非交互模式](./non-interactive.md#标准输入)。没有输入时用 `< /dev/null` 运行。
 
+## 启动提示数据目录布局警告
+
+**现象**：启动时打印 `Data layout warning: unexpected entries remain in ...`，或 `/doctor` 显示 `data layout leftovers` / `data layout unknown entries`。
+
+**原因**：数据目录从旧布局迁移到 v2 后，根目录仍有旧的路径或程序不认识的条目。dcl 不会删除未知文件，只把它们列在启动日志和诊断快照中。
+
+**处理**：先退出所有共用该目录的 dcl、Desktop、服务器和后台 Worker，再重新启动，让中断的迁移继续。仍存在的旧路径会显示在 `data layout leftovers`；确认内容已在新位置后，可以手动移走旧副本。`data layout unknown entries` 中的文件如果是自己放的，可以保留；不再需要时手动移走。不要删除 `layout.json` 或整个数据目录来消除提示。
+
+提示 `Layout conflict` 时，旧路径和新路径同时存在；先确认哪一份要保留，手动合并或移走另一份。提示布局版本高于当前程序时，升级 dcl/Desktop，不要用旧版本继续写这个目录。只读的 `dcl --info` 和 `dcl sessions export` 不会初始化不存在或为空的目录；其他命令首次启动时可能写入 `layout.json` 和 `README.md`。
+
 ## 启动时报 Session worker startup failed
 
 **现象**：macOS 上启动 dcl 后只显示 `Error: Session worker startup failed:`，冒号后没有内容；会话 Worker 目录里的 `stderr.log` 记录 `Session host failed: path must be shorter than SUN_LEN`。
@@ -186,12 +196,30 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 模型运行到一半时关闭终端，同样可以恢复：
 
-- 只关闭了终端、任务还在后台运行时，恢复后会显示任务 ID。发送 `/continue` 回到这个任务，正在执行的请求不会重来。
+- 只关闭了终端、任务还在后台运行时，`/resume` 列表会为该会话标注 `[running]` 并显示完整会话 ID；恢复后以与正常会话一致的富文本界面进入只读观察，并在输入框上方常驻显示只读占用状态。发送 `/continue` 回到这个任务，正在执行的请求不会重来；观察期间普通消息不会提交，执行 `/exit` 或 `Ctrl+C` 仅离开观察视图，不会停止后台 worker。
+- 另一个进程直接执行这个会话（如 `dcl --print`）时，恢复后以富文本实时显示对方新发布的文本与已完成工具块（不重放恢复前已显示的内容），输入框上方常驻只读占用状态，普通消息不会提交；执行 `/exit` 或 `Ctrl+C` 同样不会影响原进程或其异步 Hook。占用结束后只读状态自动消失、输入恢复，但观察期间排队的内容不会自动提交。
 - 任务进程也已退出时，恢复后发送 `/continue` 开始新的请求。模型会知道上次的工具调用没有结果，先检查当前状态，再决定是否重新执行。
+
+会话被占用时不会再显示原始的 `lock acquisition failed` 错误；提示会给出占用中的任务 ID 或运行开始时间，以及 `/continue`、`/tasks show ID` 等可执行操作。直接执行进程没有可接回的任务时，只能等待它结束或在它自己的进程里操作。
 
 任务长时间没有响应但进程还在时，可以用 `/tasks show ID` 查看，或用 `/clear` 开始新会话。
 
-直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
+直接拖选文字，松开鼠标即可复制，包括 `!` 命令输出；右击或按 `c` 会复制并取消选中，输入框上方内容区右下角显示复制结果。在 tmux 中需要先执行 `tmux set -g mouse on`，否则 dcl 收不到拖动和右击事件。通过 SSH 使用时，如果外层终端不支持 OSC 52，文字仍会写入 tmux buffer，可用 tmux 的粘贴快捷键（默认先按 `Ctrl+B`，再按 `]`）取回。需要使用终端原生选择时，按住 `Shift` 拖动，并使用终端的复制快捷键。
+
+## 恢复会话时原项目目录或 worktree 已被删除
+
+**现象**：在旧版本中，运行 `/resume`（`Ctrl+A` 查看全部项目）或 `dcl --resume <ID>` 选择一个目录或 worktree 已被删除的历史会话，会直接报错：
+
+```text
+Error: Folder must be an existing absolute directory: /path/to/deleted-workspace
+```
+
+或 `Conversation worktree is unavailable; restore it before continuing`。
+
+**处理**：升级到当前版本后，交互式 `/resume` 和 `dcl --resume <ID>` 会自动以**只读历史模式**打开该会话（`/resume` 全部项目列表中该条目带 `[missing]` 标注），无需恢复目录即可通过 `Ctrl+O`、`/history`、`/export`、`/copy`、`/status` 浏览和导出完整历史，且不会修改 `session.db`、运行 Hook 或发起模型请求。
+
+- 若仍需继续对话：重新创建原目录（或恢复对应的 Git worktree）后再次 `/resume <ID>`，或直接用 `/resume` 切换到其他有效会话，即可恢复可写模式。
+- 非交互与严格执行入口（如 `dcl --print --resume <ID>`、`--fork-session`、`--init-only`、`--input-format stream-json`）仍会严格报错；未信任目录或现有目录路径变更也不会降级为只读。
 
 ## 计划模式下 Bash 被禁用
 
@@ -252,7 +280,7 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 默认在第 1 至第 7 次失败后分别等待 2、4、8、16、32、64、128 秒；第 8 次失败后结束。等待从失败返回后开始，请求自身耗时另计。首次显示“正在重连”，后续显示“第2次重连”至“第7次重连”，并注明等待秒数和可以取消。HTTP 重试配置仍可覆盖默认次数与基础间隔。
 
-经共享发送层执行的模型请求，其每次 HTTP 尝试详情独立保存在数据目录的 `logs/request-attempts/<session-id>.jsonl`，不依赖 tracing 日志是否启用。记录时间、与请求快照及请求头对应的本地请求 ID、尝试次数、耗时、已知 HTTP 状态/阶段/类别、等待时间及后续动作；本轮结束另记完成、失败或取消状态。各次失败分别保存，因此能区分连续 500 和不同类别的失败。响应头收到不等于响应流已完成，`response_received` 只表示前者。
+经共享发送层执行的模型请求，其每次 HTTP 尝试详情独立保存在数据目录的 `diagnostics/logs/request-attempts/<session-id>.jsonl`，不依赖 tracing 日志是否启用。记录时间、与请求快照及请求头对应的本地请求 ID、尝试次数、耗时、已知 HTTP 状态/阶段/类别、等待时间及后续动作；本轮结束另记完成、失败或取消状态。各次失败分别保存，因此能区分连续 500 和不同类别的失败。响应头收到不等于响应流已完成，`response_received` 只表示前者。
 
 日志不保存请求正文或任意服务端自由文本；HTTP 错误只保留状态、类别、白名单内的错误码，以及可提取且通过 UUID 校验的服务端 request ID。传输错误使用脱敏原因链。无法获得的信息保持未知。若服务端未返回有效 UUID 格式的 request ID，不猜测该字段。
 
@@ -269,7 +297,7 @@ Could not list models: The endpoint answered 404 Not Found with a web page, not 
 
 ## 图片请求与终端文字显示
 
-所有模型默认允许图片输入，`supports_vision` 默认是 `true`。旧配置的能力标记不会拦截图片：普通消息、排队消息以及 Read 返回的图片都由服务端判断是否支持。请求失败时，界面显示服务端的状态码和错误正文，可据此检查模型名称、协议和供应商配置。
+所有模型默认允许图片输入，`supports_vision` 默认是 `true`。旧配置的能力标记不会拦截图片：普通消息、排队消息以及 `Read` / `computer_use` 返回的图片都由服务端判断是否支持。请求失败时，界面显示服务端的状态码和错误正文，可据此检查模型名称、协议和供应商配置。
 
 终端会保留回答、错误和通知的逻辑文本。窗口缩窄再恢复时，当前视图和历史视图按新的宽度重排；拖选使用与显示一致的文字记录。窗口缩放会取消旧的选择区域，避免旧坐标覆盖重排后的文字。同一行内闭合的 Markdown 代码标记保留正文，也不会影响后续段落的样式。
 
@@ -277,11 +305,11 @@ Markdown 等文本文件支持 Read。模型传入空的 `pages`、空白字符�
 
 若出现 `--depth 1` 变成 `--depth1`、代码语言标签与命令粘连，先比较代理记录中的上游原文、下游原文和会话保存内容。纯空白 delta 也是正文：独立的空格、换行、制表符都需要保留。会话内容与下游一致时，应检查协议转换的文本保真；更新转换端后，新回答会保留这些边界，历史中已经缺失的空白不会自动补回。
 
-交互终端的底层诊断日志写入数据目录的 `logs/cli-<进程号>.log`，避免异步日志占用正在绘制的行。用户需要处理的请求错误仍显示在界面中；显式指定调试文件时优先使用该文件。
+交互终端的底层诊断日志写入数据目录的 `diagnostics/logs/cli-<进程号>.log`，避免异步日志占用正在绘制的行。用户需要处理的请求错误仍显示在界面中；显式指定调试文件时优先使用该文件。
 
 ## 查询 CPU 和内存采样
 
-Windows 下，CLI 默认每 10 秒记录一次本进程及仍在运行的后代进程，采样使用系统接口，不启动 PowerShell。记录保存在数据目录的 `logs/resources/process-<PID>-<启动时间>.jsonl`，每行包含 UTC 时间、会话 ID、进程与父进程 ID、CPU 使用率、常驻内存、私有内存、线程数及系统可用内存。首次采样没有 CPU 差值，`cpu_percent` 为 `null`；后续以单个逻辑核的满载为 100%，多核进程可以超过 100%。尚未绑定会话的宿主记录中，`session` 可以为空。
+Windows 下，CLI 默认每 10 秒记录一次本进程及仍在运行的后代进程，采样使用系统接口，不启动 PowerShell。记录保存在数据目录的 `diagnostics/logs/resources/process-<PID>-<启动时间>.jsonl`，每行包含 UTC 时间、会话 ID、进程与父进程 ID、CPU 使用率、常驻内存、私有内存、线程数及系统可用内存。首次采样没有 CPU 差值，`cpu_percent` 为 `null`；后续以单个逻辑核的满载为 100%，多核进程可以超过 100%。尚未绑定会话的宿主记录中，`session` 可以为空。
 
 单文件约 1 MiB 时轮转，每个采样器保留当前文件和上一份；每分钟清理最旧的采样文件，使总量回落到约 32 MiB。每次最多采集 128 个相关进程，不记录命令参数、环境变量、路径或消息正文，也不向终端输出采样内容。短于采样间隔的进程可能没有记录；这些数据用于定位持续资源占用。
 

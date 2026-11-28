@@ -29,11 +29,11 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 
 `content` 可以是字符串，也可以是内容块数组（`text`、`image`）。`uuid` 可选；没有时 `dcl` 自动生成。`session_id` 省略、为空或为 `"default"` 时都视为当前会话。
 
-## 回合进行中发送的消息（中途引导）
+### 回合进行中的用户消息
 
 上一轮还没结束时（工具正在运行、模型正在回答，或正在等待审批）再发送一条普通用户消息，`dcl` 不会打断当前工具。它把消息放进与交互式模式相同的持久队列，在下一个安全边界——当前工具批次全部结束、工具结果记录完成之后，发出下一次模型请求之前——交给模型。模型的下一轮请求同时包含工具结果和这条消息，并把它当作本轮的用户指示继续处理。
 
-- 判断规则与交互式输入一致：纯文本会被引导；以 `/`、`!` 或 `# ` 开头的命令、控制帧和后台任务通知仍按原来的下一轮处理。
+- 判断规则与交互式输入一致：纯文本会被引导；以 `/`、`!` 或 `# ` 开头的命令、控制帧、带初始 Hook 的消息、指定其它会话的消息和后台任务通知仍按下一轮处理。
 - 多条消息按到达顺序交付，每条只交付一次。若本轮在没有下一个工具边界时结束（例如模型直接给出最终回答），尚未交付的消息作为下一轮的用户消息运行，既不丢失也不重复。
 - 取消或中断本轮（`interrupt`）不会丢弃未交付的消息，它们在下一轮运行；`cancel_async_message` 只能取消尚未交付的引导消息，已经交给模型的返回 `cancelled: false`。
 - 只有带文本的消息会被引导；`content` 仅为图片的消息仍按下一轮处理。等待工具审批或 Hook 回调时发送的消息同样排队，等审批结束后的工具边界再交付。
@@ -63,12 +63,13 @@ stdin 关闭后，`dcl` 处理完已排队的消息再退出。
 - `system`（`subtype: init`）：每个进程一次，含 `session_id`、`cwd`、`model`、`tools`（含 MCP 与宿主 MCP 工具）、`mcp_servers`、`permissionMode`、`slash_commands`、`agents`。
 - `assistant`：每个内容块一条，`message.content` 为 `text`、`thinking` 或 `tool_use`；同一轮模型请求的块共享 `message.id`。
 - `user`：工具结果，`content` 为 `tool_result` 块；MCP 工具的结果保留为内容块数组。
-  dcl 的前台 `Bash` 事件保留原始结果文本，成功时通常是包含 `stdout`、`stderr`、`exit_code` 的 JSON 字符串；工具失败时也可能是带 `Error: ` 前缀的文本。长 Base64 在模型预览中折叠，stream-json 结果仍保留原始内容。用 `tool_use_id` 关联调用，用 `is_error` 判断调用是否报错。普通后台 Shell 的 `TaskGet` 返回快照，其中的 `output` 和 `result` 是精简文本；控制台任务的终态仍是 JSON 字符串。见 [Java 读取示例](/sdk/java/sessions#读取-shell-任务结果)。
-- `resource_alert`：系统资源持续紧张时发出，`kind` 指明 CPU、内存或磁盘指标，`summary` 是简短说明，`details` 是更详细的处理建议。长工具循环自动压缩时，也可能出现 `compaction_notice`（`message`）和 `context_reset`（`session_id`、`boundary_id`、`reason`）。
+  dcl 的前台 `Bash` 事件保留原始结果文本，成功时通常是包含 `stdout`、`stderr`、`exit_code` 的 JSON 字符串；工具失败时也可能是带 `Error: ` 前缀的文本。长 Base64 在模型预览中折叠，stream-json 仍保留原始工具结果。用 `tool_use_id` 关联调用，用 `is_error` 判断调用是否报错。普通后台 Shell 的 `TaskGet` 返回快照，其中的 `output` 和 `result` 是精简文本；控制台任务的终态仍是 JSON 字符串。见 [Java 读取示例](/sdk/java/sessions#读取-shell-任务结果)。
 - `stream_event`：仅在 `--include-partial-messages` 时输出，`event` 为 `message_start`、`content_block_start`、`content_block_delta`（`text_delta`、`thinking_delta`、`input_json_delta`）、`content_block_stop`、`message_delta`、`message_stop`。
 - `result`：每轮一条，含 `subtype`（`success`、`error_max_turns`、`error_during_execution`）、`is_error`、`result`、`num_turns`、`duration_ms`、`total_cost_usd`（会话累计）、`usage`、`structured_output`，以及 `permission_denials`（本轮被规则、模式、Hook 或宿主拒绝的工具调用）。
 - `prompt_suggestion`：`initialize` 打开 `promptSuggestions` 后，符合缓存条件时可在回合结束后发出。恢复会话时也可收到仍有效的建议，`suggestion` 是文本，`session_id` 是所属会话。
 - `request_attempt`：请求尝试诊断，包含 `requestId` 和 `outcome`。`retry_wait` 表示正在等待常规重试，例如收到 HTTP 503 后等待重连，`requestId` 是同一请求各次常规尝试共用的 ID。`post_content_retry` 仅在[开启内容后超时恢复](./providers.md#流式请求超时与重试)时出现，表示即将重新请求当前尚未提交的模型步骤，`requestId` 是将被替换的原超时请求的 ID。两种通知都无需开启 `--include-partial-messages`，此时回合仍在进行。
+- 回合内自动压缩时可收到 `compaction_notice`（`message`）和 `context_reset`（`session_id`、`boundary_id`、`reason`）。
+- `resource_alert`：内置宿主机资源监控在活动回合触发告警时发出，包含 `kind`（`cpu`、`memory` 或 `disk`）、`summary`（单行摘要）和 `details`（详细指标），同时会在下一个模型安全边界以 `<task-notification>` 告知模型。空闲会话不会发送该事件；配置与开关见[系统资源监控](./settings.md#系统资源监控)。
 
 以 Chat Completions 为例，如果超时最终导致本轮失败，`result` 帧包含 `is_error: true` 和 `subtype: "error_during_execution"`。等待响应头超时时，dcl 返回 `stop_reason: "error"`。如果在收到内容后因正文读取超时而失败，dcl 可返回 `stop_reason: "stream_error"`，`result` 可包含保留的部分文本。SDK 输入保持可用，宿主仍可发送下一轮。`stop_reason` 由 CLI 提供，可以为 `null` 或省略，例如宿主发起的取消可能只在 `turn.status` 中标记为 `cancelled`。
 
@@ -141,7 +142,7 @@ printf '%s\n' \
 {"type": "result", "subtype": "success", "is_error": false, "result": "Tool said: Permission denied: Plan mode: write operations are not allowed", "num_turns": 2, "duration_ms": 108, "total_cost_usd": 0.0, "permission_denials": [{"tool_input": {}, "tool_name": "mcp__app__server_time", "tool_use_id": "time-1"}], "session_id": "4472dafa-acf8-4c0a-a281-2f9f0f03398c"}
 ```
 
-`system/init.tools` 列出工具名，其中包括 `ToolLoad`。`TodoRead` 和 `TodoWrite` 默认常驻，无需先加载。每次模型请求实际收到的定义取决于加载设置和当前代理。加载调用按普通 `tool_use` 块发送，例如 `"name":"ToolLoad","input":{"names":["ListDir","LSP"]}`；宿主可以用调用 ID 关联对应的 `tool_result`。SDK 收到结构化 JSON 文本，其中的 `content` 是模型所见的一行结果，`tools` 保留已加载的定义。
+`system/init.tools` 列出工具名，其中包括 `ToolLoad`。默认常驻的 `TodoRead` 和 `TodoWrite` 无需加载。每次模型请求实际收到的定义取决于加载设置和当前代理。加载调用按普通 `tool_use` 块发送，例如 `"name":"ToolLoad","input":{"names":["ListDir","LSP"]}`；宿主可以用调用 ID 关联对应的 `tool_result`。SDK 收到结构化 JSON 文本，其中的 `content` 是模型所见的一行结果，`tools` 保留已加载的定义。
 
 ## Java SDK
 

@@ -12,14 +12,24 @@
 
 ## 记忆管理
 
-在**长期记忆**中选择受信任的项目，或打开已有会话。**Project memories** 显示该项目或私有工作区的记忆，可搜索条目、编辑 Markdown、新建文件或确认删除。若另一端已修改同一文件，先刷新并核对新版本，再保存。
+从侧边栏打开**记忆**（Memory），默认显示当前项目或会话的**项目记忆**，可以：
 
-会话首先读取各作用域的 `MEMORY.md` 索引，需要时打开正文。CLI 与 Desktop 共用文件；目录、可见范围与索引上限见[长期记忆](/cli/memory)。
+- 按关键词搜索，查看每个条目的名称、类型和描述。
+- 新建或编辑 Markdown 记忆；文件名使用小写 ASCII，反馈类和项目类条目需要写 `## Why` 和 `## How to apply`。
+- 删除条目。修改已有条目时使用版本校验，冲突会要求刷新后重试。
 
-打开 **Legacy archive / remote settings** 可查看旧版本保存在本机的个人条目，或预览、导入和导出其 JSON 归档。旧条目不会自动出现在项目记忆中。
+各级 `MEMORY.md` 索引在会话开始时加载，模型通过普通的 Read、Write、Edit 维护记忆文件。对话不会自动检索记忆正文，也不会在回复后自动保存。
+
+![项目记忆面板](/desktop-memory-list.png)
+
+页面右侧的“Legacy archive / remote settings”进入旧版本归档：浏览、搜索、编辑、导入导出旧条目。归档里的“记忆设置”可以打开或关闭长期记忆，并调整默认检索条数和最低重要性。关闭后新请求不再注入索引，记忆目录的写入会被拒绝，系统提示词也会省略记忆说明；已保存内容保留。这个开关与 `dcl config memory off` 共用。
+
+![编辑一条记忆](/desktop-memory-edit.png)
+
+Desktop 和 [dcl](/cli/memory) 共用数据目录，任一端的修改另一端都能看到。旧归档保存在 `data/memory.sqlite3`，项目记忆保存在数据目录的 `data/memory/` 下。
 
 ## 数据处理
 
-删除条目或清空记忆前确认保留需求。备份时保存知识库、数据目录及另行配置的团队记忆目录。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
+删除条目或清空记忆前确认保留需求。备份时分别保存知识库和数据目录及另行配置的[团队记忆目录](/cli/memory#索引位置与可见范围)。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
 
-源码参考：`KnowledgePanel.tsx`、`FileMemoryPanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。
+源码参考：`KnowledgePanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。

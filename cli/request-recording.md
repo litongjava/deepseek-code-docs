@@ -43,7 +43,7 @@ dcl
 
 关闭时将值改为 `0` 或 `false`。若要恢复由配置和启动参数决定，Linux / macOS 使用 `unset DEEPSEEK_CODE_RECORD_REQUESTS`，PowerShell 使用 `Remove-Item Env:DEEPSEEK_CODE_RECORD_REQUESTS -ErrorAction SilentlyContinue`。环境变量变更后需要重新启动应用及对应 Worker。
 
-### settings.json
+### config/settings.json
 
 在[数据目录](./data-directory.md)的 `config/settings.json` 中加入以下设置；已有文件时合并字段，保留其他设置：
 
@@ -63,10 +63,10 @@ dcl
 
 1. 带 `--record-requests` 时强制开启，即使环境变量或配置为 `false`。
 2. 否则，环境变量中的有效值优先。
-3. 否则，使用 `config/settings.json` 中 `requestRecording.enabled` 的布尔值。
+3. 否则，使用 `settings.json` 中 `requestRecording.enabled` 的布尔值。
 4. 以上均未指定时，`--full-access`（别名 `--yolo`）自动开启；普通启动关闭。
 
-因此，环境变量为 `0`、`false` 或配置为 `false`，可以关闭完全访问模式的自动记录；环境变量仍优先于配置。排查问题只需使用 `--record-requests`，无需切换[完全访问模式](./permissions.md#完全访问)。这些启动参数不会改写 `config/settings.json`。
+因此，环境变量为 `0`、`false` 或配置为 `false`，可以关闭完全访问模式的自动记录；环境变量仍优先于配置。排查问题只需使用 `--record-requests`，无需切换[完全访问模式](./permissions.md#完全访问)。这些启动参数不会改写 `settings.json`。
 
 ## 查看记录
 
@@ -107,7 +107,7 @@ dcl requests $sessionId
 
 ### 上下文压缩
 
-开启记录后，摘要请求同样逐次保存，`purpose` 为 `compaction`。元数据中的 `compaction_stage`、`compaction_label` 可帮助区分分段摘要、合并、恢复和最终摘要；使用常规请求前缀加摘要指令的请求也按压缩计量。内置 GPT Responses 的原生压缩请求会记录同一会话的 `prompt_cache_key`；缓存命中量以提供商报告为准。
+开启记录后，摘要请求同样逐次保存，`purpose` 为 `compaction`。元数据中的 `compaction_stage`、`compaction_label` 可帮助区分分段摘要、合并、恢复和最终摘要；GPT Responses 原生压缩请求也会记录，可对照同一会话普通请求中的 `prompt_cache_key`。
 
 每次压缩还会生成独立编号的 `compaction-NNNN.json`，包含触发原因、压缩前消息、压缩前 token 估算、开始与结束时间、完成状态、摘要和压缩后边界。`request_sequences` 关联这次压缩实际发出的请求序号，便于对照请求和响应；提交前取消或压缩未完成时，记录保持未完成状态。
 

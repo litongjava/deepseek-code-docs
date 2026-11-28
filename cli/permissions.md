@@ -6,19 +6,21 @@ dcl 的每次工具调用都要经过权限检查：只读的操作通常直接�
 
 | 模式 | 行为 |
 |---|---|
-| `ask` | 读文件、搜索等只读操作直接执行，只读的 shell 命令也直接执行；改文件、运行其他命令前询问 |
+| `ask`（默认） | 读文件、搜索等只读操作直接执行，只读的 shell 命令也直接执行；改文件、运行其他命令前询问 |
 | `accept-edits` | 文件编辑自动放行，只读的 shell 命令直接执行，其他命令仍然询问 |
 | `plan` | 允许非危险 Shell 命令和查询工具，直接编辑仅限计划文件，见[计划模式](./plan-mode.md) |
-| `auto`（默认） | 普通文件编辑和未命中危险规则的 Bash 直接放行；危险 Bash 逐次询问，其他未明确放行的工具由分类器判断，见[自动权限模式](./auto-mode.md) |
+| `auto` | 普通文件编辑和未命中危险规则的 Bash 直接放行；危险 Bash 逐次询问，其他未明确放行的工具由分类器判断，见[自动权限模式](./auto-mode.md) |
 | `dont-ask` | 不询问：需要审批的调用一律拒绝，已放行的规则照常生效 |
 | `bypass` | 自动批准工具调用，允许访问工作目录之外的路径；跳过 ask，显式 deny 规则仍生效 |
 
 只读的 shell 命令指 `ls`、`cat`、`grep`、`find`（不含 `-exec`、`-delete`）、`git status`/`log`/`diff` 等只查看内容的命令，用管道或 `&&` 连接时每一段都必须只读。在 ask 和 accept-edits 模式下，这类命令的路径参数还必须都在工作目录内：`cat /etc/hosts`、`ls ..`、以 `~` 开头或含 `$` 变量的参数仍然会询问。显式的 ask 或 deny 规则（例如 `/permissions ask Bash(ls *)`）优先。Plan 模式允许更广泛的非危险 Shell 命令，包括构建、测试和依赖安装，同时保留危险命令拦截和显式规则。
 
+`Python` 工具不是只读命令，也不属于 Plan 模式自动放行的 Shell 命令：计划模式默认拒绝它，显式 `Python(...)` 规则也不能覆盖。需要执行时先切出 Plan 模式。
+
 - 启动时指定：`dcl --permission-mode accept-edits`。
 - 运行中切换：`Shift+Tab` 按 ask → accept-edits → plan → bypass → auto → ask 循环；也可以用 `/permissions <模式>`。普通 `dcl` 启动即可切换到 bypass，无需额外参数；auto 没有配置分类模型时跳过，直接回到 ask。
 - 不带参数的 `/permissions` 和 Claude Code 一样打开分页管理：Recently denied（本会话被拒绝的调用）、Allow、Ask、Deny（`Add a new rule…` 添加规则，选中规则可以删除；命令行和设置文件里的规则只读）、Auto mode（自动模式配置）、Workspace（工作目录和 `Add directory…`），`←`/`→` 切换。
-- `--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 保留兼容，普通启动已经允许切换。未指定模式时以 auto 开始，切换为 bypass 后才按该模式执行。首次以 bypass 启动时会先确认一次。
+- `--dangerously-skip-permissions` 直接以 bypass 启动；`--allow-dangerously-skip-permissions` 保留兼容，普通启动已经允许切换。默认仍以 ask 开始，切换为 bypass 后才按该模式执行。首次以 bypass 启动时会先确认一次。
 
 ### 完全访问
 
@@ -116,7 +118,8 @@ This command requires approval
 - **危险命令**：不显示此选项，已有会话授权也不会覆盖危险规则，每条命令单独确认。显式 ask/deny、工具禁用、Hook、沙箱继续生效。
 - **查看与撤销**：`/permissions` 的 Allow 页显示 Session Bash，选择可撤销；也可用 `/permissions bash-session show`、`/permissions bash-session revoke`。撤销影响后续调用，不中断已经开始的命令。
 - 会话授权只在工具参数和权限检查通过后提交。拒绝、取消、过期、重复审批或把参数改成危险命令不会留下授权。
-- Bash 先显示说明，再在虚线之间显示完整命令；其他工具显示工具名和格式化后的输入（最多 12 行）。
+- Bash 先显示说明，再在虚线之间显示完整命令；Python 显示完整代码、`env` 的键值、`cwd`、`interpreter` 或 `conda`，以及 `save_name` 将写入的 `temp/` 路径；其他工具显示工具名和格式化后的输入（最多 12 行）。
+- Python 审批不提供 **Allow for Session**，每次调用单独确认。要长期放行，请显式添加 `Python(*)` 规则；该规则等价于放行任意代码，见下文。
 - 没有实时界面时（例如输入来自管道），同样的内容以文本显示，输入 `1`/`y` 放行、`2` 放行并记住（有该项时）、切换到自动模式那一项的编号（有该项时），其他输入拒绝。
 - 连接了[远程控制](./remote-control.md)时，远程客户端同样会收到这个请求，哪一方先回答就以哪一方为准。
 
@@ -177,6 +180,15 @@ dcl --allowed-tools "Bash(npm test)" --allowed-tools Edit
 ```
 
 `WebFetch` 规则按域名匹配：`domain:example.com` 匹配这个主机，`domain:*.example.com` 匹配它的子域名；解析不了的 URL 不会被放行规则匹配，但会被 deny 和 ask 规则匹配。
+
+### Python 规则
+
+`Python(...)` 匹配的是入参 `code`，不是 shell 命令。代码无法像命令行那样做可靠的前缀审查：
+
+- `Python(*)` 和裸 `Python` 等价于放行任意代码；`Python(import *)` 之类的窄规则只按字符串前缀匹配，不能阻止代码在运行时执行其他操作。只在你确实信任这个会话时使用。
+- 代码中常见的括号、`;`、`$` 不会像 Bash 复合命令那样自动降级为询问；Python 规则的粒度实际上就是“放行/不放行”。
+- 真正的隔离靠[沙箱](./sandbox.md)和权限模式，不能把 Python 规则当代码审查。
+- 计划模式默认拒绝 Python；`bypass` 和 `auto` 仍按各模式的规则处理，不要假设 Python 会被自动放行。
 
 显式的 deny 规则优先于任何模式，包括 `bypass`；只有 `--full-access` 会忽略它。
 

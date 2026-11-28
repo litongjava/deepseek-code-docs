@@ -12,6 +12,8 @@
 4. 检查回复是否逐步出现。若一直等待，先查看网络请求和 Rust 日志，不要反复发送相同请求。
 5. 切换会话再返回，检查消息是否仍在。
 
+若尚未配置独立联网搜索（缺少服务地址、模型或 API Key），窗口顶部会显示可关闭的 `System Reminder` 横幅，点击 `Configure` 可直接跳转到联网搜索设置页；配置说明见[联网搜索与深度研究](/cli/web-search#配置联网搜索)。
+
 真实模型调用需要有效凭据并可能产生费用；文档站自身不执行这些调用。
 
 ## 项目与工具
@@ -30,7 +32,7 @@ MCP 连接外部工具服务，需要配置启动命令或服务连接信息。�
 
 ## 本地数据与日志
 
-Desktop 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）用 `global.db` 保存会话目录，用 `data/sessions/<storage_key>/session.db` 分别保存会话历史，知识库放在该目录下的 `data/knowledge`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
+Desktop 在数据目录（默认 `~/.deepseek-code`，与 CLI 共用）用 `global.db` 保存会话目录，用 `data/sessions/<storage_key>/session.db` 分别保存会话历史，知识库放在该目录下的 `data/knowledge/`。启动日志会打印真实数据目录，排查时以日志为准；解析规则见[数据位置](../maintenance/data.md#数据位置)。
 
 日志初始化逻辑将滚动日志写入进程工作目录下的 `logs`。不同启动方式可能改变工作目录。
 

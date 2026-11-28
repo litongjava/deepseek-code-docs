@@ -16,7 +16,7 @@ DeepSeek Code 内置了 `skill-creator`。首次启动时，dcl 将它安装在�
 
 ## 技能发现位置
 
-个人技能放在数据目录的 `skills/<名称>/SKILL.md`，供 CLI 和 Desktop 共用。项目专用技能放在工作区的 `.claude/skills/<名称>/SKILL.md`。查找顺序和升级后的目录变化见[技能从哪里读取](./data-directory.md#技能从哪里读取)。
+个人技能放在数据目录的 `skills/<名称>/SKILL.md`，供 CLI 和 Desktop 共用。项目专用技能放在工作区的 `.claude/skills/<名称>/SKILL.md` 或 `.agents/skills/<名称>/SKILL.md`；同名时 `.agents` 优先。查找顺序和升级后的目录变化见[技能从哪里读取](./data-directory.md#技能从哪里读取)。
 
 ## 技能结构
 

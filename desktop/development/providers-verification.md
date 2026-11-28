@@ -8,7 +8,7 @@
 - PASS：嵌套 `architecture.input_modalities`、`context_length`、`top_provider.max_completion_tokens` 解析为 Text/Image、256000、32000。
 - PASS：GPT-4o-mini 明确返回 `supports_vision=false` 和 `context_window="64K"` 时保持 Text、64000。
 - PASS：自定义 `custom-vl-72b-256k` 识别 Image 与 256000；72B 不作为上下文。
-- 点击页面保存后通过接口重新读回，5 项断言全部通过；完整数据见 [JSON 证据](../../assets/models-auto-fetch-check.json)。截图为单个模型卡片证据。
+- 点击页面保存后通过接口重新读回，5 项断言全部通过；完整数据见 [JSON 证据](/models-auto-fetch-check.json)。截图为单个模型卡片证据。
 - Rust discovery 测试 2 项通过；前端相关测试、默认 TypeScript 检查、生产构建和差异检查通过，最终检查范围见下节。
 
 范围：验证配置发现、推断、编辑和保存；未调用外部模型或验证真实视觉识别。测试临时供应商在收尾时删除。
@@ -19,9 +19,9 @@
 
 继续使用可见 Chrome 任务 `2026101407`，验证实际页面与 localStorage：
 
-- PASS：Settings → Models 为 Chat、Work、Study 分别选择 Gateway Vision、Custom VL 72B、gpt-4o-mini；完整刷新后所有 provider/model 选项仍匹配保存值。见 [设置读回证据](../../assets/models-mode-defaults-check.json)。
+- PASS：Settings → Models 为 Chat、Work、Study 分别选择 Gateway Vision、Custom VL 72B、gpt-4o-mini；完整刷新后所有 provider/model 选项仍匹配保存值。见 [设置读回证据](/models-mode-defaults-check.json)。
 - PASS：打开新会话，模型为 Chat 默认的 Gateway Vision；切换 Work、Study、Chat 后依次为 Custom VL 72B、gpt-4o-mini、Gateway Vision。
-- PASS：模型菜单两个供应商组内全部模型升序，按显示名称忽略大小写、按数字自然顺序比较。见 [运行与排序证据](../../assets/models-mode-runtime-check.json)。
+- PASS：模型菜单两个供应商组内全部模型升序，按显示名称忽略大小写、按数字自然顺序比较。见 [运行与排序证据](/models-mode-runtime-check.json)。
 - 前端 11 个相关测试文件、88 项测试通过，覆盖同 ID 跨供应商选择、设置持久化、无效/禁用默认值回退、已有会话及旧模型 ID 保留、手动选择不被目录刷新覆盖、项目模型回归、多语言完整性及流式记录。
 - 默认 TypeScript 检查、前端生产构建、文档生产构建通过。补齐所有支持语言的默认模型文案和原有设置缺失键；测试中读取最后一次调用改为兼容 ES2021 的索引写法。测试后恢复原模式默认值并删除临时供应商。
 
@@ -40,7 +40,7 @@
 - Settings → Models 保留原设置页导航和整体布局，仅显示供应商配置；新增页面包含“第三方模型供应商”和“自定义模型 API”两类。
 - 第三方目录显示 40 个供应商。目录共 1354 个模型，来源为本机 DeepSeek Harness 中的 `@earendil-works/pi-ai@0.85.1`。
 - 浏览器创建临时自定义供应商，填写 ID、Name、URL、Key、OpenAI 协议。Key 在 URL 下方且遮挡显示。
-- 模型设置输入 `1M`、`32K` 并选择 Text / Image，保存后本地 `config.json` 中分别为 `1000000`、`32000`、`supports_vision=true`。后端重启后重新打开页面，仍显示 `1M`、`32K` 和 Image 选中状态。
+- 模型设置输入 `1M`、`32K` 并选择 Text / Image，保存后本地 `config/config.json` 中分别为 `1000000`、`32000`、`supports_vision=true`。后端重启后重新打开页面，仍显示 `1M`、`32K` 和 Image 选中状态。
 - 输入 `0` 时表单报告无效并显示“Token 数量超出有效范围”。Rust 拒绝输出上限超过上下文窗口的配置。
 - 旧浏览器供应商 “Local Claude 8317” 及其 47 个模型迁移成功；测试结束保留该配置。
 - 新建会话的模型菜单按供应商分组；Effort 菜单显示 Off / Low / High / Max。
@@ -86,6 +86,6 @@ npm.cmd run build
 
 ## 供应商重命名回归
 
-在可见 Chrome 中打开已保存的临时供应商，将顶部 Name 从 `Rename Test Before` 修改为 `Rename Test After`，点击顶部“保存”。列表和本地 `config.json` 均读回新名称。TypeScript 检查与生产构建通过，测试供应商随后清理。
+在可见 Chrome 中打开已保存的临时供应商，将顶部 Name 从 `Rename Test Before` 修改为 `Rename Test After`，点击顶部“保存”。列表和本地 `config/config.json` 均读回新名称。TypeScript 检查与生产构建通过，测试供应商随后清理。
 
 ![供应商名称编辑与保存](../../assets/provider-name-edit.png)

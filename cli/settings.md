@@ -2,9 +2,9 @@
 
 本页汇总可以调整 dcl 行为的设置项和环境变量。每一项的详细说明见对应的功能文档。
 
-## settings.json
+## config/settings.json
 
-文件位于[数据目录](./data-directory.md)下的 `config/settings.json`，使用 JSON 格式。文件不存在时，所有项使用默认值。
+位于[数据目录](./data-directory.md)的 `config/settings.json`，JSON 格式。文件不存在时，所有项使用默认值。
 
 ```json
 {
@@ -22,30 +22,78 @@
 | `summarize_long_command_output` | `true` | 为模型标出长命令输出中省略的字节、整行和相关原文，见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果) |
 | `editorMode` | `normal` | 设为 `vim` 时使用 vim 风格编辑，见[vim 模式](./vim-mode.md) |
 | `hooks` | 无 | 工具调用前后执行的 hooks |
-| `sandbox` | 无 | 在沙箱中运行 Bash 命令，见[沙箱](./sandbox.md) |
+| `sandbox` | 无 | 在沙箱中运行 Bash 和 Python 命令，见[沙箱](./sandbox.md) |
 | `shell` | 工具使用 Bash，手动终端保留原默认值 | 共用 Shell 配置，见下文 |
+| `python` | 无 | 默认 Python 解释器，见[Python 解释器](#python-解释器) |
 | `permissions` | 无 | `allow`、`ask`、`deny` 规则列表，见[权限](./permissions.md#规则) |
 | `remoteControlAtStartup` | `false` | 交互会话启动时自动连接远程控制，见[远程控制](./remote-control.md#启动时自动连接) |
 | `localCoordination.enabled` | `false` | 开启 Linux CLI 的本地协调，见[本地协调](./local-coordination.md) |
 | `localCoordination.registry` | `true` | 开启本地协调后，自动登记 CLI 会话与常驻 Worker |
+| `resourceMonitor` | 默认启用 | 内置宿主机 CPU、内存与磁盘压力监控，见[系统资源监控](#系统资源监控) |
 
 `localCoordination.enabled` 和 `localCoordination.registry` 是 `localCoordination` 对象中的字段。嵌套写法见[启用登记](./local-coordination.md#启用登记)。
 
-要控制后续回合中的本地文件记忆，在 `/config` 的 Config 页切换 **Long-term memory**，或使用 `dcl config memory on`、`dcl config memory off`。配置团队索引目录时，在用户设置中填写绝对路径 `memory.team_dir`。见[长期记忆](./memory.md)。
-
 ## 请求记录
 
-在数据目录的 `config/settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
+在 `config/settings.json` 中设置 `"requestRecording": { "enabled": true }` 可开启原始模型请求与响应记录，设为 `false` 可显式关闭。默认关闭；`--full-access`（`--yolo`）在未显式配置时自动开启。
 
 优先级是 `--record-requests` 强制开启 → `DEEPSEEK_CODE_RECORD_REQUESTS` 的有效值 → `requestRecording.enabled` → 完全访问模式自动开启。环境变量支持 `1`、`true`、`0`、`false`。请求体不脱敏，完整示例、保存位置与隐私说明见[请求记录](./request-recording.md)。Desktop 使用同一份数据目录配置。
 
 ## 流式模型请求
 
-流式请求的读取空闲超时和内容后超时恢复在 `config/orchestration.toml` 的 `[http]` 段配置。默认分别为 `300` 秒和 `false`。完整配置示例见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
+流式请求的读取空闲超时（`request_timeout_secs`）、连接池空闲时长（`pool_idle_timeout_secs`）和内容后超时恢复（`post_content_timeout_recovery`）在 `config/orchestration.toml` 的 `[http]` 段配置。默认分别为 `300` 秒、`300` 秒和 `false`，修改后需重启进程生效。完整配置示例见[流式请求超时与重试](./providers.md#流式请求超时与重试)。
+
+## 记忆开关
+
+`dcl config memory` 查看全局记忆开关和检索设置；`dcl config memory off` 关闭，`on` 重新开启。在交互界面运行 `/config`，可以在 Config 页的 `Long-term memory` 一行直接切换。也可以用 `dcl config set memory.enabled false`。开关保存在数据目录的数据库里，Desktop 与 CLI 共用：关闭后新请求不再注入 `MEMORY.md` 索引，记忆目录的写入会被拒绝，系统提示词也会省略记忆说明；已保存内容保留。详见[长期记忆](./memory.md#关闭记忆)。
+
+团队共享的 Markdown 记忆目录单独在用户级 `config/settings.json` 中设置，例如 `{"memory":{"team_dir":"/srv/team/memory"}}`。目录须用绝对路径。见[记忆索引的可见范围](./memory.md#索引位置与可见范围)。
+
+## 联网搜索与网页抓取代理
+
+独立联网搜索（`deepseek_search`）与 `WebFetch` 代理（`web_fetch.proxy`）保存在 `config/config.json`，每次调用实时生效，无需重启：
+
+```bash
+dcl config set search.provider deepseek|openai|anthropic
+dcl config set search.api_key sk-...
+dcl config set search.base_url https://api.deepseek.com/anthropic/v1
+dcl config set search.model deepseek-flash
+dcl config set fetch.proxy http://127.0.0.1:10808   # 设为空字符串 "" 可清除
+```
+
+在交互会话中也可通过 `/search-config`、`/config search`、`/config fetch-proxy`，或在 `/config` 面板的 `Config` 页（`Web search` / `Web fetch proxy`）直接配置。详见[联网搜索与深度研究](./web-search.md)。
+
+## 系统资源监控
+
+dcl 与 Desktop 共用内置宿主机资源监控器，通过原生系统调用周期性采样 CPU、内存以及当前工作区所在磁盘的可用空间（不额外启动子进程）。持续超限时仅在**活动回合**（回合开始或工具结果边界）向模型注入一条 `<task-notification>`（`task-id` 为 `builtin-resource-monitor`）并向界面推送 `resource_alert` 警告；**会话空闲时不会唤醒模型或向队列写入输入**，回合开始前已恢复的短暂峰值会自动丢弃。
+
+在 `config/settings.json` 中可通过 `resourceMonitor` 调整全部阈值（字段均为可选，缺失或格式非法时回退默认值）：
+
+```json
+{
+  "resourceMonitor": {
+    "enabled": true,
+    "intervalSecs": 10,
+    "cpuPercentThreshold": 95.0,
+    "cpuConsecutive": 3,
+    "memoryAvailablePercentThreshold": 10.0,
+    "memoryAvailableMinBytes": 2147483648,
+    "memoryConsecutive": 2,
+    "diskAvailablePercentThreshold": 5.0,
+    "diskAvailableMinBytes": 2147483648,
+    "diskConsecutive": 2,
+    "cooldownSecs": 300
+  }
+}
+```
+
+- **采样与冷却**：`intervalSecs` 限制在 `2`–`300` 秒；`cpuConsecutive`、`memoryConsecutive`、`diskConsecutive` 至少为 `1`；同类告警在 `cooldownSecs`（默认 `300` 秒）内不重复触发，且恢复需越过回差区间以防阈值抖动。
+- **触发条件**：CPU 使用率达到 `cpuPercentThreshold`（有效范围 `0`–`100`，超出或非有限数时回退 `95.0`）；内存需**同时**低于可用百分比阈值与最小可用字节数（默认 `10%` 且 `< 2 GiB`）；磁盘在可用百分比或可用字节数**任一**低于阈值（默认 `5%` 或 `< 2 GiB`）时触发。
+- **环境变量覆盖**：设置 `DEEPSEEK_CODE_RESOURCE_MONITOR=0`（或 `false`）可强制关闭，`1`（或 `true`）可强制开启，优先级高于 `settings.json`；非法值忽略并沿用文件配置。
 
 ## Shell 配置
 
-`shell` 与其他设置共用数据目录的 `config/settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
+`shell` 与其他设置共用 `config/settings.json`。模型工具读取 `toolDefault`，dcl 的 `!` 命令读取 `terminalDefault`；工具参数显式指定 `shell` 时优先。
 
 ```json
 {
@@ -87,9 +135,37 @@ dcl config set shell.terminalDefault wsl
 
 前台超时、取消、后台任务停止会结束本次调用拥有的 Linux 进程组，不会终止整个发行版。主动脱离进程组的守护进程不在这一保证内。启用的沙箱目前不能隔离 WSL 时会明确拒绝执行，不能通过指定 WSL 绕过沙箱。
 
-## 系统资源提醒
+## Python 解释器
 
-dcl 默认每 10 秒采样 CPU、可用内存和磁盘空间。压力持续多个采样周期时，终端显示系统资源提醒，Desktop 显示通知。在用户设置 `config/settings.json` 中可用 `{"resourceMonitor":{"enabled":false}}` 关闭，或调整 `intervalSecs`、`cpuPercentThreshold` 等字段。环境变量 `DEEPSEEK_CODE_RESOURCE_MONITOR=0` 或 `1` 优先于文件中的开关。
+`Python` 工具在不传 `interpreter` 或 `conda` 时使用默认解释器。可以在 `config/settings.json` 中指定：
+
+```json
+{
+  "python": {
+    "path": "/usr/bin/python3"
+  }
+}
+```
+
+```powershell
+dcl config set python.path /usr/bin/python3
+dcl config set python.path ""        # 清除，恢复自动解析
+dcl config show                      # 查看保存值
+```
+
+`python.path` 可以是绝对路径，也可以是 PATH 上的程序名。解析顺序是：
+
+1. 工具参数 `interpreter`（绝对路径或 PATH 程序名）；
+2. 工具参数 `conda` 指定的 conda 环境；
+3. `config/settings.json` 的 `python.path`；
+4. 环境变量 `VIRTUAL_ENV`；
+5. 环境变量 `CONDA_PREFIX`；
+6. 工作区的 `.venv`、`venv`、`env`；
+7. PATH：Windows 先试 `py -3`，再试 `python3`、`python`。Windows 会跳过 `WindowsApps` 中的 Microsoft Store 占位程序。
+
+`interpreter` 和 `conda` 互斥，同时传入会直接报错。显式路径不存在、环境名找不到或 PATH 上没有解释器时，工具会列出尝试过的候选并提示用 `Bash` 执行 `py -0p`、`conda env list` 或 `which python`。配置的路径失效不会回退到 PATH，而是明确报错，避免静默使用别的环境。
+
+新会话的环境块会列出默认解释器的绝对路径和版本，和 Node.js 版本并列。工具结果每次仍带 `interpreter` 与 `interpreter_source`；模型预览只在解释器与请求不同，或工作区虚拟环境替换了默认解释器时多显示一行。
 
 ## 环境变量
 
@@ -100,6 +176,7 @@ dcl 默认每 10 秒采样 CPU、可用内存和磁盘空间。压力持续多�
 | `DEEPSEEK_CODE_DATA_DIR` | 数据目录 | [数据目录](./data-directory.md) |
 | `DEEPSEEK_CODE_COORDINATION_DIR` | 本地协调目录 | [本地协调](./local-coordination.md) |
 | `DEEPSEEK_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | 启用代理团队工具 | [代理团队](./agent-teams.md) |
+| `DEEPSEEK_CODE_RESOURCE_MONITOR` | 覆盖内置系统资源监控开关（`0`/`1`/`true`/`false`） | [系统资源监控](#系统资源监控) |
 | `CLAUDE_BRIDGE_OAUTH_TOKEN` | 远程控制服务的 token | [远程控制](./remote-control.md) |
 | `TEAM_SYNC_TOKEN` | 团队同步客户端 token | [团队同步](./team-sync.md) |
 | `TEAM_SERVER_TOKENS` | 团队同步服务端的 token 与团队映射 | [团队同步](./team-sync.md) |

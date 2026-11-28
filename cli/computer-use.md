@@ -17,7 +17,7 @@
 | `KeyDown` | 按住一个键 | `key`，例如 `Control`、`Shift` |
 | `KeyUp` | 松开一个键 | `key` |
 | `TypeText` | 输入文字 | `text`；输入到当前获得焦点的控件 |
-| `Screenshot` | 截取屏幕并保存文件 | 无额外参数，返回本地绝对路径 |
+| `Screenshot` | 截取屏幕并保存文件 | 无额外参数，返回本地绝对路径并自动附带截图供模型查看 |
 | `Wait` | 等待 | `duration_ms`，毫秒；默认 1000 |
 
 鼠标按钮名称为 `Left`、`Right`、`Middle`、`Back`、`Forward`，实际支持情况取决于平台后端。键名支持常用方向键、编辑键、F1–F12、修饰键等；未知键名不应当作有效按键使用。
@@ -54,7 +54,7 @@
 
 ## 截图保存位置与返回值
 
-新版工具将截图保存到数据目录的 `cache/screenshots/` 子目录，默认是 `~/.deepseek-code/cache/screenshots/`。指定 `DEEPSEEK_CODE_DATA_DIR` 或通过 CLI `--data-dir` 使用其他数据目录时，截图随数据目录保存。每张图片使用唯一文件名，不覆盖旧截图。
+新版工具将截图保存到数据目录的 `cache/screenshots` 子目录，默认是 `~/.deepseek-code/cache/screenshots/`。指定 `DEEPSEEK_CODE_DATA_DIR` 或通过 CLI `--data-dir` 使用其他数据目录时，截图随数据目录保存。每张图片使用唯一文件名，不覆盖旧截图。
 
 Windows 本地截图为主显示器的 JPEG。返回示例：
 
@@ -71,12 +71,16 @@ Windows 本地截图为主显示器的 JPEG。返回示例：
 
 - `screenshot_path` 是已保存文件的绝对路径；没有截图时为 `null`。
 - `mime_type` 表示图片格式；没有截图时为 `null`。
-- 工具结果不再包含旧版 `screenshot` Base64 字段。已有脚本应改为读取 `screenshot_path`。
-- Windows 当前实现会在成功动作后附带截图，因此点击、输入或等待的结果也可能返回截图路径。
+- 工具返回的 JSON 文本不包含旧版 `screenshot` Base64 字段，界面显示和 `function_call_output` 仍保持简洁 JSON；已有脚本可继续读取 `screenshot_path`。
+- 当 `computer_use` 执行成功且生成了 `screenshot_path` 时，引擎会自动将本地截图作为图片内容附带给模型，无需模型再额外调用一次 `Read`：
+  - OpenAI Chat Completions / Responses 协议：在当前批次的 `tool` / `function_call_output` 消息之后，自动紧跟一条包含该图片的 `user` 消息（`Image content from tool result <id>:` + 图片内容）。
+  - Anthropic Messages 协议：直接在 `tool_result` 的内容块中附带图片。
+  - 会话持久化与 `--resume` 恢复时也会通过图片 sidecar 保留该截图。
+- Windows 当前实现会在成功动作后附带截图，因此点击、输入或等待的结果也可能返回截图路径并自动附带图片。
 - `duration_ms` 是动作执行计时，不包含后续截图与文件保存耗时，截图动作可能显示为 0。
 - 截图为空、解码失败或无法写入文件时，工具返回错误，不会给出虚假的成功路径。
 
-可以直接用图片查看器打开保存的文件。成功取得截图时，工具结果会把图像随动作信息一起交给支持视觉输入的模型，无需再调用一次 `Read`。
+磁盘上的截图仍可直接用图片查看器打开。图片是否被模型接受由服务端决定；纯文本模型可借助另行提供的 OCR 工具读取文字。
 
 截图会保留在磁盘中，目前没有自动清理策略，可按需手动删除。
 

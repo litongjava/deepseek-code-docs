@@ -242,7 +242,9 @@ cd /Users/dev/code/my-app
 dcl
 ```
 
-Mac 的模型配置、数据目录和会话属于 Mac，不会自动共享 Windows 的配置。需要长时间运行时可在 Mac 使用已安装的 tmux：`tmux new -s mac-dev`，在其中运行 dcl；断线后重新 SSH 登录，再 `tmux attach -t mac-dev`。这比假定 SSH 断开后所有任务都能继续更可靠。
+Mac 的模型配置、数据目录和会话属于 Mac，不会自动共享 Windows 的配置。需要长时间运行时可在 Mac 使用已安装的 tmux：`tmux new -s mac-dev`，在其中运行 dcl；断线后重新 SSH 登录，再 `tmux attach -t mac-dev`。这比假定 SSH 断开后所有任务都能继续更可靠。进入 tmux 后先执行 `tmux set -g mouse on`（或写入 `~/.tmux.conf`），否则 dcl 收不到拖动选择和右击复制事件。
+
+复制选择时，dcl 会先把文字写入 tmux buffer，并尝试用 OSC 52 把它送到 Windows 终端。Windows Terminal 等支持 OSC 52 的终端可以直接粘贴到本地；不支持时用 tmux 的粘贴快捷键（默认先按 `Ctrl+B`，再按 `]`），或按住 `Shift` 拖动使用终端原生选择。
 
 ### 通过 Remote Control 从 Windows 接入 Mac 会话
 
@@ -294,7 +296,7 @@ dcl
 /remote-control mac-dev --server https://rc-api.example.com --save
 ```
 
-`--save` 保存服务地址到 Mac 数据目录的 `remote-control.json`，不会保存 token。重新启动 dcl 时仍需提供 token；模型的 API key 与 Remote Control token 分别配置。
+`--save` 保存服务地址到 Mac 数据目录的 `config/remote-control.json`，不会保存 token。重新启动 dcl 时仍需提供 token；模型的 API key 与 Remote Control token 分别配置。
 
 连接建立后会显示类似：
 
@@ -329,7 +331,7 @@ Remote Control active: https://rc.example.com/code/<session-id>
 
 Mac 上的 dcl 前端必须持续运行；退出 dcl 会断开、归档远程会话并注销环境。电脑睡眠或网络中断会影响连接，断线重连不等于任务一定成功，恢复后检查日志和状态。
 
-如果通过 SSH 在 Mac 启动 dcl，建议先进入 Mac 上的 tmux，再设置上述环境变量和运行 dcl；关闭 Windows SSH 窗口前按 tmux 的 `Ctrl+B`、`D` 分离。需要时重新登录 Mac，用 `tmux attach -t mac-dev` 回到本地前端。tmux 不负责唤醒睡眠中的 Mac。
+如果通过 SSH 在 Mac 启动 dcl，建议先进入 Mac 上的 tmux，再设置上述环境变量和运行 dcl；关闭 Windows SSH 窗口前按 tmux 的 `Ctrl+B`、`D` 分离。需要时重新登录 Mac，用 `tmux attach -t mac-dev` 回到本地前端。tmux 中同样先执行 `tmux set -g mouse on`，否则拖动选择和右击复制不可用；复制路径见[复制与 tmux/SSH](./interface.md#复制与-tmux-ssh)。tmux 不负责唤醒睡眠中的 Mac。
 
 代码和产物仍保存在 Mac 上。Remote Control 不会自动把 `.app`、ZIP 或整个项目同步到 Windows，可按本文“取回产物与日志”一节使用 SCP，或使用已授权的 Git/制品仓库流程。
 

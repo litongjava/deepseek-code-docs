@@ -1,12 +1,21 @@
 # 自动权限模式
 
-`auto` 模式直接放行未命中[危险规则](./dangerous-commands.md)的 Bash 命令，包括构建、测试、管道、复合命令和未知脚本；这类命令不调用分类器，也不等待分类器预算或网络。命中规则的命令每次请求人工确认。普通文件编辑工具 `Write`、`Edit`、`MultiEdit`、`NotebookEdit` 同样直接执行，不调用分类器。其他未明确放行的工具仍由独立模型分类，不能自动批准时交给你确认。
+`auto` 是“确定性规则 + 可选分类器”的模式，不是每个工具都问模型。
 
-显式 ask/deny、工具禁用、Hook 和沙箱仍然有效。未命中规则只表示符合直接放行条件，不代表已经审计脚本内容。
+## 规则
 
-## 配置分类器
+- **直接放行**：只读工具；普通 `Write`、`Edit`、`MultiEdit`、`NotebookEdit`、`ApplyPatch`；未命中危险规则的 `Bash` / `PowerShell`；`TodoWrite`、`TaskCreate`、`TaskUpdate`；MCP 只读；`GitHub` 读；`Config` 读；`Agent` / `Task` / `team`；`SendMessage`；`TaskStop`；`SearchReplace` / `GlobReplace`。
+- **人工确认**：危险 `Bash` / `PowerShell`；受保护路径编辑（`.git`、`.vscode`、`.idea`、`.claude`、`.deepseek-code`、`.gitconfig`、`.bashrc`、`.zshrc`、`.mcp.json` 等）；本地/内网 `WebFetch`；MCP 写；`GitHub` 写；`Config` 写；`Delete`；`cron` / `CronCreate` / `CronDelete` / `ScheduleWakeup`；显式 `Confirm` 和 `requires_confirmation`。
+- **分类器**：未归类的未知工具；未预批准的公网 `WebFetch`；`SkillCreate` / `SkillUpdate`。分类器拒绝、超时、传输失败、无效返回、输入超限或未配置时，转人工确认。
+- **直接拒绝**：显式 `Deny`、工具禁用。
 
-auto 模式需要先**显式**配置用哪个模型做判断，否则启动时报 `Auto permissions are disabled`。在交互模式里：
+未命中危险规则不代表脚本已经审计。`python`、`awk`、未知脚本仍属于普通 Shell，直接放行。
+
+## 配置分类器（可选）
+
+`auto` 不要求先配置分类器。没有配置时，未知工具直接转人工，不会回退到 `ask`，也不会让启动失败；配置后，未知工具才发分类请求。
+
+在交互模式里：
 
 ```text
 /permissions auto-config set {"enabled":true,"classifier":{"kind":"current"}}
@@ -15,10 +24,22 @@ auto 模式需要先**显式**配置用哪个模型做判断，否则启动时�
 
 - `classifier.kind`：`current` 使用当前会话的模型；`named` 配合 `provider_id`、`model_id` 指定另一个模型。
 - `timeout_ms`：单次判断的超时，100 到 60000，默认 15000。
-- `max_input_tokens`：发给分类器的上下文上限，默认 8192。
+- `max_input_tokens`：发给分类器的上下文上限，默认 8192；实现按 UTF-8 字节估算，不是精确 token。
 - `failure_policy`：默认 `manual`；兼容读取旧的 `deny` 配置，有交互审批宿主时分类器异常统一转人工确认。
 
-`/permissions auto-config off` 关闭。
+`/permissions auto-config off` 关闭分类器；`auto` 仍会按上面的本地规则运行，未知工具转人工。
+
+### 支持的分类器传输
+
+分类器支持：
+
+- 直连 OpenAI Chat Completions；
+- 直连 Anthropic Messages；
+- `openai-responses`：
+  - `builtinId=openai` + `model.api=openai-responses`；
+  - 普通 provider（没有 `builtinId`）+ `model.api=openai-responses`。
+
+其他内置 provider 传输（Azure、Codex、Bedrock、Google 等）仍然不支持作为分类器。`classifier.kind=current` 只有在当前主模型属于上述组合时才可用；否则会提示分类器不可用，未知工具转人工。
 
 ## 使用
 
@@ -42,6 +63,7 @@ dcl -m deepseek-flash --api-format anthropic --permission-mode auto -p "创建 h
 
 - 分类器异常不计入拒绝次数；拒绝次数仅用于统计，不设置连续或累计次数上限。每次调用独立审批，被拒绝的调用会把原因返回给模型，后续调用仍可继续审批。
 - 分类器只看到你明确表达过的授权和当前的调用，不会看到工具返回的内容。
+- 分类器只处理未归类的未知工具、未预批准的公网 `WebFetch` 和 `SkillCreate` / `SkillUpdate`；普通 Shell、普通文件编辑和只读工具不会产生分类请求。
 - DeepSeek 在 Anthropic 协议下会先返回思考内容再给出判断，dcl 会跳过思考，只解析唯一的文本答案。
 
 ## 相关文档

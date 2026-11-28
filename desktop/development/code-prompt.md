@@ -86,9 +86,11 @@ Git 操作通过 `Bash` 执行，例如 `git status`、`git diff`、`git add <�
 
 85 个样本 MCP 工具均未复制注册。
 
-### 4.3 文件记忆
+### 4.3 文件记忆 {#_4-3-显式使用长期记忆}
 
 项目说明之后是可见作用域的常驻索引。模型根据索引读取所需的 Markdown 文件；变更随输入提示，压缩后重新附上各份索引。路径和截断规则见[文件记忆](/cli/memory)，管理入口见[记忆面板](../usage/knowledge.md)。
+
+发送消息时不会自动检索记忆，回合完成后也不会自动把对话写成记忆。旧配置中的 `auto_search`、`auto_ingest` 和 `auto_ingest_importance_threshold` 不再生效；续接旧会话时会跳过先前自动附加的召回片段。会话历史仍单独保存。
 
 ## 5. 当前工具协议
 
@@ -98,7 +100,7 @@ Git 操作通过 `Bash` 执行，例如 `git status`、`git diff`、`git add <�
 
 - `Bash` 的 `timeout` 单位是**毫秒**，前台默认 120000，最大 600000。
 - 支持 `run_in_background`：返回 `task_id` 和 `stdout_file`/`stderr_file`，用 `TaskGet` 读取有限长度的日志和状态，用 `TaskStop` 结束整个进程树。后台命令跨轮次存活，worker 退出时结束。
-- 每次调用仍是新进程，但**工作目录跨调用保留**：bash、sh、zsh、PowerShell、Git Bash 和 Windows `cmd` 都会记住上次 `cd` 的位置；目录离开项目时重置回项目根目录。shell 变量不保留。并行发起的一批 Shell 命令从同一目录快照开始，一条命令中的 `cd` 不会改变同批其他命令的起点。
+- 每次调用仍是新进程，但**工作目录跨调用保留**：bash、sh、zsh、PowerShell、Git Bash 和 Windows `cmd` 都会记住上次 `cd` 的位置；目录离开项目时重置回项目根目录。shell 变量不保留。
 - `Bash` 和 `Monitor` 的说明使用配置的默认 Shell，只列出本机可用的 Shell。需要切换语法时，用 `shell` 选择另一个可用项。
 
 PowerShell 文件读取示例：
@@ -120,7 +122,7 @@ PowerShell 包装器设置 UTF-8 输入输出与文件 cmdlet 编码。文件写
 ### 用户提问和联网
 
 - `AskUserQuestion` 使用 `questions` 数组，一次 1–4 个问题，每个问题带 `header`、2–4 个 `options`（含 `description`，可选 `preview`），支持 `multiSelect`。
-- `WebFetch` 参数为 `url`、`prompt` 和可选的 `offset`：短页面直接返回提取的正文，长页面用会话模型按 `prompt` 回答，同一 URL 缓存 15 分钟，长页面用 `offset` 分段读取；访问新主机前按权限规则询问，可用 `WebFetch(domain:example.com)` 规则放行。
+- `WebFetch` 参数为 `url`、`prompt` 和可选的 `offset`：短页直接返回清理后的正文，长页用会话模型按 `prompt` 回答，同一 URL 缓存 15 分钟，长页面用 `offset` 分段读取；访问新主机前按权限规则询问，可用 `WebFetch(domain:example.com)` 规则放行。
 - `WebSearch` 参数为 `query`，可选 `allowed_domains`、`blocked_domains` 过滤结果；搜索供应商沿用项目配置，没有配置时如实报告。
 
 ## 6. 代码接入链路
@@ -138,29 +140,33 @@ HTTP / 原生聊天请求
   → 模型供应商与本地请求快照
 ```
 
-CLI 与 Desktop 各模式共用默认系统提示词：
+默认系统提示词在 Code 与 Desktop 下相同，包含以下内容：
 
 1. 一行身份 `You are deepseek-code, an agentic coding tool for DeepSeek models.`，单独带缓存断点。
-2. `code.md`、`behavior.md` 和启用记忆时的 `memory.md` 依次提供编码、通用行为与记忆指引。默认的 `Execution and verification` 要求在探索性提问中先给建议和主要取舍，获得同意再实施；非交互运行给完建议就结束。改动界面时，应在条件允许时运行应用检查主要流程和边界情况，说明未能验证的部分。项目临时文件、长期保留的辅助文件和文档分别放入 `./temp/`、`./permanent/` 和 `./docs/`。遇到阻碍先排查原因，改动陌生文件前先调查；范围较大的探索可委派，引用记忆中的路径前要在当前工作区核对。查阅第三方库源码时先检查项目和依赖缓存；仍找不到时，克隆到 `~/code/<owner>/<repo>`（GitHub 用户或组织名、仓库名），已有克隆先执行 `git fetch`，再到该目录阅读源码。
-3. 若本次请求提供自定义提示词，放在 `<additional_instructions>` 中。
+2. `code.md`，单独带缓存断点。默认的 `Execution and verification` 要求在探索性提问中先给建议和主要取舍，获得同意再实施；非交互运行给完建议就结束。改动界面时，应在条件允许时运行应用检查主要流程和边界情况，说明未能验证的部分。遇到阻碍先排查原因，改动陌生文件前先调查；范围较大的探索可委派，引用记忆中的路径前要在当前工作区核对。需要查阅第三方库的源码时，先找项目和依赖缓存；仍找不到时克隆到 `~/code/<owner>/<repo>`，已有克隆则先 fetch。
+3. `behavior.md`，单独带缓存断点：跨模式通用的回答与工具行为。
+4. `memory.md`，单独带缓存断点；全局记忆关闭时省略这一段。
+5. 若本次请求提供自定义提示词，放在 `<additional_instructions>` 中。
 
 环境细节、项目指令、技能与工具清单随用户消息发送：
 
-- **第一条用户消息**在实际输入之前，依次附上用户级指令、独立 CLI 的前端说明（如适用）、项目指令、可见的文件记忆索引、项目经验索引、可加载工具、技能清单与常驻技能正文、`# Working environment`、日期和会话开始时的 Git 快照。环境段含项目名、工作目录、Git 仓库状态、平台及架构，能检测时还列出 Shell 路径、系统版本和 Node.js 版本。有多个源码目录时逐行列出。若工作区本身不在 Git 仓库中，启动快照会列出直接子目录中的仓库（最多八个）。首次请求的工具与技能清单保留在原位，之后的增减随最新用户消息提示。见[工具目录与加载](/cli/tools#工具目录与加载)。
+- **第一条用户消息**在实际输入之前，依次附上用户级指令、独立 CLI 的前端说明（如适用）、项目指令、可见的记忆索引、项目经验索引、可加载工具、可调用技能及常驻技能正文、`# Working environment`、日期和会话开始时的 Git 快照。环境段含项目名、工作目录、Git 仓库状态、平台及架构，能检测时还列出 Shell 路径、系统版本和 Node.js 版本。有多个源码目录时逐行列出。首次请求的工具与技能清单保留在原位，之后的增减随最新用户消息提示。见[工具目录与加载](/cli/tools#工具目录与加载)。
 - **每轮用户消息**后面附上该轮的钩子附加内容和 `/技能` 展开的技能正文。这些内容按会话保存，之后的每次请求都放回同一条消息后面，不会在下一轮丢失。
 - 压缩之后，已调用技能的正文会作为提醒重新附上。
 
 用户级指令和项目指令分属两个提醒块，空组略去，导语只出现一次。Anthropic 保留各个文本块，Responses 使用独立的 `input_text`，Chat Completions 为兼容服务端而合并成字符串。文件查找顺序见[项目说明](/cli/memory-notes#会加载哪些说明文件)。
 
-Anthropic 请求在静态系统提示词分块上标记缓存断点，对话中最后一个用户块再放一个滚动断点。
+Anthropic 请求在静态系统提示词各段上各放一个缓存断点（记忆关闭时为三段），对话中最后一个用户块再放一个滚动断点。
 
-`chat`、`work`、`study` 与 Code 共用默认身份和行为指引，并遵循相同的记忆开关。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
+`chat`、`work`、`study` 与 Code 使用同一份静态提示词，记忆通过显式的文件读写维护。没有桌面会话记录的内部任务保持 Desktop 默认，即使给出了工作目录也不会自动切到 Code。Code 会话未选择项目时使用会话专属目录；关联项目时使用有效、已信任、未归档的项目目录。
 
 主要源码位于 CLI 与 Desktop 共用的核心引擎中：
 
-- `prompt/code.md`：Code 行为规则，编译时嵌入。
+- `prompt/code.md`：编码与运行环境行为规则，编译时嵌入。
+- `prompt/behavior.md`：跨模式通用的回答与工具行为，编译时嵌入。
+- `prompt/memory.md`：记忆使用说明，编译时嵌入，记忆关闭时省略。
 - `prompt/code.rs`：部分原生工具的 `Code mode:` 说明补充；保留实际参数 schema。
-- `prompt/mod.rs`：提示词 profile、组装入口和缓存分块。
+- `prompt/mod.rs`：提示词组装入口、静态分段、记忆开关和缓存分块。
 - `native_engine/engine_core.rs`：选择 profile，组装项目说明、Git 快照和每轮附加内容。
 - `services/turn_context.rs`、`git_snapshot.rs`、`project_instructions.rs`：随用户消息附带的上下文。
 - `native_engine/tool_loop.rs`：两种协议使用同一工具适配逻辑。
@@ -176,10 +182,9 @@ Anthropic 请求在静态系统提示词分块上标记缓存断点，对话中�
 
 自动化验证包括：
 
-- 默认系统提示词、模型身份、自定义指令和记忆开关。
+- Code / Desktop 使用同一静态提示词、记忆开关省略引导段、模型身份、自定义指令保留。
 - 数据库会话模式选择和内部任务默认值。
-- 文件记忆测试覆盖不同作用域的可见性、索引变更和压缩后的重新发送。
-
+- 工具名称和 schema 保持原生实现。文件记忆测试覆盖索引可见范围、内容变更和压缩后重新发送。
 - `Grep.include`、中文文本、相对路径、`Glob` 文件匹配与非法模式。
 - 原有 UTF-8 文件和 PowerShell 回归检查。
 

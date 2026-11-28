@@ -8,15 +8,15 @@
 | **内置提供商** | 第一次启动时从列表中选择，粘贴 API Key 即可，见[首次启动与内置提供商](./first-run.md) |
 | **保存的提供商** | 用 `/provider add` 保存到数据目录，之后可以用 `/provider`、`/model` 随时切换，Desktop 也能看到 |
 
-交互终端输入 `/provider` 可打开包含 Provider、Accounts 和 Models 的面板，在其中添加或编辑连接、获取并筛选可用模型，以及测试连接。
-
-使用 GPT Responses 的原生压缩时，提供商会收到与生成请求相同的会话缓存键。其他模型的摘要请求也尽量复用系统提示、工具和历史前缀。见[上下文用量与费用](./context-and-cost.md#提示词缓存)。
+关于文字摘要如何复用请求前缀，以及原生 GPT Responses 压缩携带的会话缓存键，见[上下文用量与费用](./context-and-cost.md#responses-原生压缩)。
 
 ## 同时保存多个提供商
 
 保存的提供商是一个列表，可以同时存在多个，彼此独立：每个提供商各自记录协议、接口地址、凭据来源和模型列表，用 `/provider` 切换，切换后对话历史保留。
 
 每个会话保存自己的提供商和模型。重启、从另一个终端恢复或交接给 Worker 时，会继续使用原绑定。要改用其他模型，请在会话中显式切换，或在恢复命令中指定 `--model provider::model`。
+
+切换提供商或模型后，历史里由旧模型签发的加密思考不会被回放：Responses 的 `encrypted_content`、Anthropic 的 thinking 签名只对签发它们的账号和模型有效。dcl 保留可读摘要、丢弃无法验证的不透明状态，会话不会因此中断；只有在同一提供商和模型内继续对话时才原样回放。
 
 常见用法：
 
@@ -107,11 +107,23 @@ dcl 不把 API Key 写进会话记录，使用时按下面的顺序确定读哪�
 
 如果提供商在 `config/config.json` 里直接保存了 `api_key`（即在 `/provider add` 中直接填 Key，或由 Desktop 添加），且没有设置对应的环境变量时，dcl 会直接使用它，不需要再配置环境变量。该字段是明文，请确保数据目录只有本人可读，不要在共享机器上保存正式 Key。
 
-## 切换提供商和模型
+## 切换与管理提供商：`/provider` 面板
+
+在交互式终端里直接运行 `/provider`，会打开交互式提供商面板，包含 `provider`、`Accounts`、`Models` 三个页面（按 `Tab` 切换，`Esc` 关闭）：
+
+- **`provider` 页面**：顶部输入框支持实时搜索筛选；上方 `connected` 列出已保存的提供商（当前会话提供商带 `•` 标记，显示协议、主机、模型数和凭据状态），下方 `add a connection` 列出常用提供商预设（默认首项为 `OpenCode · OpenAI Responses · opencode.ai`）。
+  - `↑` / `↓`：选择条目；
+  - `Enter`：在已连接提供商上查看并切换其模型；在 `add a connection` 预设上打开预填表单；
+  - `Ctrl+A`：打开新增连接表单（`name` / `protocol` / `address` / `key`，`Tab` 切字段，`←` / `→` 切换 `OpenAI` / `OpenAI Responses` / `Anthropic` / `Gemini` 协议）；填写凭据后按 `Enter` 自动抓取模型列表；
+  - `Ctrl+E`：编辑选中的已连接提供商；
+  - `Ctrl+N`：手动添加连接或模型（跳过自动拉取模型列表）；
+  - `Ctrl+D`：删除选中的已连接提供商。
+- **抓取模型列表**：拉取后展示每个模型的上下文预算与识图能力（未声明时显示 `capabilities not declared`），直接输入关键字搜索，按 `Space` 多选，按 `Enter` 进入确认页。
+- **模型确认页**：按 `Enter`（`connect and use`）保存、测试连接并切换当前会话；`Ctrl+S`（`save only`）仅保存不切换；`Ctrl+O` 展开高级设置（上下文预算、最大输出、识图开关）；`Ctrl+F` 重新从端点拉取模型列表；`Esc` 返回。
 
 | 命令 | 作用 |
 |---|---|
-| `/provider` | 列出已启用的提供商并选择一个 |
+| `/provider` | 打开交互式提供商面板（非交互终端下列出已启用的提供商并选择） |
 | `/provider list` | 只列出已启用的提供商，不切换 |
 | `/provider <ID>` | 直接切换到指定提供商 |
 | `/provider refresh [ID]` | 刷新模型列表；省略 ID 时刷新当前提供商 |
@@ -168,7 +180,7 @@ dcl config set model deepseek-flash  # 可设置 model、base_url、api_format�
 dcl config reset                     # 只删除 CLI 管理的提供商和偏好
 ```
 
-## 手工编辑 `config/config.json` {#手工编辑-config-json}
+## 手工编辑 `config.json`
 
 需要批量调整，或者想把配置复制到另一台机器时，可以直接编辑数据目录下的 `config/config.json`。保存后执行 `/provider` 就能看到新的提供商，不需要重启。
 
@@ -261,9 +273,11 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 
 流式模型请求默认允许 **300 秒读取空闲**，包括等待响应头，以及响应正文迟迟没有新数据的情况。只要模型持续返回数据，整段回复可以超过 300 秒。非流式模型请求仍使用 300 秒的总时限。
 
+所有流式模型请求共享进程级 HTTP/1.1 keep-alive 连接池（按重定向策略与单次替换语义分开），同一协议、主机和端口的相邻请求在连接仍空闲时直接复用 TCP/TLS，避免重复握手。连接在池中保持空闲的上限由 `[http].pool_idle_timeout_secs` 控制，默认 **300 秒**（服务端可能更早关闭空闲连接）。
+
 对于内置提供商的 Chat Completions 模型，例如 OpenCode Go 的 `deepseek-v4.1-flash`，dcl 可在收到内容前重连。网络、HTTP 与内容前的重试共用同一尝试额度。默认 `max_retries = 7`，包括首次请求在内最多 8 次。思考内容和工具参数也算内容；收到流中的显式错误或结束标记时，也不会触发内容前重连。
 
-在启动目录的 `config/orchestration.toml` 中调整 `[http]`，然后重新启动 dcl。通过 `-C` 指定目录时，以切换后的工作目录为准。已有文件只需修改其中的 `[http]`；新建文件时可使用以下完整示例，把空闲时间设为 120 秒，并开启内容后超时恢复：
+在启动目录的 `config/orchestration.toml` 中调整 `[http]`，然后重新启动 dcl（这些参数与代理环境变量都在共享客户端首次构建时读取，运行期修改不会生效）。通过 `-C` 指定目录时，以切换后的工作目录为准。已有文件只需修改其中的 `[http]`；新建文件时可使用以下完整示例，把读取空闲时间设为 120 秒、连接池空闲时长设为 300 秒，并开启内容后超时恢复：
 
 ```toml
 [tool_loop]
@@ -275,10 +289,11 @@ JSON 写错时，启动会报 `Invalid config` 并指出文件位置；dcl 不�
 
 [http]
 request_timeout_secs = 120
+pool_idle_timeout_secs = 300
 post_content_timeout_recovery = true
 ```
 
-`request_timeout_secs` 必须是正整数。设为 `0` 时，流式请求会在连接模型前报告配置错误。
+`request_timeout_secs` 和 `pool_idle_timeout_secs` 都必须是正整数。任一项设为 `0` 时，流式请求都会在连接模型前报告配置错误。
 
 `post_content_timeout_recovery` 默认是 `false`。正文在已有内容后空闲超时时，默认保留部分回复并将本轮标为失败。设为 `true` 后，内置和直连的 Chat Completions 模型可在还有尝试额度且未收到结束标记或提供商错误时，丢弃未提交的部分输出，再请求当前模型步骤一次。每轮最多恢复一次，可在等待时取消，先前完成的工具调用不会重做。启用期间，适用步骤的正文和思考会在该步骤结束时显示。
 

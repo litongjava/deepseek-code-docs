@@ -18,16 +18,15 @@
 
 MCP 服务的工具以 `mcp__服务名__工具名` 的名字出现，见[MCP 服务](./mcp.md)。
 
-`Python` 可按需加载以执行传入的 Python 代码；用 `interpreter` 或 `conda` 选择解释器。设置 `run_in_background: true` 时返回任务 ID，可用 `TaskGet` 读取输出、`TaskStop` 停止。
+读取文本时，`Read` 会把识别出的连续 Base64 数据折叠成一行（普通数据至少 1024 个字符，`data:` URI 载荷至少 256 个字符），例如 `[base64 data omitted: about 2048 bytes decoded, looks like PNG]`。需要核对原文时，传入 `{"file_path":"page.html","raw":true}`；也可加 `offset` 和 `limit` 只读相关行。原文件不受影响。
 
-读取文本时，`Read` 会把识别出的连续 Base64 数据折叠成一行（普通数据至少 1024 个字符，`data:` URI 载荷至少 256 个字符），例如 `[base64 data omitted: about 2048 bytes decoded, looks like PNG]`。需要核对原文时，传入 `{"file_path":"page.html","raw":true}`；也可加 `offset` 和 `limit` 只读相关行。原文件不受影响。Shell 和 Monitor 输出的占位符另带原文路径与行号，见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
-
-启用[文件记忆](./memory.md)后，可按常驻索引使用普通文件工具读取和维护条目。
+`Bash`、Shell 任务的 `TaskGet` 和 `Monitor` 也会在模型预览中折叠长 Base64。按占位符给出的文件路径和行号[读取完整输出](./context-and-cost.md#发给模型的工具结果)。
 
 ## dcl 自己的工具
 
 - `ToolLoad`：按目录中的完整名称加载工具定义，见[工具目录与加载](#工具目录与加载)。
 
+- `Python`：直接运行一段 Python 源码，不经过 shell，见下文。
 - [`ContextSearch`](#contextsearch)：在当前会话已保存的历史中检索原文。
 - `ListDir`、`MultiEdit`：列目录、一次多处编辑。
 - `DeepSeekCode`、`ClaudeCode`、`Codex`：把子任务交给本机的另一个 dcl、Claude Code 或 Codex，见[外部代理](./external-agents.md)。
@@ -56,13 +55,14 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 **Bash**：
 
 - Windows 自动寻找 Git for Windows 的 Bash，支持 PATH 中非 C 盘的安装位置；跳过 System32 和 WindowsApps 的 WSL Bash 别名。找不到 Bash 时明确报错。
-- `shell` 参数列出本机可用的 Shell，并标明默认项。模型看到的命令语法和路径提示跟随 [shell.toolDefault](./settings.md)。例如 Git Bash 使用 Unix 语法，PowerShell 使用 `$env:NAME`，cmd 使用 `%NAME%`。原始结果记录实际程序路径，发给模型的文本只在发生回退时显示路径。
-- `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。前台命令到时间仍未结束时不会被终止，而是转为后台受管任务继续运行：模型拿到已有输出和任务编号，再决定用 `TaskGet` 等待或用 `TaskStop` 停止，对话里显示“Still running after 2m; moved to the background”。子代理里的命令到时间仍会被终止。
-- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知模型，需要时模型用 `TaskGet` 读取输出（默认立即返回当前快照；`block: true` 最多等待 `timeout` 毫秒，默认 30000、最多 600000，等待超时不会结束进程）、用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
-- **调用结束会清理整棵子进程树**，包括命令自己启动的子进程。需要跨调用、跨进程存活的服务（本地服务、守护进程）用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。它不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
+- `shell` 参数列出本机可用的 Shell，并标明默认项。模型看到的命令语法和路径提示跟随 [shell.toolDefault](./settings.md)。例如 Git Bash 使用 Unix 语法，PowerShell 使用 `$env:NAME`，cmd 使用 `%NAME%`。需要运行非默认解释器（如 PowerShell）脚本时，提示模型直接传 `shell` 参数而非在默认 Shell 里嵌套调用，避免转义问题。原始结果记录实际程序路径，发给模型的文本只在发生回退时显示路径。
+- `timeout` 以**毫秒**计，前台默认 120000（2 分钟），最多 600000（10 分钟）。前台命令到时间仍未结束时不会被终止，而是转为后台受管任务继续运行：模型拿到已有输出和任务编号，引导其继续处理其他工作或直接结束本轮等待完成通知（仅在需要查看中间输出或怀疑卡死时调用非阻塞 `TaskGet`，需要终止时用 `TaskStop`），对话里显示“Still running after 2m; moved to the background”。子代理里的命令到时间仍会被终止。
+- `run_in_background: true` 让命令作为受管任务在后台运行，命令结束时自动通知并唤醒模型；工具返回明确引导模型继续其他工作或结束本轮等待通知，避免刚启动就用 `TaskGet(block: true)` 阻塞轮询。需要查看中间输出或排查卡死时可用非阻塞 `TaskGet` 读取快照，用 `TaskStop` 停止，你可以用 `/tasks` 查看，见[交互界面](./interface.md)。
+- **调用结束会清理整棵子进程树**，包括命令自己启动的后台子进程和自动拉起的守护进程。需要跨调用、跨进程存活的常驻服务（例如前端开发服务器 `vite`/`pnpm dev`、后端 API 服务、本地浏览器/数据库守护进程）必须用 `detach: true`：立即返回 `pid` 与日志文件路径，不等待输出，也不作为任务跟踪。`run_in_background: true` 仅用于会自行结束并回调通知的有限耗时任务；`detach: true` 不能与 `run_in_background`、`timeout` 同时使用。宿主进程组拒绝脱离时结果里的 `isolated` 为 `false`，提示文字也会相应说明该进程可能随本次调用一起结束。
 - **管道按原命令报告退出码**：bash 和 zsh（包括 Windows 上的 Git Bash）加上 `pipefail`，所以 `失败命令 | head` 不会再显示为成功。输出被 `head` 之类的读取方提前截断时，bash 退出码为 141，原始结果里 `pipeline_sigpipe` 和 `success` 均为 `true`。模型会看到退出码和下游提前关闭管道的说明。其他输出规则见[发给模型的工具结果](./context-and-cost.md#发给模型的工具结果)。
-- **工作目录在调用之间保留**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持。shell 变量不保留。
-- 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。
+- **工作目录在调用之间保留（批内快照隔离）**：上一次 `cd` 进入的目录，下一次调用仍然在那里。bash、sh、zsh、PowerShell（pwsh 和 Windows PowerShell）、Windows 上的 Git Bash 和 `cmd` 都支持；shell 变量不保留。同一轮模型输出多个前台 `Bash` 调用时，会在批前冻结 `batch_start_cwd`，批内每条命令均以同一批前目录启动，不读取同批前序调用刚写入的目录变更，仅在整批结束后提交最终有效目录变更，避免同批多条 `cd <子目录>` 互相踩踏报错。
+- 如果目录跑到了项目之外，下一次调用回到项目根目录，结果里附一句 `Shell cwd was reset to <项目目录>`。当 `shell-cwd` 位于子目录（不同于工作区根目录）且命令重复前置 `cd <当前目录>`（含 Git Bash `/d/...` 与 Windows `D:/...` 路径写法）时，结果 metadata 会直接提示 `Bash already runs in <目录>; omit redundant leading 'cd'.`。
+- **运行中纠偏与首条提示（`SESSION_TIPS`）**：首条用户消息末尾附带静态 `<system-reminder>` 提示，覆盖多行短脚本合并、优先使用 `codegraph` CLI、项目相关文件落盘规范（临时文件写 `./temp/`、非临时文件写 `./permanent/`、文档写 `./docs/`，避免写入系统临时目录）以及 `detach: true` 规范。执行过程中，引擎还会对 5 类高置信度反模式向模型注入**非落库、每类独立 4 轮冷却**的临时 `<system-reminder>` 纠偏（同轮多命中合并为一条）：① 冗余前置 `cd`；② 前台 `sleep` / `for` 轮询等待；③ 高频独立内联 `python -c` / heredoc（≥ 2 次且 `Python` 工具可用）；④ Git Bash 内多次嵌套 `powershell`/`pwsh -Command`（≥ 2 次）；⑤ 高频纯独立单条 `grep`/`rg`（≥ 2 次且 `Grep` 工具完全支持）。
 - 开启[沙箱](./sandbox.md)后在隔离环境中运行；`dangerouslyDisableSandbox: true` 在沙箱外运行这一条命令。
 
 **Monitor**：在后台运行一段 shell 脚本，把输出的每一行变成通知来唤醒模型，适合盯日志、构建或 CI。脚本应只在需要处理的事情发生时才输出一行，例如 `tail -f app.log | grep --line-buffered ERROR`，每一级管道都要逐行刷新。200 毫秒内到达的多行合并成一条通知；stderr 只写入日志，不通知。它和 Bash 的 `run_in_background` 不同：后者只在命令结束时通知一次，Monitor 每有输出就通知。
@@ -72,6 +72,15 @@ Git 操作（如 `git status`、`git diff`、`git log`、`git add`、`git commit
 需要长时间监视时，再传入整数 `max_runtime_ms`，它必须大于 `timeout_ms` 且最多为 86400000（24 小时）。例如 `"timeout_ms":600000,"max_runtime_ms":7200000` 表示每 10 分钟续期，总共最多 2 小时。只要原脚本仍在运行，就延长本次监视，不重启脚本；总时限从启动时算起。续期通知最多每分钟一条。脚本退出、任务停止、达到总时限或一分钟内输出事件超过 30 个时，监视结束并报告原因。
 
 Monitor 只在当前会话运行时存在，会话结束随之停止。它和 Bash 命令走同一套[权限规则与审批](./permissions.md)，用 `TaskStop` 传入返回的 `task_id` 停止。它默认按需加载：模型调用 `ToolLoad` 并传入 `{"names":["Monitor"]}` 后，从下一次请求开始可以用它。
+
+**Python**：把模型给的源码写成文件，用选定的解释器执行。它不经过 shell，管道、重定向、`$VAR`、`&&` 和通配符都不会被解释；`python -m ...`、带参数的脚本或不可信代码继续用 `Bash`。脚本以 `__main__` 运行，`__file__` 指向真实文件；stdin 为空，`input()` 会立即遇到 EOF 并抛出 `EOFError`。前台复用 Bash 的捕获、超时和结果截断，后台复用受管任务，用 `TaskGet` 读取、`TaskStop` 停止。
+
+- **解释器**：`interpreter` 与 `conda` 至多传一个。都不传时依次尝试 `settings.json` 的 `python.path`、`VIRTUAL_ENV`、`CONDA_PREFIX`、工作区的 `.venv`/`venv`/`env`、PATH；Windows 先试 `py -3`，并跳过 Microsoft Store 的 `WindowsApps` 占位程序。显式路径必须存在，裸名必须在 PATH 上。模型可用 `Bash` 执行 `py -0p`、`conda env list` 或 `which python` 查询。
+- **保存脚本**：传 `save_name` 时写到 `<工作区>/temp/<save_name>`，自动创建目录、覆盖已有 `.py` 文件，并在结果的 `script_path` 返回绝对路径。`save_name` 必须是相对路径、只含 `.py`、不能有 `..`，最多 8 层目录。目标已存在且是符号链接时拒绝写入。不传时写系统临时文件，前台调用结束后删除，结果的 `script_saved` 为 `false`。
+- **环境变量**：`env` 在解释器启动前合并到继承环境。`PYTHONPATH` 不是替换而是合并：`cwd` → `env` 中的条目 → 继承的 `PYTHONPATH`，按顺序去重，因此项目模块总是可导入。`env` 最多 32 个键、总计 16 KiB，不能设置宿主保留的 `DEEPSEEK_CODE_*` 后台变量。
+- **超时**：`timeout` 以毫秒计，1–600000，前台默认 120000。后台模式下不传则没有任务超时。结果包含每次的 `interpreter` 和 `interpreter_source`；模型可见的预览只在与请求不同，或工作区虚拟环境替换了默认解释器时显示 `interpreter:`，存在 `script_path` 时显示 `script:`，输出使用小写 `stdout:`/`stderr:`。
+- **权限与沙箱**：`Python(...)` 的 subject 是 `code`，不是 shell 命令；`Python(*)` 等价于放行任意代码，不能当作代码审查。计划模式默认拒绝 Python。开启[沙箱](./sandbox.md)时解释器直接被沙箱包装，Windows 上和 Bash 一样明确报错，不会静默放行。Python 不提供 `dangerouslyDisableSandbox`。
+- **默认加载**：和 `Monitor` 一样默认只开“按需加载”，模型调用 `ToolLoad` 并传入 `{"names":["Python"]}` 后，从下一次请求开始可以用它。新会话的环境块会列出默认解释器路径和版本。系统提示还会要求：纯 Python 片段、数值实验或查看 Python 对象时优先加载并使用 Python 工具，不要用 Bash heredoc 或 `python -c`；需要 shell 语法、脚本参数或 `python -m` 时才用 Bash。
 
 **Agent**：默认在后台运行（`run_in_background` 默认为 `true`），子代理结束时通知模型；设为 `false` 时本轮等待结果。可以用 `subagent_type` 选择代理类型，`isolation: "worktree"` 让子代理在独立的 Git worktree 中工作。
 
@@ -99,7 +108,7 @@ Agent 工具的说明里会列出当前可用的代理类型，每种一行，�
 /agents model explore default        # 清除，改回沿用父会话的模型
 ```
 
-会话外用 `dcl agents model`，参数相同。设置保存在数据目录的 `agent-models.json`。调用时明确传了 `model` 的以调用为准；没有设置默认模型的类型沿用父会话的模型。模型 ID 在代理启动时才检查，当前供应商没有这个模型时会报告错误并提示如何修改或清除。分叉（`fork`）始终使用父会话的模型。
+会话外用 `dcl agents model`，参数相同。设置保存在数据目录的 `config/agent-models.json`。调用时明确传了 `model` 的以调用为准；没有设置默认模型的类型沿用父会话的模型。模型 ID 在代理启动时才检查，当前供应商没有这个模型时会报告错误并提示如何修改或清除。分叉（`fork`）始终使用父会话的模型。
 
 `subagent_type` 设为 `"fork"` 时不新建空会话，而是分叉当前会话：子会话复制父会话到此刻为止的完整历史，包括本轮已经得到的工具结果，因此 `prompt` 只需要写任务本身，不必重复背景。分叉总在后台运行，使用父会话的模型和绑定的代理，会话标题为 `Fork: <description>`。分叉时传 `run_in_background: false`、`model`、输出 schema 或工具列表会直接报错；分叉出来的会话不能再分叉。适合需要沿用当前上下文的旁支任务；需要干净上下文时用其他代理类型。
 
@@ -143,7 +152,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 ## 调整工具和系统提示词
 
-工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 自定义页的[提示词](/desktop/usage/skills#提示词)和[工具](/desktop/usage/skills#工具)页面编辑，dcl 自动生效，下一次模型请求开始使用。
+工具开关、工具说明、自定义工具和系统提示词都保存在数据目录的 `customization.json`，由 Desktop 自定义页的[提示词](/desktop/usage/skills#提示词)和[工具](/desktop/usage/skills#工具)页面编辑；工具目录的逐行说明（`tool_summaries`）目前直接写在这个文件里。dcl 自动生效，下一次模型请求开始使用。
 
 ## 启用与按需加载
 
@@ -159,7 +168,7 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 - 只开按需：默认不加载；模型用 `ToolLoad` 加载后，从下一次请求开始可以调用。
 - 两个都关：目录中不列出，加载和直接调用都会被拒绝。
 
-默认常驻的工具有 `Bash`、`Read`、`Write`、`Edit`、`MultiEdit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskGet`、`TaskStop`、`TodoRead`、`TodoWrite`、`WebFetch` 和 `WebSearch`。模型从第一次请求起即可读写待办，默认的按需目录不列出这两个工具。其他工具（例如 `ListDir`、`LSP` 和 `Agent`）按设置加载。
+默认只有这些核心工具两个开关都打开：`Bash`、`Read`、`Write`、`Edit`、`MultiEdit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、`EnterPlanMode`、`ExitPlanMode`、`TaskGet`、`TaskStop`、`TodoRead`、`TodoWrite`、`WebFetch`、`WebSearch`。其他内置工具默认只开“按需加载”，例如 `Python`、`ListDir`、`Monitor`、`LSP`、`Agent`、`Workflow`、`ContextSearch`、定时任务和桌面操作。按默认设置，`TodoRead` 和 `TodoWrite` 从第一次请求起即可直接使用，按需目录中不会再列出它们。之后新增的内置工具同样默认按需加载，不会自动进入核心名单。
 
 “启用”不是总开关：关掉它只表示不再默认加载，模型仍然可以按需发现这个工具。核心名单只决定默认值，任何一个工具的开关都可以修改。
 
@@ -179,7 +188,9 @@ dcl tasks import-plan --workspace <项目目录> --session <会话 UUID> --plan 
 
 ### 工具目录与加载
 
-会话首次请求会在第一条用户消息中列出可按需加载的内置工具和 MCP 工具，每行一个完整名称和简短说明。之后启停工具或重新连接 MCP 时，可用项的变化会随最新的用户消息发送。加载时仍会检查当前工具设置和代理权限。
+会话首次请求会在第一条用户消息中列出可按需加载的内置工具和 MCP 工具，每行一个完整名称和一行说明。内置工具使用各自维护的 `summary`；MCP 和自定义工具没有 `summary`，使用其说明文本。说明会折叠空白为单行，并与 Experience、Skill 列表统一按 300 字符上限截断（超出时末尾加 `…`），避免超长说明挤占首条消息上下文。之后启停工具或重新连接 MCP 时，可用项的变化会随最新的用户消息发送。加载时仍会检查当前工具设置和代理权限。
+
+想改某一行，在 `customization.json` 的 `tool_summaries` 里按工具名写文本，例如 `"tool_summaries": {"Python": "用工作区解释器运行 Python 代码"}`。优先级是 `tool_summaries`、`tool_descriptions`、内置 `summary`、完整 `description`，空字符串视为未设置。目录在这个会话的首条消息里固定下来，改配置不会重写它；新建会话才使用新文本。
 
 模型调用 `ToolLoad` 时只传一个 `names` 数组，包含 1 至 64 个非空字符串。每项都必须是完整名称，区分大小写。例如，同时加载目录中的两个工具：
 

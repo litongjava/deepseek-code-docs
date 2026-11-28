@@ -24,17 +24,19 @@ Skill 复用任务说明、方法和上下文。MCP 提供工具服务，Skill �
 
 Skills 入口的示例区包含内置的 `skill-creator`。文件保存在数据目录的 `skills/bundled/skill-creator/`，展开后显示文件树（`SKILL.md`、`scripts/`、`references/`、`license.txt`、`NOTICE.md`），点击文件可以查看内容。它用于创建和校验新技能，模型会在合适时自动调用；也可以在 dcl 中运行 `/skill-creator`。命令行用法、脚本参数和 frontmatter 字段见 [用 skill-creator 创建技能](/cli/skill-creator)。
 
+`test-dcl`、`llm-proxy-data-troubleshooting` 和 `project-docs` 也随 dcl 安装并默认启用，分别用于验证 dcl、从 `proxy.db` 排查 java-llm-proxy 的数据、维护 VitePress 文档站。它们与 `skill-creator` 一样出现在 Skills 列表里，可在详情中查看 `SKILL.md` 与附带的 `scripts/`；不需要时在列表中设为关闭。命令行状态管理见[技能与插件面板](/cli/skills#仓库工具技能)。
+
 ### 给代理准备任务说明
 
 内置技能 `task-template` 默认关闭，用 `dcl skills state task-template user` 启用后，在聊天中选择它或输入 `/task-template` 并补充任务详情，可在委派前写清问题、具体改动、验证方法和报告要求。见[模板与命令行用法](/cli/skills#task-template)。
 
 ## 查找与使用
 
-先读取数据目录的 `skills/bundled/`，再读取个人技能 `skills/`，最后读取项目的 `.claude/skills`、`.claude/commands` 和 `.agents/skills`。同名时项目优先。模型可见的技能列表、`Skill` 工具和斜杠名称使用同一套结果，斜杠命令沿用数据目录的旧命名规则（小写、空格转 `-`，标点保留）。完整顺序、名称与重名规则、`enabled`/`disable-model-invocation` 开关和 `dcl skills list` 的验证方法见[数据目录](/cli/data-directory#技能从哪里读取)。
+先读取数据目录的 `skills/bundled/`，再读取个人技能 `skills/`，最后读取项目的 `.claude/skills` 和 `.claude/commands`，以及 `.agents/skills`。同名时项目优先，项目内 `.agents` 又优先于 `.claude`。模型可见的技能列表、`Skill` 工具和斜杠名称使用同一套结果，斜杠命令沿用数据目录的旧命名规则（小写、空格转 `-`，标点保留）。完整顺序、名称与重名规则、`enabled`/`disable-model-invocation` 开关和 `dcl skills list` 的验证方法见[数据目录](/cli/data-directory#技能从哪里读取)。
 
 在列表筛选条目，查看详情和使用入口。项目页也有选择 Skill 的交互。选择后补充本次任务的材料；Skill 不会自动知道未提供的文件内容。
 
-对话输入框的加号菜单里也有 Skills 列表，列出可以用斜杠调用的技能。状态为 `user-only` 的技能会在名称右侧标出 `user-only`；选择一项会把 `/名称 ` 插入输入框，再补充本次的文本即可。在 dcl 中用 `/skills state` 设置的状态同样作用于 Desktop，两处使用数据目录中的同一份技能状态，设为 `off` 的技能不会出现在这里。技能状态、`/skills` 面板和用量查看见[技能与插件面板](/cli/skills)。
+对话输入框的加号菜单里也有 Skills 列表，列出可以用斜杠调用的技能。状态为 `user-only` 的技能会在名称右侧标出 `user-only`；选择一项会把 `/名称 ` 插入输入框，再补充本次的文本即可。在 dcl 中用 `/skills state` 设置的状态同样作用于 Desktop，两处使用数据目录中的同一份技能状态，设为 `off` 的技能不会出现在这里。技能状态、`/plugins` 面板和用量查看见[技能与插件面板](/cli/skills)。
 
 连接器入口需按具体服务配置，Skill 文本不能替代连接凭据。
 
@@ -85,7 +87,7 @@ Skill 使用同一套会话执行与持久化流程。切换页面或断开流�
 - **启用**：默认加载，每次模型请求都带上这个工具的定义。
 - **按需加载**：允许模型按完整名称通过 `ToolLoad` 加载它，不需要先打开“启用”。
 
-两个都关时工具完全不可用；只关“启用”时，模型仍可从目录按名加载。默认常驻的工具包括 `TodoRead` 和 `TodoWrite`，从首轮起就可直接读写待办。`MultiEdit`、`TaskGet`、`WebFetch` 和 `WebSearch` 也默认常驻。每项都可以单独调整，完整名单见[工具目录与加载](/cli/tools#工具目录与加载)。
+两个都关时工具完全不可用；只关“启用”时模型仍能从目录按名加载它。默认只有核心工具两个开关都打开，包括 `Bash`、`Read`、`Write`、`Edit`、`Grep`、`Glob`、`Skill`、`ToolLoad`、`AskUserQuestion`、计划相关工具，以及 `TaskStop`、`TodoRead` 和 `TodoWrite`。其他工具默认只开“按需加载”，标记为“默认核心”的工具也可以修改。工具的说明也可以修改，用来调整模型何时使用它，随时可以恢复默认。
 
 以前关闭过的内置工具读作“启用关、按需加载开”，模型仍可按名加载它。只有**工具页**保存时才会整理这些旧条目，把它们折算成两个开关；保存提示词不会改动工具设置。两个页面各自保存，另一页未保存的修改会继续保留。
 

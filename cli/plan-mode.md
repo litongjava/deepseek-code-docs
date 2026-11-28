@@ -28,7 +28,7 @@ Here is DeepSeek Code's plan:
    2. Yes, manually approve edits
    3. Tell DeepSeek Code what to change
       shift+tab to approve with this feedback
- ctrl+g to edit in vi · ~/.../plans/....md
+ ctrl+g to edit in vi · ~/.../tasks/plans/....md
 ```
 
 - **1. Yes, auto-accept edits**：批准计划，之后的文件修改直接放行（`accept-edits` 模式）。已经配置[自动权限模式](./auto-mode.md)时，这一项是"Yes, and use auto mode"，批准后切换到 `auto` 模式。

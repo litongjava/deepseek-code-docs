@@ -1,6 +1,6 @@
 # 首次启动与内置提供商
 
-第一次运行 `dcl` 时，如果还没有任何可用的模型配置，dcl 会引导你接入一个提供商，默认推荐使用 Responses 协议的 OpenCode。
+第一次运行 `dcl` 时，如果还没有任何可用的模型配置，dcl 会引导你接入一个提供商，默认推荐 OpenCode（使用 OpenAI Responses 协议）。
 
 ## 已经设置了 DEEPSEEK_API_KEY
 
@@ -8,7 +8,29 @@
 
 ## 引导流程
 
-1. **选择提供商**：在 `Number or saved provider ID [1]` 处直接回车会选择 OpenCode，输入对应编号也可选择 DeepSeek 等其他提供商。已保存的提供商可按 ID 选择。
+```text
+Welcome to DeepSeek Code! Connect a model provider to get started.
+
+Choose a provider:
+   1. OpenCode (recommended)
+   2. DeepSeek
+   3. Anthropic Claude
+   4. OpenAI
+   5. Moonshot Kimi (China)
+   6. Zhipu GLM Coding Plan (China)
+   7. MiniMax (China)
+   8. Alibaba Qwen Token Plan (China)
+   9. OpenCode Go
+  10. OpenRouter
+  11. Another OpenAI- or Anthropic-compatible endpoint
+Number or saved provider ID [1]:
+Create an OpenAI API key for OpenCode at https://opencode.ai/auth (defaults to OpenAI Responses protocol)
+Paste the API key (hidden), or press Enter to set OPENCODE_API_KEY yourself: ••••••••••••
+Checking the connection with deepseek-v4.1-flash…
+Connected. OpenCode is saved as the default provider (key stored in config.json, readable only by you).
+```
+
+1. **选择提供商**：直接回车选择 OpenCode（默认使用 OpenAI Responses 协议）；输入编号选择其他提供商（例如 `2` 选择 DeepSeek）。已经保存过的提供商会列在下方，输入它的 ID 即可使用。
 2. **提供 API Key**：
    - 如果对应的环境变量已经设置（例如 `MOONSHOT_API_KEY`），直接使用，不需要粘贴；
    - 否则可以把 Key 粘贴进来。输入时只显示圆点，Key 不会出现在终端记录里。它保存在[数据目录](./data-directory.md)的 `config/config.json` 中，该文件只有你自己可读写；
@@ -21,7 +43,7 @@
 
 | 提供商 | 默认模型 | API Key 环境变量 |
 |---|---|---|
-| OpenCode（推荐） | deepseek-v4.1-flash 等，使用 OpenAI Responses | `OPENCODE_API_KEY` |
+| OpenCode（默认推荐，Responses 协议） | 全部模型，默认走 OpenAI Responses 协议；常用 deepseek-v4.1-flash、deepseek-v4-pro、glm-5.3、kimi-k3 | `OPENCODE_API_KEY` |
 | DeepSeek | deepseek-flash、deepseek-v4-pro | `DEEPSEEK_API_KEY` |
 | Anthropic Claude | claude-sonnet-4-5、claude-opus-4-6、claude-haiku-4-5 | `ANTHROPIC_API_KEY` |
 | OpenAI | gpt-5.1、gpt-5-mini、gpt-4.1 | `OPENAI_API_KEY` |

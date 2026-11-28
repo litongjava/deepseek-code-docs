@@ -168,4 +168,6 @@ ExitPlanMode 使用专用的“审阅执行计划”对话框。计划正文按 
 
 文本完整、没有悬挂的工具步骤，切换后消息仍可访问。涉及文件修改时检查实际变更；涉及外部服务时检查返回结果。
 
+执行期间若宿主机 CPU、内存或当前项目磁盘持续超限，后端会通过 SSE 推送 `resource_alert` 事件，聊天界面底部弹出资源告警提示（与联网搜索等提示纵向堆叠、短暂展示后自动消失，同时模型也会在工具边界收到对应告警）。Desktop 与 CLI 共用数据目录中 `config/settings.json` 的 `resourceMonitor` 配置，详见[系统资源监控](/cli/settings#系统资源监控)。
+
 无回复或一直加载，依次检查供应商、Rust Bridge 和模型错误，见[故障排查](../development/troubleshooting.md)。

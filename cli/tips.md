@@ -27,11 +27,12 @@
 - **界面操作**：`Ctrl+O` 展开详情、`Shift+Tab` 切换模式、`Ctrl+R` 搜索历史、`Ctrl+J` 换行；
 - **会话与模型**：`/plan`、`/compact`、`dcl --continue`、`/rename`、`/provider` 与 `/model`、`/test`、`/status`；
 - **代码智能**：`/lsp`；
-- **自动化与协作**：`--max-tokens`、`--json-schema`、`/remote-control`、`dcl team-sync`。
+- **自动化与协作**：`--max-tokens`、`--json-schema`、`/remote-control`、`dcl team-sync`；
+- **远端终端**：tmux 中执行 `tmux set -g mouse on` 才能使用拖动选择和右击复制。
 
 ## 关闭
 
-在 `config/settings.json` 中设置：
+在 `settings.json` 中设置：
 
 ```json
 { "spinnerTipsEnabled": false }

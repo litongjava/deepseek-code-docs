@@ -26,6 +26,15 @@ Bash 审批显示说明和完整命令。未命中危险规则时提供 **Allow 
 
 打开输入框的权限菜单可查看 **Session Bash**，点击 **Revoke session Bash permission** 撤销。审批接口拒绝响应时，弹窗保留并显示原因。显式 ask/deny、工具禁用、Hook 与沙箱继续有效。
 
+## Python 代码审批
+
+Python 审批显示完整代码，以及模型提供的 `env`、`cwd`、`interpreter`/`conda` 和 `save_name` 解析后的 `temp/` 绝对路径（`<workspace>/temp/<save_name>`，界面会填入当前项目工作区）。`save_name` 是文件写入能力，审批时同样要看目标，尤其是覆盖已有文件时。
+
+- Python 审批不提供 **Allow for Session**，每次调用单独确认。需要长期放行时显式添加 `Python(*)` 规则；它等价于放行任意代码，不能当作代码审查。
+- 计划模式默认拒绝 Python；需要执行时先切出 Plan 模式。
+- 开启[沙箱](../../cli/sandbox.md)后 Python 和 Bash 一样被隔离；Windows 上会明确报错，不会静默在沙箱外执行。
+- **Cancel turn** 和 **Deny** 的行为与 Bash 相同：前者终止整个回合，后者只拒绝当前调用。
+
 ## 使用 bypass
 
 普通启动即可在权限菜单切换 bypass，也可在计划审批中选择两种 bypass 执行方式：

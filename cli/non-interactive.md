@@ -45,7 +45,7 @@ Warning: no stdin data received in 3s, proceeding without it; redirect stdin fro
 
 ## 权限
 
-非交互模式没有人可以回答审批请求。显式使用 `--permission-mode ask` 时，如果模型调用了需要审批的工具（例如修改文件的 `Edit`、运行非只读命令的 `Bash`、访问新网站的 `WebFetch`），这次调用会被**拒绝**，模型收到
+非交互模式没有人可以回答审批请求。默认的 `ask` 模式下，如果模型调用了需要审批的工具（例如修改文件的 `Edit`、运行非只读命令的 `Bash`、访问新网站的 `WebFetch`），这次调用会被**拒绝**，模型收到
 
 ```
 Permission to use <tool> was not granted: no approval host is available in this session. Grant it with --allowed-tools or a permission mode.

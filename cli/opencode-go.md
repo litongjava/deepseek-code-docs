@@ -139,7 +139,7 @@ oc-custom is saved; fix it with /provider edit oc-custom.
 
 用 `/provider edit <ID>` 修正地址、Key 或模型，不需要重新添加。只有 Key 来自环境变量且当前终端没有设置时才会跳过测试，此时会提示先设置变量。
 
-## 手工编辑 `config/config.json` {#手工编辑-config-json}
+## 手工编辑 `config.json`
 
 预设保存的提供商 `base_url` 为空，由目录按模型提供地址；`settings.builtinId` 必须为 `opencode-go`，否则运行时找不到目录条目：
 
