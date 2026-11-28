@@ -33,10 +33,10 @@ git diff --check
 
 页面状态记录：
 
-- [项目布局和配置数量](../../assets/project-layout-models-check.json)
-- [菜单内全部模型核对](../../assets/project-model-menu-check.json)
-- [New Chat 默认项目](../../assets/code-new-chat-project-check.json)
-- [刷新后默认项目](../../assets/code-new-chat-project-reload-check.json)
+- [项目布局和配置数量](/project-layout-models-check.json)
+- [菜单内全部模型核对](/project-model-menu-check.json)
+- [New Chat 默认项目](/code-new-chat-project-check.json)
+- [刷新后默认项目](/code-new-chat-project-reload-check.json)
 
 以下图片是浏览器中的项目内容区域截图。
 

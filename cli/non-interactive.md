@@ -53,7 +53,7 @@ Permission to use <tool> was not granted: no approval host is available in this 
 
 并继续完成本轮回答，退出码为 0。需要让工具真正执行时，用 `--allowed-tools <工具>` 单独放行，或选择合适的 `--permission-mode`。
 
-读写长期记忆（`memory_search`、`memory_ingest`）、待办和任务列表这类只影响 dcl 自身状态的工具和 Claude Code 一样不需要审批，`-p` 模式下也会直接执行。
+待办和任务列表这类只影响 dcl 自身状态的工具和 Claude Code 一样不需要审批，`-p` 模式下也会直接执行。
 
 ## 压缩会话
 

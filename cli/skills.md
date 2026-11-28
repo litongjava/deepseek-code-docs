@@ -1,6 +1,6 @@
 # 技能与插件面板
 
-每个技能有一个状态，决定它是否出现在模型看到的技能列表里、能否用 `/name` 调用。`/skills state` 用来查看和修改状态，`/plugins` 面板集中管理技能、插件和 MCP 服务，并查看技能的上下文开销与用量。
+每个技能有一个状态，决定它是否出现在模型看到的技能列表里、能否用 `/name` 调用。`/skills state` 用来查看和修改状态，在 `/skills` 面板中可查看技能的上下文开销与用量，`/plugins` 管理插件，`/tools` 的 Mcp 页管理 MCP 服务。
 
 ## 启用随附技能
 
@@ -54,7 +54,7 @@ SDK 宿主也可以在子代理定义中设置 `"skills":["task-template"]`，�
 
 状态保存在数据目录的 `config/skill-states.json`。已保存的状态优先于安装默认值。个人和项目技能通常默认是 `user`；技能文件本身也可以限制谁能调用。
 
-修改后不需要重启：会话内的斜杠列表立即刷新，模型看到的技能列表在下一轮请求时按新状态生成。
+安装插件、添加或编辑技能文件后，当前会话也会在下一轮使用更新。修改技能状态后不需要重启：会话内的斜杠列表立即刷新，模型看到的技能列表在下一轮请求时按新状态生成。
 
 ## 查看和设置：`/skills state`
 
@@ -76,24 +76,20 @@ dcl skills state translate-zh-en user
 
 它和交互模式里的 `/skills state` 读取同一份状态文件。
 
-## `/plugins` 面板
+## 技能、插件与 MCP 面板 {#plugins-面板}
 
-```text
-/plugins
-```
-
-面板分 Installed、Errors、Stats 三页，用 `←`/`→` 切换，`Esc` 关闭。
+`/skills` 和 `/plugins` 面板各分 Installed、Errors、Stats 三页，用 `←`/`→` 切换，`Esc` 关闭。
 
 ### Installed
 
-按区块列出插件、MCP 服务和技能：
+进入对应面板的 Installed 页可以筛选插件或技能：
 
 - **Not used recently**：超过 14 天没有使用的插件（含从未使用）。
-- **User**：最近使用的插件和 MCP 服务。
+- **User**：最近使用的插件。
 - **Skills**：所有未设为 `off` 的技能，附带状态、来源、列出开销和上次使用时间。
-- **Show disabled**：展开后显示已停用的插件、MCP 服务和技能；展开期间这一行变成 Hide disabled，再按一次收起。
+- **Show disabled**：展开后显示当前面板中已停用的条目；展开期间这一行变成 Hide disabled，再按一次收起。
 
-操作方式：
+MCP 服务列在 `/tools` 的 Mcp 页。各面板的操作方式如下：
 
 - 直接输入文字筛选列表。
 - 在技能或 MCP 服务上按 `空格` 在 `off` 与 `user` 之间切换；在插件上按 `空格` 启用或停用。
@@ -105,24 +101,22 @@ dcl skills state translate-zh-en user
 
 ### Errors
 
-列出无法读取或格式错误的技能文件，以及启动失败的 MCP 服务，并给出第一行错误信息。没有问题时显示 `No errors.`。同样用 `←`/`→` 切换页、`Esc` 关闭。
+在 `/skills` 中列出无法读取或格式错误的技能文件。没有问题时显示 `No errors.`。MCP 服务的启动错误在 `/tools` 的 Mcp 页查看。同样用 `←`/`→` 切换页、`Esc` 关闭。
 
 ### Stats
 
-显示机器上各技能的上下文开销和使用情况：
+在 `/skills` 中显示机器上各技能的上下文开销和使用情况：
 
 - **skill**：技能名称。同步来的技能显示最后一段短名称，来源为 `synced`。
 - **source**：来源，例如插件 ID、`built-in`、`project`、`user` 或 `synced`。
-- **context**：首条用户消息中该技能的清单项所占的估算 token 数；`-` 表示当前列表中没有它，不占上下文，完整的 `SKILL.md` 只在技能运行时加载。
+- **context**：首条用户消息中该技能的清单项所占的估算 token 数；`-` 表示当前列表中没有它，不占上下文，`always` 技能按首轮载入的正文估算。
 - **7d tokens**：最近 7 天本机会话中归到这个技能的 token 数。
 - **uses**：调用次数。
 - **last used**：多久之前使用过；从未使用会写 `never`。
 
-技能之后是 **MCP servers** 区块，每个服务一行：名称、`MCP`、状态、上下文开销（`-` 表示不占上下文）和上次使用时间。
+技能列表下方会提示已加载但从未调用的技能数量。插件用量可在 `/plugins` 的 Stats 页查看。用 `↑`/`↓` 逐行滚动，`PageUp`/`PageDown` 翻页，`Home`/`End` 跳到开头或结尾。
 
-列表下方会提示已加载但从未调用的技能数量，以及近期未使用的插件。用 `↑`/`↓` 逐行滚动，`PageUp`/`PageDown` 翻页，`Home`/`End` 跳到开头或结尾。
-
-`/skill-doctor` 直接打开这个面板的 Stats 页，并在顶部提示技能用量和上下文开销已经移到这里。没有可用终端时，`/plugins` 和 `/skill-doctor` 会输出同一份 Stats 文本。
+`/skill-doctor` 直接打开技能的 Stats 页。没有可用终端时，`/plugins` 和 `/skill-doctor` 分别输出插件和技能的 Stats 文本。
 
 ## 翻译技能
 

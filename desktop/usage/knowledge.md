@@ -30,6 +30,6 @@ Desktop 和 [dcl](/cli/memory) 共用数据目录，任一端的修改另一端�
 
 ## 数据处理
 
-删除条目或清空记忆前确认保留需求。备份时分别保存知识库和实际使用的记忆后端。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
+删除条目或清空记忆前确认保留需求。备份时分别保存知识库和数据目录及另行配置的[团队记忆目录](/cli/memory#索引位置与可见范围)。保留会话还需备份全局目录和各会话数据库，见[数据备份](../maintenance/data.md#备份步骤)。
 
 源码参考：`KnowledgePanel.tsx`、`MemoryPanel.tsx`、`crates/core/src/knowledge`、`crates/core/src/memory`。

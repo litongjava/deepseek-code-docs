@@ -61,9 +61,11 @@ public class Conversation {
 
 需要找回压缩前的路径、决定或报错时，dcl 的 SDK 持久会话也可使用 `ContextSearch`。模型先用 `ToolLoad` 加载 `{"names":["ContextSearch"]}`，再查询当前会话。应用可从返回的摘录中读取 `message_id` 和可用的 `tool_call_id`，定位原始记录。 完整参数见 [ContextSearch](/cli/tools#contextsearch)。
 
+使用 `includeRawFrames(true)` 时，`RawMessage.getType()` 也可返回 `resource_alert`。从 `getRaw()` 读取 `kind`、`summary` 和 `details`。同一回合的自动压缩可产生 `compaction_notice` 和 `context_reset`，继续读取到该轮的 `ResultMessage` 即可。
+
 ## 读取 Shell 任务结果
 
-dcl 在 stream-json 的 `user` 消息里发送 `tool_result` 块。通过 `ToolResultBlock.getToolUseId()` 与之前的 `ToolUseBlock.getId()` 关联，按调用的工具名选择解析方式。前台 `Bash` 成功时，SDK 通常收到含 `stdout`、`stderr` 和 `exit_code` 的原始 JSON 文本。模型下一次请求收到的则是精简文本，例如只含标准输出，或静默成功时的 `(Completed with no output)`。长命令的模型预览可能附带 `Omitted output:`，SDK 应按原始结果字段读取。调用失败时先检查 `isError()`，正文可能带有 `Error: ` 前缀。
+dcl 在 stream-json 的 `user` 消息里发送 `tool_result` 块。通过 `ToolResultBlock.getToolUseId()` 与之前的 `ToolUseBlock.getId()` 关联，按调用的工具名选择解析方式。前台 `Bash` 成功时，SDK 通常收到含 `stdout`、`stderr` 和 `exit_code` 的原始 JSON 文本。模型下一次请求收到的则是精简文本，例如只含标准输出，或静默成功时的 `(Completed with no output)`。长命令的模型预览可能附带 `Omitted output:`，SDK 应按原始结果字段读取。`Bash`、Shell 的 `TaskGet` 及 `Monitor` 的长 Base64 在模型上下文中显示为含文件路径和行号的占位符；Java 端仍按相应工具原有的结果格式读取，无需解析占位符。调用失败时先检查 `isError()`，正文可能带有 `Error: ` 前缀。
 
 下面的方法处理已按 ID 确认为 `TaskGet` 的普通受管 Shell 快照。查询调用成功仍可能查到失败的任务，应读取快照的 `status`。已结束任务的 `output` 和 `result` 保留命令输出和必要状态；成功时无需匹配 `Exit code: 0`。
 

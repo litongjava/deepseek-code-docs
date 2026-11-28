@@ -37,7 +37,7 @@ public class InProcessTools {
 
 工具抛出的异常会作为 `isError` 结果返回给 Agent，会话继续进行，模型可以据此换一种做法。
 
-使用 dcl 时，`SystemMessage.getTools()` 返回初始化消息中的工具名称清单。模型按需加载工具时，`ToolUseBlock.getName()` 返回 `ToolLoad`，`getInput().get("names")` 保留完整名称的数组，例如 `["ListDir","WebFetch"]`。名称区分大小写；若有未知或不可用的名称，dcl 在对应的 `tool_result` 中报告，整批都不会新增加载的工具。成功加载的新工具从下一次模型请求开始，按加载顺序追加在常驻工具之后。模型只看到一行确认，例如 `Loaded WebFetch. Available from the next request.`。SDK 的 `ToolResultBlock.getContentText()` 仍保留结构化 JSON 文本；应用可按调用 ID 关联结果，再读取 `content`、`loaded_tools`、`already_available` 和 `tools`。
+使用 dcl 时，`SystemMessage.getTools()` 返回初始化消息中的工具名称清单。默认从第一次模型请求起便可直接使用 `TodoRead` 和 `TodoWrite`，按需目录中没有这两项。文件记忆通过普通文件工具维护；工具清单已移除 `memory_search` 和 `memory_ingest`。模型按需加载工具时，`ToolUseBlock.getName()` 返回 `ToolLoad`，`getInput().get("names")` 保留完整名称的数组，例如 `["ListDir","LSP"]`。名称区分大小写；若有未知或不可用的名称，dcl 在对应的 `tool_result` 中报告，整批都不会新增加载的工具。成功加载的新工具从下一次模型请求开始，按加载顺序追加在常驻工具之后。模型只看到一行确认，例如 `Loaded ListDir, LSP. Available from the next request.`。SDK 的 `ToolResultBlock.getContentText()` 仍保留结构化 JSON 文本；应用可按调用 ID 关联结果，再读取 `content`、`loaded_tools`、`already_available` 和 `tools`。
 
 ## 子 Agent 与结构化输出
 

@@ -8,7 +8,7 @@
 - PASS：嵌套 `architecture.input_modalities`、`context_length`、`top_provider.max_completion_tokens` 解析为 Text/Image、256000、32000。
 - PASS：GPT-4o-mini 明确返回 `supports_vision=false` 和 `context_window="64K"` 时保持 Text、64000。
 - PASS：自定义 `custom-vl-72b-256k` 识别 Image 与 256000；72B 不作为上下文。
-- 点击页面保存后通过接口重新读回，5 项断言全部通过；完整数据见 [JSON 证据](../../assets/models-auto-fetch-check.json)。截图为单个模型卡片证据。
+- 点击页面保存后通过接口重新读回，5 项断言全部通过；完整数据见 [JSON 证据](/models-auto-fetch-check.json)。截图为单个模型卡片证据。
 - Rust discovery 测试 2 项通过；前端相关测试、默认 TypeScript 检查、生产构建和差异检查通过，最终检查范围见下节。
 
 范围：验证配置发现、推断、编辑和保存；未调用外部模型或验证真实视觉识别。测试临时供应商在收尾时删除。
@@ -19,9 +19,9 @@
 
 继续使用可见 Chrome 任务 `2026101407`，验证实际页面与 localStorage：
 
-- PASS：Settings → Models 为 Chat、Work、Study 分别选择 Gateway Vision、Custom VL 72B、gpt-4o-mini；完整刷新后所有 provider/model 选项仍匹配保存值。见 [设置读回证据](../../assets/models-mode-defaults-check.json)。
+- PASS：Settings → Models 为 Chat、Work、Study 分别选择 Gateway Vision、Custom VL 72B、gpt-4o-mini；完整刷新后所有 provider/model 选项仍匹配保存值。见 [设置读回证据](/models-mode-defaults-check.json)。
 - PASS：打开新会话，模型为 Chat 默认的 Gateway Vision；切换 Work、Study、Chat 后依次为 Custom VL 72B、gpt-4o-mini、Gateway Vision。
-- PASS：模型菜单两个供应商组内全部模型升序，按显示名称忽略大小写、按数字自然顺序比较。见 [运行与排序证据](../../assets/models-mode-runtime-check.json)。
+- PASS：模型菜单两个供应商组内全部模型升序，按显示名称忽略大小写、按数字自然顺序比较。见 [运行与排序证据](/models-mode-runtime-check.json)。
 - 前端 11 个相关测试文件、88 项测试通过，覆盖同 ID 跨供应商选择、设置持久化、无效/禁用默认值回退、已有会话及旧模型 ID 保留、手动选择不被目录刷新覆盖、项目模型回归、多语言完整性及流式记录。
 - 默认 TypeScript 检查、前端生产构建、文档生产构建通过。补齐所有支持语言的默认模型文案和原有设置缺失键；测试中读取最后一次调用改为兼容 ES2021 的索引写法。测试后恢复原模式默认值并删除临时供应商。
 

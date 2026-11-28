@@ -107,7 +107,7 @@ dcl requests $sessionId
 
 ### 上下文压缩
 
-开启记录后，摘要请求同样逐次保存，`purpose` 为 `compaction`。元数据中的 `compaction_stage`、`compaction_label` 可帮助区分分段摘要、合并、恢复和最终摘要；Responses 原生压缩请求也会记录。
+开启记录后，摘要请求同样逐次保存，`purpose` 为 `compaction`。元数据中的 `compaction_stage`、`compaction_label` 可帮助区分分段摘要、合并、恢复和最终摘要；GPT Responses 原生压缩请求也会记录，可对照同一会话普通请求中的 `prompt_cache_key`。
 
 每次压缩还会生成独立编号的 `compaction-NNNN.json`，包含触发原因、压缩前消息、压缩前 token 估算、开始与结束时间、完成状态、摘要和压缩后边界。`request_sequences` 关联这次压缩实际发出的请求序号，便于对照请求和响应；提交前取消或压缩未完成时，记录保持未完成状态。
 
